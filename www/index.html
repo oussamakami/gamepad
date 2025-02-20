@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./assets/style.css">
+    <link rel="shortcut icon" href="./assets/images/icon.png" type="image/x-icon">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="./assets/script.js" defer></script>
+    <title>GamePad | Your Game Portal!</title>
+</head>
+<body>
+    <nav id="side-nav">
+        <a id="nav-logo" href="/">
+            <h1 class="logo">gamepad</h1>
+        </a>
+        <ul>
+            <label>navigation</label>
+            <li class="active"><a href=""><i class='bx bx-home-alt'></i> <span>dashboard</span></a></li>
+            <li><a href=""><i class='bx bx-chat'></i> <span>chat</span></a></li>
+            <li><a href=""><i class='bx bx-group'></i> <span>friends</span></a></li>
+            <li><a href=""><i class='bx bx-user-circle'></i> <span>profile</span></a></li>
+
+            <label>games</label>
+            <li><a href=""><i class='bx bx-meteor'></i> <span>ping pong</span></a></li>
+            <li><a href=""><i class='bx bx-circle'></i> <span>tic tac toe</span></a></li>
+            <li><a href=""><i class='bx bx-cut'></i> <span>rock paper</span></a></li>
+
+            <label>user</label>
+            <li><a href=""><i class='bx bx-cog'></i> <span>settings</span></a></li>
+            <li><a href=""><i class='bx bx-exit'></i> <span>logout</span></a></li>
+        </ul>
+    </nav>
+    <div id="app-sections">
+        <header id="top-nav">
+            <button id="toggle-side-nav" class="top-nav-icon-btn">
+                <i class='bx bx-menu'></i>
+            </button>
+            <div id="search-box">
+                <i class='bx bx-search-alt'></i>
+                <input type="search" id="nav-search" name="nav-search" placeholder="Search...">
+                <button id="nav-search-btn" class="btn">search</button>
+            </div>
+            <ul>
+                <li class="top-nav-icon-btn"><i class='bx bx-bell'></i></li>
+                <li class="top-nav-icon-btn"><a href="/settings"><i class='bx bx-cog'></i></a></li>
+                <li class="top-nav-icon-btn" id="mode-toggle"><i class='bx bx-moon'></i></li>
+                <li class="top-nav-icon-btn" id="toggle-fullscreen"><i class='bx bx-fullscreen'></i></li>
+                <li>
+                    <a href="/profile">
+                        <figure class="nav-profile">
+                            <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture" data-profile-img>
+                            <figcaption data-profile-name>oussama kamili</figcaption>
+                        </figure>
+                    </a>
+                </li>
+            </ul>
+        </header>
+        <main>
+            <section>
+            </section>
+            <footer>2025 &copy; your game portal - gamepad</footer>
+        </main>
+    </div>
+
+</body>
+</html>

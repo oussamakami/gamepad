@@ -22,21 +22,21 @@ This is a full-stack web development project focused on building a single-page a
 # Modules
 ## Design
 ### Front-End
-- [ ] **Navigation**
-    - [ ] **Top Navigation**
-        - [ ] Profile Name
-        - [ ] Profile Picture
-        - [ ] Fullscreen Toggle
-        - [ ] Light/Dark Mode Toggle
-        - [ ] Settings Shortcut
-        - [ ] Notifications Drawer
-        - [ ] User Search Bar
-        - [ ] Sidebar Toggle
-    - [ ] **Side Navigation**
-        - [ ] App Logo
-        - [ ] Dashboard Navigation
-        - [ ] Games Navigation
-        - [ ] Logout Button
+- [X] **Navigation**
+    - [X] **Top Navigation**
+        - [X] Profile Name
+        - [X] Profile Picture
+        - [X] Fullscreen Toggle
+        - [X] Light/Dark Mode Toggle
+        - [X] Settings Shortcut
+        - [X] Notifications Drawer
+        - [X] User Search Bar
+        - [X] Sidebar Toggle
+    - [X] **Side Navigation**
+        - [X] App Logo
+        - [X] Dashboard Navigation
+        - [X] Games Navigation
+        - [X] Logout Button
 - [ ] **Dashboard**
     - [ ] Total games played count
     - [ ] Total Ping Pong games played
