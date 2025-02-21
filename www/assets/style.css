@@ -21,12 +21,15 @@
     --body-bg: rgb(250, 251, 254);
     --card-bg: rgb(255, 255, 255);
     --input-bg: rgb(240, 243, 248);
+    --border-color: rgb(223, 223, 223);
+    --primary-google-btn-bg: rgb(255, 255, 255);
+    --secondary-google-btn-bg: rgb(244, 245, 255);
 
     /* Layout Dimensions */
     --top-nav-height: 70px;
     --side-nav-width: 240px;
+    --footer-height: 3rem;
 
-    --footer-border-color: rgb(223, 223, 223);
     --box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, .15);
 }
 
@@ -56,12 +59,22 @@ ul {
 }
 
 input {
+    display: block;
     background-color: var(--input-bg);
     font-size: .9rem;
     padding: .7rem .9rem;
     outline: none;
     border: none;
     border-radius: .25rem;
+}
+
+input[type="submit"] {
+    background-color: var(--primary-brand-color);
+}
+
+input[type="checkbox"] {
+    display: inline-block;
+    cursor: pointer;
 }
 
 .btn {
@@ -76,8 +89,30 @@ input {
     transition: background-color .1s ease;
 }
 
-.btn:hover {
+.btn img {
+    width: 20px;
+    height: 20px;
+}
+
+.google-btn {
+    color: var(--secondary-text-color);
+    width: 100%;
+    margin: 1rem 0;
+    background-color: var(--primary-google-btn-bg);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn:hover,
+input[type="submit"]:hover {
     background-color: var(--secondary-brand-color);
+}
+
+.google-btn:hover {
+    background-color: var(--secondary-google-btn-bg);
 }
 
 .hidden {
@@ -180,12 +215,14 @@ main {
 }
 
 footer {
-    text-transform: capitalize;
-    padding: .8rem 1.5rem;
-    border-top: 1px solid var(--footer-border-color);
-    color: var(--secondary-text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: .9rem;
-    text-align: center;
+    height: var(--footer-height);
+    text-transform: capitalize;
+    color: var(--secondary-text-color);
+    border-top: 1px solid var(--border-color);
 }
 
 #top-nav {
@@ -268,4 +305,90 @@ section {
     border-radius: .25rem;
     background-color: var(--card-bg);
     box-shadow: var(--box-shadow);
+}
+
+.auth-section {
+    display: grid;
+    place-content: center;
+    width: 100%;
+    min-height: calc(100% - var(--footer-height));
+}
+
+.container {
+    width: 24vw;
+    font-size: 1rem;
+    text-align: center;
+    color: var(--secondary-text-color);
+}
+
+.container p {
+    text-transform: lowercase;
+    font-size: .9rem;
+}
+
+.container .logo {
+    font-size: 2rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.container-description {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-transform: capitalize;
+    padding: 1rem 2rem;
+    gap: 1rem;
+}
+
+.container-form {
+    padding: 0 1rem;
+    text-align: start;
+}
+
+.container-form label {
+    display: block;
+    margin: 1rem 0;
+    cursor: pointer;
+    text-transform: capitalize;
+}
+
+.container-form label > span {
+    color: var(--primary-text-color);
+}
+
+.container-form > input {
+    width: 100%;
+    margin: 1rem 0;
+}
+.container-form > input:not([type="submit"]) {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 1rem 0;
+    gap: 2%;
+    font-size: .9rem;
+}
+
+.form-options label {
+    display: inline;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+    margin: 0 .5rem;
 }

@@ -10,7 +10,8 @@
     <title>GamePad | Your Game Portal!</title>
 </head>
 <body>
-    <nav id="side-nav">
+    <!-- Side Navigation -->
+    <nav id="side-nav" class="hidden">
         <a id="nav-logo" href="/">
             <h1 class="logo">gamepad</h1>
         </a>
@@ -31,8 +32,10 @@
             <li><a href=""><i class='bx bx-exit'></i> <span>logout</span></a></li>
         </ul>
     </nav>
+
     <div id="app-sections">
-        <header id="top-nav">
+        <!-- Top Navigation -->
+        <header id="top-nav" class="hidden">
             <button id="toggle-side-nav" class="top-nav-icon-btn">
                 <i class='bx bx-menu'></i>
             </button>
@@ -56,12 +59,135 @@
                 </li>
             </ul>
         </header>
+        <!-- Sections Container -->
         <main>
-            <section>
+
+            <!-- Login Section -->
+            <section id="login" class="auth-section">
+                <div class="container card">
+                    <a class="logo" href="/">gamepad</a>
+
+                    <div class="container-description">
+                        <h1>Sign in</h1>
+                        <p>enter you account credentials to access you account.</p>
+                    </div>
+
+                    <form id="login-form" class="container-form">
+                        <button class="btn google-btn">
+                            <img src="./assets/images/google_icon.png" alt="google logo">
+                            Log in with Google
+                        </button>
+
+                        <p class="divider">or</p>
+
+                        <label for="loginEmail">Email address</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+
+                        <label for="loginPass">Password</label>
+                        <input type="password" id="loginPass" name="password" placeholder="Enter your password" minlength="8" required>
+
+                        <div class="form-options">
+                            <div>
+                                <input type="checkbox" id="rememberMe" name="remember">
+                                <label for="rememberMe">Remember me</label>
+                            </div>
+                            <a href="/recovery">Forgot password?</a>
+                        </div>
+
+                        <input type="submit" class="btn" value="Log in">
+                    </form>
+                    <p>Don't have an account? <strong><a href="/signup">Sign up</a></strong></p>
+                </div>
             </section>
+
+            <!-- Signup Section -->
+            <section id="signup" class="auth-section hidden">
+                <div class="container card">
+                    <a class="logo" href="/">gamepad</a>
+
+                    <div class="container-description">
+                        <h1>Sign up</h1>
+                        <p>Don't have an account? Create your account, it takes less than a minute.</p>
+                    </div>
+
+                    <form id="signup-form" class="container-form">
+                        <button class="btn google-btn">
+                            <img src="./assets/images/google_icon.png" alt="google logo">
+                            sign up with Google
+                        </button>
+
+                        <p class="divider">or</p>
+
+                        <label for="signupName">Full name</label>
+                        <input type="text" id="signupName" name="name" placeholder="Enter your name" maxlength="25" required>
+
+                        <label for="signupEmail">Email address</label>
+                        <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required>
+
+                        <label for="signupPass">Password</label>
+                        <input type="password" id="signupPass" name="password" placeholder="Enter your password" minlength="8" required>
+
+                        <div class="form-options">
+                            <div>
+                                <input type="checkbox" id="useTerms" name="useTerms" required>
+                                <label for="useTerms"><span>I accept</span> Terms and Conditions</label>
+                            </div>
+                        </div>
+
+                        <input type="submit" class="btn" value="sign up">
+                    </form>
+                    <p>Already have account? <strong><a href="/login">log in</a></strong></p>
+                </div>
+            </section>
+
+            <!-- Recovery Section -->
+            <section id="recovery" class="auth-section hidden">
+                <div class="container card">
+                    <a class="logo" href="/">gamepad</a>
+
+                    <div class="container-description">
+                        <h1>forgot password?</h1>
+                        <p>Enter your email address and we'll send you an email with instructions.</p>
+                    </div>
+
+                    <form id="recovery-form" class="container-form">
+
+                        <label for="accountEmail">Email address</label>
+                        <input type="email" id="accountEmail" name="email" placeholder="Enter your email" required>
+
+                        <input type="submit" class="btn" value="reset password">
+                    </form>
+                    <p><a href="/login">&lt&lt Back To <strong>login</strong></a></p>
+                </div>
+            </section>
+
+            <!-- Reset Password Section -->
+            <section id="reset" class="auth-section hidden">
+                <div class="container card">
+                    <a class="logo" href="/">gamepad</a>
+
+                    <div class="container-description">
+                        <h1>reset password</h1>
+                        <p>Enter a new password to secure your account and regain access.</p>
+                    </div>
+
+                    <form id="recovery-form" class="container-form">
+
+                        <label for="resetPass">Password</label>
+                        <input type="password" id="resetPass" name="new-password" placeholder="Enter your password" minlength="8" required>
+
+                        <label for="confirmResetPass">confirm Password</label>
+                        <input type="password" id="confirmResetPass" name="confirm-password" placeholder="Enter your password" minlength="8" required>
+
+                        <br>
+                        <input type="submit" class="btn" value="reset password">
+                    </form>
+                </div>
+            </section>
+
+            <!-- Footer -->
             <footer>2025 &copy; your game portal - gamepad</footer>
         </main>
     </div>
-
 </body>
 </html>

@@ -131,36 +131,32 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Enter game/tournament ID to join
         - [ ] Join a random game button
 - [ ] **Authentication**
-    - [ ] **Login**
-        - [ ] Email input field
-        - [ ] Password input field
-        - [ ] "Remember Me" checkbox
-        - [ ] Password recovery link
-        - [ ] Submit button to log in
-        - [ ] Option to sign in with Google
-        - [ ] "Sign Up" button for new users
-    - [ ] **Sign Up**
-        - [ ] First name input field
-        - [ ] Last name input field
-        - [ ] Email input field
-        - [ ] Password input field
-        - [ ] Confirm password input field
-        - [ ] Gender selection (radio buttons)
-        - [ ] Agree to terms & conditions checkbox
-        - [ ] Submit button to register
+    - [X] **Login**
+        - [X] Email input field
+        - [X] Password input field
+        - [X] "Remember Me" checkbox
+        - [X] Password recovery link
+        - [X] Submit button to log in
+        - [X] Option to sign in with Google
+        - [X] "Sign Up" button for new users
+    - [X] **Sign Up**
+        - [X] Full name input field
+        - [X] Email input field
+        - [X] Password input field
+        - [X] Agree to terms & conditions checkbox
+        - [X] Submit button to register
+        - [X] Option to sign up with Google
     - [ ] **Two-Factor Authentication (2FA)**
         - [ ] Input field to enter authentication code
         - [ ] "Verify" button to confirm identity
         - [ ] Option to resend authentication code
-    - [ ] **Account Recovery**
-        - [ ] Input field for registered email
-        - [ ] "Recover Account" button
-    - [ ] **Password Reset**
-        - [ ] New password input field
-        - [ ] Confirm new password input field
-        - [ ] "Reset Password" button
-        - [ ] Confirmation message after successful reset
-        - [ ] Redirect to login page after resetting
+    - [X] **Account Recovery**
+        - [X] Input field for registered email
+        - [X] "Recover Account" button
+    - [X] **Password Reset**
+        - [X] New password input field
+        - [X] Confirm new password input field
+        - [X] "Reset Password" button
 - [ ] **404 Error Page**
     - [ ] Display "Page Not Found" message
     - [ ] Show a friendly error description
