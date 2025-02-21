@@ -176,7 +176,7 @@
                         <label for="resetPass">Password</label>
                         <input type="password" id="resetPass" name="new-password" placeholder="Enter your password" minlength="8" required>
 
-                        <label for="confirmResetPass">confirm Password</label>
+                        <label for="confirmResetPass">Confirm Password</label>
                         <input type="password" id="confirmResetPass" name="confirm-password" placeholder="Enter your password" minlength="8" required>
 
                         <br>
@@ -185,6 +185,26 @@
                 </div>
             </section>
 
+            <!-- Two-Factor Authentication Section -->
+            <section id="twofa" class="auth-section hidden">
+                <div class="container card">
+                    <a class="logo" href="/">gamepad</a>
+
+                    <div class="container-description">
+                        <h1>2FA verification code</h1>
+                        <p>Enter the verification code from your email or authenticator app, if set up.</p>
+                    </div>
+
+                    <form id="twofa-form" class="container-form">
+
+                        <label for="twofaCode">Code</label>
+                        <input type="number" id="twofaCode" name="verification-code" placeholder="6-digit code" required>
+                        
+                        <input type="submit" class="btn" value="verify">
+                    </form>
+                    <p>didn't get the code? <strong><a>Resend</a></strong></p>
+                </div>
+            </section>
             <!-- Footer -->
             <footer>2025 &copy; your game portal - gamepad</footer>
         </main>

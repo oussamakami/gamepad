@@ -94,10 +94,10 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] Change email address
     - [ ] Update gender information
     - [ ] Reset or change password
-- [ ] **Logged-in Sessions**
-    - [ ] Display session name
-    - [ ] Sign out button for each session
-    - [ ] Sign out from all sessions button
+    - [ ] **Logged-in Sessions**
+        - [ ] Display session name
+        - [ ] Sign out button for each session
+        - [ ] Sign out from all sessions button
     - [ ] **Privacy Settings**
         - [ ] Choose who can view your profile
         - [ ] Choose who can see your game history
@@ -130,7 +130,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Generate a tournament game ID
         - [ ] Enter game/tournament ID to join
         - [ ] Join a random game button
-- [ ] **Authentication**
+- [X] **Authentication**
     - [X] **Login**
         - [X] Email input field
         - [X] Password input field
@@ -146,10 +146,10 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Agree to terms & conditions checkbox
         - [X] Submit button to register
         - [X] Option to sign up with Google
-    - [ ] **Two-Factor Authentication (2FA)**
-        - [ ] Input field to enter authentication code
-        - [ ] "Verify" button to confirm identity
-        - [ ] Option to resend authentication code
+    - [X] **Two-Factor Authentication (2FA)**
+        - [X] Input field to enter authentication code
+        - [X] "Verify" button to confirm identity
+        - [X] Option to resend authentication code
     - [X] **Account Recovery**
         - [X] Input field for registered email
         - [X] "Recover Account" button
