@@ -6,12 +6,13 @@
     <link rel="stylesheet" href="./assets/style.css">
     <link rel="shortcut icon" href="./assets/images/icon.png" type="image/x-icon">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" defer></script>
     <script src="./assets/script.js" defer></script>
     <title>GamePad | Your Game Portal!</title>
 </head>
 <body>
     <!-- Side Navigation -->
-    <nav id="side-nav" class="hidden">
+    <nav id="side-nav" class="">
         <a id="nav-logo" href="/">
             <h1 class="logo">gamepad</h1>
         </a>
@@ -35,7 +36,7 @@
 
     <div id="app-sections">
         <!-- Top Navigation -->
-        <header id="top-nav" class="hidden">
+        <header id="top-nav" class="">
             <button id="toggle-side-nav" class="top-nav-icon-btn">
                 <i class='bx bx-menu'></i>
             </button>
@@ -63,7 +64,7 @@
         <main>
 
             <!-- Login Section -->
-            <section id="login" class="auth-section">
+            <section id="login" class="auth-section hidden">
                 <div class="container card">
                     <a class="logo" href="/">gamepad</a>
 
@@ -205,6 +206,234 @@
                     <p>didn't get the code? <strong><a>Resend</a></strong></p>
                 </div>
             </section>
+
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="dash-section">
+                <div class="section-title">
+                    <h4>dashboard</h4>
+                    <button id="dash-refresh" class="btn"><i class='bx bx-revision'></i></button>
+                </div>
+                <div class="cards-container" id="website-stats">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>games played</h4>
+                            <i class='bx bx-joystick card-icon'></i>
+                        </div>
+                        <div class="card-value">119744</div>
+                        <div class="card-value-extra">
+                            <div>
+                                <i class='bx bx-chevrons-up'></i>
+                                <span>437</span>
+                            </div>
+                            since today
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>ping pong played</h4>
+                            <i class='bx bx-meteor card-icon'></i>
+                        </div>
+                        <div class="card-value">41362</div>
+                        <div class="card-value-extra">
+                            <div>
+                                <i class='bx bx-chevrons-up'></i>
+                                <span>156</span>
+                            </div>
+                            since today
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>ic tac toe played</h4>
+                            <i class='bx bx-circle card-icon'></i>
+                        </div>
+                        <div class="card-value">38527</div>
+                        <div class="card-value-extra">
+                            <div>
+                                <i class='bx bx-chevrons-up'></i>
+                                <span>129</span>
+                            </div>
+                            since today
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>rock paper played</h4>
+                            <i class='bx bx-cut card-icon'></i>
+                        </div>
+                        <div class="card-value">39855</div>
+                        <div class="card-value-extra">
+                            <div>
+                                <i class='bx bx-chevrons-up'></i>
+                                <span>152</span>
+                            </div>
+                            since today
+                        </div>
+                    </div>
+                </div>
+                <div class="cards-container" id="website-chart">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>daily games projection</h4>
+                            <i class='bx bx-bar-chart card-icon'></i>
+                        </div>
+                        <div class="card-value">
+                            <div id="projection-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="cards-container" id="website-activity">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>recent activities</h4>
+                            <i class='bx bx-data card-icon'></i>
+                        </div>
+                        <ul class="activity-list">
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                            <li>
+                                <i class='bx bx-meteor card-icon'></i>
+                                <span><strong>john doe (TheDestroyer)</strong> emerged victorious over <strong>dave doe (ShadowKnight)</strong>.</span>
+                                <span class="activity-time">2:30 PM</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="cards-container" id="website-leaderboard">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>leaderboard</h4>
+                            <i class='bx bx-party card-icon'></i>
+                        </div>
+                        <ul class="activity-list">
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#1</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#2</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#3</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#4</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#5</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#6</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#7</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#8</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#9</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                            <li class="leaderboard">
+                                <a href="/profile?id=5947">
+                                    <span class="card-icon">#10</span>
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <strong>oussama kamili</strong>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- Footer -->
             <footer>2025 &copy; your game portal - gamepad</footer>
         </main>

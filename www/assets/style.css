@@ -5,15 +5,17 @@
     font-size: 16px;
 
     /* Brand Colors */
-    --primary-brand-color: rgb(114, 124, 245);
-    --secondary-brand-color: rgb(105, 115, 227);
+    --primary-brand-color-rgb: 114, 124, 245;
+    --secondary-brand-color-rgb: 105, 115, 227;
+    --primary-brand-color: rgb(var(--primary-brand-color-rgb));
+    --secondary-brand-color: rgb(var(--primary-brand-color-rgb));
 
     /* Text Colors */
-    --primary-text-color: rgb(66, 64, 75);
-    --secondary-text-color: rgb(108, 117, 125);
+    --primary-text-color: rgb(108, 117, 125);
+    --secondary-text-color: rgb(66, 64, 75);
 
     /* Navigation Colors */
-    --active-nav-color: rgb(105, 115, 227);
+    --active-nav-color: rgb(var(--primary-brand-color-rgb));
     --top-nav-bg: rgb(255, 255, 255);
     --side-nav-bg: rgb(255, 255, 255);
 
@@ -24,6 +26,12 @@
     --border-color: rgb(223, 223, 223);
     --primary-google-btn-bg: rgb(255, 255, 255);
     --secondary-google-btn-bg: rgb(244, 245, 255);
+
+    /* Status Colors */
+    --danger-color-rgb: 250, 92, 124;
+    --success-color-rgb: 10, 207, 151;
+    --danger-color: rgb(var(--danger-color-rgb));
+    --success-color: rgb(var(--success-color-rgb));
 
     /* Layout Dimensions */
     --top-nav-height: 70px;
@@ -72,10 +80,6 @@ input {
     border-radius: .25rem;
 }
 
-input[type="submit"] {
-    background-color: var(--primary-brand-color);
-}
-
 input[type="checkbox"] {
     display: inline-block;
     cursor: pointer;
@@ -98,7 +102,7 @@ input[type="number"]::-webkit-outer-spin-button {
     padding: .7rem .9rem;
     border-radius: .25rem;
     background-color: var(--primary-brand-color);
-    color: var(--card-bg);
+    color: rgb(255, 255, 255);
     cursor: pointer;
     text-transform: capitalize;
     transition: background-color .1s ease;
@@ -110,7 +114,7 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .google-btn {
-    color: var(--secondary-text-color);
+    color: var(--primary-text-color);
     width: 100%;
     margin: 1rem 0;
     background-color: var(--primary-google-btn-bg);
@@ -138,7 +142,7 @@ input[type="submit"]:hover {
     font-size: 1.5rem;
     font-weight: bold;
     text-transform: capitalize;
-    color: var(--primary-text-color);
+    color: var(--secondary-text-color);
 }
   
 .logo::before {
@@ -156,7 +160,6 @@ input[type="submit"]:hover {
 #side-nav {
     width: var(--side-nav-width);
     height: 100%;
-    color: var(--secondary-text-color);
     background-color: var(--side-nav-bg);
     white-space: nowrap;
     overflow: hidden;
@@ -236,7 +239,6 @@ footer {
     font-size: .9rem;
     height: var(--footer-height);
     text-transform: capitalize;
-    color: var(--secondary-text-color);
     border-top: 1px solid var(--border-color);
 }
 
@@ -244,7 +246,6 @@ footer {
     width: 100%;
     height: var(--top-nav-height);
     background-color: var(--top-nav-bg);
-    color: var(--secondary-text-color);
     box-shadow: var(--box-shadow);
     display: flex;
     align-items: center;
@@ -272,7 +273,6 @@ footer {
     top: 50%;
     left: 10px;
     font-size: 1.2rem;
-    color: var(--secondary-text-color);
     pointer-events: none;
 }
 
@@ -310,31 +310,20 @@ section {
     display: flex;
     flex-direction: column;
     padding: 1.5rem;
-}
-
-.card {
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    margin: .5rem;
-    border-radius: .25rem;
-    background-color: var(--card-bg);
-    box-shadow: var(--box-shadow);
+    width: 100%;
+    min-height: calc(100% - var(--footer-height));
 }
 
 .auth-section {
     display: grid;
     place-content: center;
-    width: 100%;
-    min-height: calc(100% - var(--footer-height));
 }
 
 .container {
-    width: 24vw;
+    width: 24vw !important;
     min-width: 360px;
     font-size: 1rem;
     text-align: center;
-    color: var(--secondary-text-color);
 }
 
 .container p {
@@ -370,7 +359,7 @@ section {
 }
 
 .container-form label > span {
-    color: var(--primary-text-color);
+    color: var(--secondary-text-color);
 }
 
 .container-form > input {
@@ -407,4 +396,137 @@ section {
     flex: 1;
     border-bottom: 1px solid var(--border-color);
     margin: 0 .5rem;
+}
+
+.dash-section {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(2, auto);
+    text-transform: capitalize;
+    gap: 1rem;
+    overflow: auto;
+}
+
+.card-title,
+.section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    grid-column: 1 / -1;
+}
+
+.section-title > button {
+    font-size: 1.3rem;
+    padding: 0.3rem .5rem;
+}
+
+.cards-container {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.card {
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    border-radius: .25rem;
+    background-color: var(--card-bg);
+    box-shadow: var(--box-shadow);
+    flex-grow: 1;
+}
+
+.card-title {
+    padding-bottom: 1rem;
+}
+
+.card-icon {
+    font-size: 1.3rem;
+    padding: 0.4rem .6rem;
+    border-radius: .25rem;
+    background-color: rgba(var(--primary-brand-color-rgb), .25);
+    color: var(--primary-brand-color);
+}
+
+.card-value {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: var(--secondary-text-color);
+    font-size: 3rem;
+    font-weight: 400;
+}
+
+.card-value-extra {
+    display: flex;
+    gap: .5rem;
+}
+
+.card-value-extra > div {
+    display: flex;
+    align-items: center;
+    color: var(--success-color);
+    font-weight: 500;
+}
+
+.activity-list {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.activity-list li {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: inherit;
+}
+
+.activity-list li .activity-time {
+    margin-left: auto;
+    text-wrap: nowrap;
+}
+
+.activity-list .leaderboard a {
+    display: flex;
+    align-items: center;
+    gap: inherit;
+    width: 100%;
+}
+
+.activity-list .leaderboard a img {
+    width: 2.7rem;
+    height: 2.7rem;
+    border-radius: 50%;
+}
+
+.activity-list .leaderboard a .card-icon {
+    font-size: 1rem;
+    width: 3rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+
+
+#dashboard #website-stats {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    grid-template-rows: repeat(2, auto);
+    grid-column: 1 / 6;
+}
+
+#dashboard #website-chart {
+    grid-column: 6 / -1;
+}
+
+#dashboard #website-activity {
+    grid-column: 1 / 10;
+}
+
+#dashboard #website-leaderboard {
+    grid-column: 10 / 13;
 }

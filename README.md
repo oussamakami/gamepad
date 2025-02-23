@@ -37,17 +37,15 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Dashboard Navigation
         - [X] Games Navigation
         - [X] Logout Button
-- [ ] **Dashboard**
-    - [ ] Total games played count
-    - [ ] Total Ping Pong games played
-    - [ ] Total Tic-Tac-Toe games played
-    - [ ] Total Rock-Paper-Scissors games played
-    - [ ] Total registered users count
-    - [ ] Total tournaments played count
-    - [ ] Graph displaying total games played per day over the last 7 days
-    - [ ] History of the last 10 games played
-    - [ ] Leaderboard showcasing the top 8 players
-    - [ ] Refresh Button for updating dashboard statistics
+- [X] **Dashboard**
+    - [X] Total games played count
+    - [X] Total Ping Pong games played
+    - [X] Total Tic-Tac-Toe games played
+    - [X] Total Rock-Paper-Scissors games played
+    - [X] Graph displaying total games played per day over the last 7 days
+    - [X] History of the last games played
+    - [X] Leaderboard showcasing the top 10 players
+    - [X] Refresh Button for updating dashboard statistics
 - [ ] **Live Chat**
     - [ ] Display list of active chats
     - [ ] Interactive chat box
