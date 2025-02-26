@@ -8,7 +8,7 @@
     --primary-brand-color-rgb: 114, 124, 245;
     --secondary-brand-color-rgb: 105, 115, 227;
     --primary-brand-color: rgb(var(--primary-brand-color-rgb));
-    --secondary-brand-color: rgb(var(--primary-brand-color-rgb));
+    --secondary-brand-color: rgb(var(--secondary-brand-color-rgb));
 
     /* Text Colors */
     --primary-text-color: rgb(108, 117, 125);
@@ -602,4 +602,28 @@ section {
 #search #results-count > span {
     font-size: 1.6rem;
     color: var(--primary-brand-color);
+}
+
+#error .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+}
+
+#error h1 {
+    font-size: 6rem;
+    font-weight: 400;
+    color: var(--primary-brand-color);
+}
+
+#error h3 {
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    text-decoration: underline;
+    color: var(--danger-color);
+}
+
+#error .btn {
+    margin: auto;
 }

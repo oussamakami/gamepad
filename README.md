@@ -156,10 +156,10 @@ This is a full-stack web development project focused on building a single-page a
         - [X] New password input field
         - [X] Confirm new password input field
         - [X] "Reset Password" button
-- [ ] **404 Error Page**
-    - [ ] Display "Page Not Found" message
-    - [ ] Show a friendly error description
-    - [ ] Include a home button to navigate back
+- [X] **404 Error Page**
+    - [X] Display "Page Not Found" message
+    - [X] Show a friendly error description
+    - [X] Include a home button to navigate back
 - [ ] **Responsive Design**
     - [ ] Support multiple screen sizes:
         - [ ] Mobile (≤ 480px)
