@@ -55,20 +55,21 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] Delete conversation option
     - [ ] Show basic user report
     - [ ] Option to block a user
-- [ ] **Friends List**
-    - [ ] Display user picture
-    - [ ] Show user name
-    - [ ] Unfollow button
-    - [ ] Send message button
-    - [ ] Block user button
-- [ ] **Search Results**
-    - [ ] Show total number of results found
-    - [ ] Display user profile picture
-    - [ ] Show username
-    - [ ] Show user gender
-    - [ ] Follow/Unfollow button
-    - [ ] Send message button
-    - [ ] Block user button
+- [X] **Friends List**
+    - [X] Display user profile picture
+    - [X] Show user name
+    - [X] Show user gender
+    - [X] Profile button
+    - [X] Unfollow button
+    - [X] Block user button
+- [X] **Search Results**
+    - [X] Show total number of results found
+    - [X] Display user profile picture
+    - [X] Show user name
+    - [X] Show user gender
+    - [X] Profile button
+    - [X] Follow/Unfollow button
+    - [X] Block user button
 - [ ] **Profile**
     - [ ] Display user picture
     - [ ] Show user name
