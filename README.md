@@ -70,23 +70,23 @@ This is a full-stack web development project focused on building a single-page a
     - [X] Profile button
     - [X] Follow/Unfollow button
     - [X] Block user button
-- [ ] **Profile**
-    - [ ] Display user picture
-    - [ ] Show user name
-    - [ ] Show user ID
-    - [ ] Show user email
-    - [ ] Show user gender
-    - [ ] Display total games played
-    - [ ] Display total games won
-    - [ ] Display total games lost
-    - [ ] Show total **Ping Pong** games played
-    - [ ] Show total **Tic-Tac-Toe** games played
-    - [ ] Show total **Rock-Paper-Scissors** games played
-    - [ ] Display history of the last 20 games played
-    - [ ] Follow/Unfollow option
-    - [ ] Option to send a message
-    - [ ] Option to block the user
-    - [ ] Indicate if the user is online
+- [X] **Profile**
+    - [X] Display user picture
+    - [X] Show user name
+    - [X] Show user ID
+    - [X] Show user email
+    - [X] Show user gender
+    - [X] Display total games played
+    - [X] Display total games won
+    - [X] Display total games lost
+    - [X] Show total **Ping Pong** games played
+    - [X] Show total **Tic-Tac-Toe** games played
+    - [X] Show total **Rock-Paper-Scissors** games played
+    - [X] Display history of the last 20 games played
+    - [X] Follow/Unfollow option
+    - [X] Option to send a message
+    - [X] Option to block the user
+    - [X] Indicate if the user is online
 - [ ] **Settings**
     - [ ] Update profile picture
     - [ ] Edit user name
@@ -166,8 +166,8 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Small Tablets (481px – 768px)
         - [ ] Large Tablets (769px – 1024px)
         - [ ] Laptops (1025px – 1366px)
-        - [ ] Desktops (1367px – 1920px)
-        - [ ] Ultra-Wide Screens (≥ 1921px)
+        - [X] Desktops (1367px – 1920px)
+        - [X] Ultra-Wide Screens (≥ 1921px)
     - [ ] Check cross-browser compatibility for Chrome and Firefox
 ## Code Structure
 ### Front-End

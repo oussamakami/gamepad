@@ -97,6 +97,15 @@ input[type="number"]::-webkit-outer-spin-button {
     margin: 0;
 }
 
+.btn-container {
+    display: flex;
+    gap: .5rem;
+}
+
+.btn-container .danger-btn {
+    margin-left: auto;
+}
+
 .btn,
 .danger-btn {
     border: none;
@@ -434,7 +443,7 @@ section {
 
 .card,
 .user-card {
-    width: auto;
+    width: 100%;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -442,7 +451,7 @@ section {
     border-radius: .25rem;
     background-color: var(--card-bg);
     box-shadow: var(--box-shadow);
-    flex-grow: 1;
+    justify-content: center;
 }
 
 .card-title {
@@ -455,6 +464,11 @@ section {
     border-radius: .25rem;
     background-color: rgba(var(--primary-brand-color-rgb), .25);
     color: var(--primary-brand-color);
+}
+
+.failure-icon {
+    background-color: rgba(var(--danger-color-rgb), .25);
+    color: var(--danger-color);
 }
 
 .card-value {
@@ -544,8 +558,6 @@ section {
 }
 
 .user-card {
-    width: 100%;
-    height: 100%;
     align-items: center;
     justify-content: center;
     padding: 4rem 2rem;
@@ -566,22 +578,23 @@ section {
     border-radius: .25rem;
 }
 
-.user-card .user-online::after,
-.user-card .user-offline::after {
-    display: block;
-    font-style: normal;
+.user-card .card-title .user-status {
     font-size: .8rem;
-    text-align: center;
+}
+
+.user-online::after,
+.user-offline::after {
+    font-style: normal;
     text-transform: lowercase;
     text-decoration: underline;
 }
 
-.user-card .user-online::after {
+.user-online::after {
     content: "online";
     color: var(--success-color);
 }
 
-.user-card .user-offline::after {
+.user-offline::after {
     content: "offline";
     color: var(--danger-color);
 }
@@ -626,4 +639,59 @@ section {
 
 #error .btn {
     margin: auto;
+}
+
+#profile #user-data {
+    grid-column: 1 / 7;
+}
+
+#profile #winning-chart {
+    grid-column: 7 / -1;
+}
+
+#profile #user-general-stats {
+    grid-column: 1 / 4;
+    flex-direction: column;
+}
+
+#profile #user-games-history {
+    grid-column: 4 / -1;
+}
+
+#profile #user-data figure {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 3rem;
+}
+
+#profile #user-data figure figcaption {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1rem;
+    text-align: start;
+    width: 50%;
+}
+
+#profile [data-user-img] {
+    width: 14rem;
+    height: 14rem;
+    border-radius: 1.25rem;
+}
+
+
+#profile [data-user-name] {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+#profile figure figcaption p {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+#profile figure figcaption p span {
+    font-weight: normal;
+    text-transform: lowercase;
 }

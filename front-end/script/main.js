@@ -34,10 +34,13 @@ let options = {
     chart: {toolbar: {}},
     xaxis: {labels: {style: {}}},
     yaxis: {labels: {style: {}}},
-    series: [{}],
+    series: [{}, {}],
     fill: {},
+    stroke: {},
     dataLabels: {},
-    plotOptions: {bar: {}}
+    legend: {labels: {}},
+    plotOptions: {bar: {}},
+    tooltip: {}
 };
 
 options.chart.type = "bar";
@@ -46,19 +49,63 @@ options.chart.height = "100%";
 options.chart.toolbar.show = false;
 options.dataLabels.enabled = false;
 options.fill.opacity = 1;
+options.stroke.width = 2;
+options.stroke.colors = "#fff0";
 options.plotOptions.bar.columnWidth = "20%";
 options.xaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
 options.yaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
 options.colors = [getCSSVariable("--primary-brand-color")];
+options.tooltip.theme = "light";
+options.legend.labels.colors = getCSSVariable("--secondary-text-color");
 
 
 options.series[0].name = "games played";  //the data name in the categories
 options.series[0].data = [582, 677, 628, 921, 349, 856, 972];  //values of each category
 options.xaxis.categories = getLast7Days();  //names of categories
+// options.xaxis.categories = ["ping pong", "tic toc toe", "rock paper"]
+// options.series[0].data = []
 
 let dashboardChart = new ApexCharts(document.getElementById("projection-chart"), options);
 dashboardChart.render();
 
+let user_options = {
+    chart: {toolbar: {}},
+    xaxis: {labels: {style: {}}},
+    yaxis: {labels: {style: {}}},
+    series: [{}, {}],
+    fill: {},
+    stroke: {},
+    dataLabels: {},
+    legend: {labels: {}},
+    plotOptions: {bar: {}},
+    tooltip: {}
+      
+};
+
+user_options.chart.type = "bar";
+user_options.chart.width = "100%";
+user_options.chart.height = "100%";
+user_options.chart.toolbar.show = false;
+user_options.dataLabels.enabled = false;
+user_options.fill.opacity = 1;
+user_options.plotOptions.bar.columnWidth = "20%";
+user_options.xaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
+user_options.yaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
+user_options.colors = [getCSSVariable("--primary-brand-color"), "#5a5f9d"];
+user_options.stroke.width = 2;
+user_options.stroke.colors = "#fff0";
+user_options.tooltip.theme = "light";
+user_options.legend.labels.colors = getCSSVariable("--secondary-text-color");
+
+
+user_options.series[0].name = "games played";  //the data name in the categories
+user_options.series[1].name = "games won";  //the data name in the categories
+user_options.series[0].data = [582, 677, 628];  //values of each category
+user_options.series[1].data = [282, 377, 571];  //values of each category
+user_options.xaxis.categories = ["ping-pong", "tic-tac-toe", "rock-paper-scissors"];  //names of categories
+
+let profileChart = new ApexCharts(document.getElementById("user-projection-chart"), user_options);
+profileChart.render();
 
 
 function shrinkAndHide() {
@@ -93,10 +140,13 @@ function lightModeToggle() {
         document.documentElement.style.setProperty('--border-color', 'rgb(86, 102, 121)');
         document.documentElement.style.setProperty('--box-shadow', '0px 0px 35px 0px rgba(49, 57, 66, .5)');
 
-        let temp = {xaxis: {labels: {style: {}}}, yaxis: {labels: {style: {}}}};
+        let temp = {xaxis: {labels: {style: {}}}, yaxis: {labels: {style: {}}}, tooltip: {}, legend: {labels: {}}};
         temp.xaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
         temp.yaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
+        temp.tooltip.theme = "dark"
+        temp.legend.labels.colors = getCSSVariable("--secondary-text-color");
         dashboardChart.updateOptions(temp);
+        profileChart.updateOptions(temp);
     }
     else {
         elem.innerHTML = `<i class='bx bx-moon'></i>`;
@@ -111,10 +161,13 @@ function lightModeToggle() {
         document.documentElement.style.setProperty('--border-color', 'rgb(223, 223, 223)');
         document.documentElement.style.setProperty('--box-shadow', '0px 0px 35px 0px rgba(154, 161, 171, .15)');
 
-        let temp = {xaxis: {labels: {style: {}}}, yaxis: {labels: {style: {}}}};
+        let temp = {xaxis: {labels: {style: {}}}, yaxis: {labels: {style: {}}}, tooltip: {}, legend: {labels: {}}};
         temp.xaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
         temp.yaxis.labels.style.colors = getCSSVariable("--secondary-text-color");
+        temp.tooltip.theme = "light"
+        temp.legend.labels.colors = getCSSVariable("--secondary-text-color");
         dashboardChart.updateOptions(temp);
+        profileChart.updateOptions(temp);
     }
 }
 
