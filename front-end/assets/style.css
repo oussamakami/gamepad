@@ -695,3 +695,15 @@ section {
     font-weight: normal;
     text-transform: lowercase;
 }
+
+#chat #chat-list {
+    grid-column: 1 / 4;
+}
+
+#chat #chat-box {
+    grid-column: 4 / 10;
+}
+
+#chat #chat-info {
+    grid-column: 10 / -1;
+}

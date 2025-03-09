@@ -1,11 +1,11 @@
 {
   "name": "gamepad",
   "version": "1.0.0",
-  "description": "full-stack web development project focused on building a single-page application (SPA) with user authentication, multiplayer gaming, real-time statistics, and game history tracking.",
-  "main": "./back-end/server.js",
+  "description": "a full-stack web development project focused on building a single-page application (SPA) with user authentication, multiplayer gaming, real-time statistics, and game history tracking.",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc --build ./front-end"
+    "build": "esbuild front-end/source/main.ts --bundle --outfile=front-end/assets/script.js --target=es6 --platform=browser --minify",
+    "clean": "rm front-end/assets/script.js"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,8 @@
     "url": "https://github.com/oussamakami/gamepad/issues"
   },
   "homepage": "https://github.com/oussamakami/gamepad#readme",
-  "devDependencies": {
-    "typescript": "^5.7.3"
+  "dependencies": {
+    "apexcharts": "^4.5.0",
+    "esbuild": "^0.25.0"
   }
 }
