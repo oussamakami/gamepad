@@ -69,7 +69,7 @@
             <!-- 404 Error Section -->
             <section id="error" class="auth-section hidden">
                 <div class="container">
-                    <h1>404</h1>
+                    <h2>404</h2>
                     <div class="container-description">
                         <h3>page not found!</h3>
                         <p>It seems the page you're looking for doesn't exist. It may have been deleted, or perhaps it never existed. Double-check the URL, or click the button below to return to the homepage.</p>
@@ -84,24 +84,26 @@
                     <a class="logo" href="/">gamepad</a>
 
                     <div class="container-description">
-                        <h1>Sign in</h1>
+                        <h2>Sign in</h2>
                         <p>enter you account credentials to access you account.</p>
                     </div>
-
+                    
                     <form id="login-form" class="container-form">
                         <button class="btn google-btn">
-                            <img src="./style/images/google_icon.png" alt="google logo">
+                            <img src="./assets/images/google_icon.png" alt="google logo">
                             Log in with Google
                         </button>
-
+                        
                         <p class="divider">or</p>
+                        
+                        <p class="auth-status"></p>
 
                         <label for="loginEmail">Email address</label>
                         <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
-
+                        
                         <label for="loginPass">Password</label>
                         <input type="password" id="loginPass" name="password" placeholder="Enter your password" minlength="8" required>
-
+                        
                         <div class="form-options">
                             <div>
                                 <input type="checkbox" id="rememberMe" name="remember">
@@ -109,7 +111,7 @@
                             </div>
                             <a href="/recovery">Forgot password?</a>
                         </div>
-
+                        
                         <input type="submit" class="btn" value="Log in">
                     </form>
                     <p>Don't have an account? <strong><a href="/signup">Sign up</a></strong></p>
@@ -122,17 +124,19 @@
                     <a class="logo" href="/">gamepad</a>
 
                     <div class="container-description">
-                        <h1>Sign up</h1>
+                        <h2>Sign up</h2>
                         <p>Don't have an account? Create your account, it takes less than a minute.</p>
                     </div>
 
                     <form id="signup-form" class="container-form">
                         <button class="btn google-btn">
-                            <img src="./style/images/google_icon.png" alt="google logo">
+                            <img src="./assets/images/google_icon.png" alt="google logo">
                             sign up with Google
                         </button>
 
                         <p class="divider">or</p>
+
+                        <p class="auth-status"></p>
 
                         <label for="signupName">Full name</label>
                         <input type="text" id="signupName" name="name" placeholder="Enter your name" maxlength="25" required>
@@ -162,11 +166,13 @@
                     <a class="logo" href="/">gamepad</a>
 
                     <div class="container-description">
-                        <h1>forgot password?</h1>
+                        <h2>forgot password?</h2>
                         <p>Enter your email address and we'll send you an email with instructions.</p>
                     </div>
 
                     <form id="recovery-form" class="container-form">
+
+                        <p class="auth-status"></p>
 
                         <label for="accountEmail">Email address</label>
                         <input type="email" id="accountEmail" name="email" placeholder="Enter your email" required>
@@ -183,11 +189,13 @@
                     <a class="logo" href="/">gamepad</a>
 
                     <div class="container-description">
-                        <h1>reset password</h1>
+                        <h2>reset password</h2>
                         <p>Enter a new password to secure your account and regain access.</p>
                     </div>
 
-                    <form id="recovery-form" class="container-form">
+                    <form id="reset-form" class="container-form">
+
+                        <p class="auth-status"></p>
 
                         <label for="resetPass">Password</label>
                         <input type="password" id="resetPass" name="new-password" placeholder="Enter your password" minlength="8" required>
@@ -207,11 +215,13 @@
                     <a class="logo" href="/">gamepad</a>
 
                     <div class="container-description">
-                        <h1>2FA verification code</h1>
+                        <h2>2FA verification code</h2>
                         <p>Enter the verification code from your email or authenticator app, if set up.</p>
                     </div>
 
                     <form id="twofa-form" class="container-form">
+
+                        <p class="auth-status"></p>
 
                         <label for="twofaCode">Code</label>
                         <input type="number" id="twofaCode" name="verification-code" placeholder="6-digit code" required>
@@ -223,7 +233,7 @@
             </section>
 
             <!-- Dashboard Section -->
-            <section id="dashboard" class="dash-section">
+            <section id="dashboard" class="dash-section hidden">
                 <div class="section-title">
                     <h4>dashboard</h4>
                     <button id="dash-refresh" class="btn"><i class='bx bx-revision'></i></button>
@@ -795,7 +805,7 @@
             </section>
 
             <!-- Chat Section -->
-            <section id="chat" class="dash-section hidden">
+            <section id="chat" class="dash-section">
                 <div class="section-title">
                     <h4>chat</h4>
                 </div>

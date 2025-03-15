@@ -454,6 +454,29 @@ section {
     justify-content: center;
 }
 
+.auth-status {
+    display: none;
+    width: 100%;
+    padding: .7rem .9rem;
+    margin: 1rem 0;
+    border-radius: .25rem;
+    box-shadow: var(--box-shadow);
+    color: white !important;
+    font-weight: 500;
+    text-align: center;
+    text-transform: capitalize !important;
+}
+
+.auth-section .success {
+    display: block;
+    background-color: var(--success-color) !important;
+}
+
+.auth-section .failure {
+    display: block;
+    background-color: var(--danger-color) !important;
+}
+
 .card-title {
     padding-bottom: 1rem;
 }
@@ -624,7 +647,7 @@ section {
     gap: 1rem;
 }
 
-#error h1 {
+#error h2 {
     font-size: 6rem;
     font-weight: 400;
     color: var(--primary-brand-color);
