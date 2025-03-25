@@ -303,7 +303,7 @@ This is a full-stack web development project focused on building a single-page a
 
 - Abdellah amardoul [@loudrama](https://github.com/loudrama)
 
-- Anas Kheireddine
+- Anas Kheireddine [@Kheireddine-Anas](https://github.com/Kheireddine-Anas)
 
 # License
 This Project Is Licensed Under &copy; [**MIT**](./LICENSE)
