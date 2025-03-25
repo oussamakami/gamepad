@@ -33,7 +33,11 @@ class userData {
                 id INTEGER PRIMARY KEY,
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
-                password TEXT
+                password TEXT,
+                _2fa BOOLEAN DEFAULT false CHECK ( _2fa IN ( true, false ) ),
+                _2fa_method TEXT NOT NULL DEFAULT 'email' CHECK ( _2fa_method IN ( 'email', 'app' ) ),
+                profile_priv TEXT NOT NULL DEFAULT 'public' CHECK ( profile_priv IN ( 'public', 'friends', 'private' ) ),
+                history_priv TEXT NOT NULL DEFAULT 'public' CHECK ( history_priv IN ( 'public', 'friends', 'private' ) )
             );
             CREATE TABLE IF NOT EXISTS sessions (
                 token_id TEXT PRIMARY KEY,
@@ -74,9 +78,7 @@ class userData {
             )
         `);
     }
-    /**
-     * @brief hello world
-    */
+
     createUser(username, email, password) {
         const result = {success: true, table: "users", action: "create"};
         let attempts = 0;
@@ -149,21 +151,29 @@ class userData {
         return result;
     }
 
-    updateUser(userIdentifier, {username, email, password}) {
+    updateUser(userIdentifier, updateData) {
         const result = {success: true, table: "users", action: "update"};
-        const newData = {username: username, email: email, password: password}
+        const defaultKeys = [
+            "username", "email", "password", "enable2FA",
+            "method2FA", "profilePrivacy", "historyPrivacy"];
+        
+        updateData = Object.fromEntries(defaultKeys.map(key => [key, updateData[key]]));
         
         try {
             const stmt = this.db.prepare(`UPDATE users SET 
                 username = COALESCE(@username, username), 
                 email = COALESCE(@email, email), 
-                password = COALESCE(@password, password) 
+                password = COALESCE(@password, password),
+                _2fa = COALESCE(@enable2FA, _2fa),
+                _2fa_method = COALESCE(@method2FA, _2fa_method),
+                profile_privacy = COALESCE(@profilePrivacy, profile_privacy),
+                history_privacy = COALESCE(@historyPrivacy, history_privacy)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
             `);
-            result.data = stmt.get(newData, userIdentifier, userIdentifier, userIdentifier);;
+            result.data = stmt.get(updateData, userIdentifier, userIdentifier, userIdentifier);;
         }
         catch (error) {
-            result.success = true;
+            result.success = false;
             result.error = error;
         }
 
@@ -295,27 +305,6 @@ class userData {
 
         return result;
     }
-
-    // createGameHistory()
-
-    /**
-     * create game
-     * fetch game
-     * delete game
-     * create chat
-     * fetch chat
-     * delete chat
-     * create message
-     * fetch message
-     * delete message
-     * create friend request
-     * accept friend request
-     * reject friend request
-     * block user
-     * unblock user
-     * fetch all users exept blocked
-     * 
-    */
 
     closeDataBase() {
         this.db.close();

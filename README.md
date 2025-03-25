@@ -208,17 +208,16 @@ This is a full-stack web development project focused on building a single-page a
 
 ## Back-End Code
 ### Database
-- [ ] **User Data** (@oussamakami)
-    - [ ] **Table Structure**
+- [X] **User Data**
+    - [X] **Table Structure**
         - [X] `id` → INTEGER, PRIMARY KEY
         - [X] `username` → TEXT, UNIQUE
         - [X] `email` → TEXT, UNIQUE
         - [X] `password` → TEXT
-        - [ ] `2FA_enabled` → BOOLEAN
-        - [ ] `2FA_email` → BOOLEAN
-        - [ ] `2FA_auth_app` → BOOLEAN
-        - [ ] `profile_visibility` → TEXT (`public`, `friends_only`, `private`)
-        - [ ] `history_visibility` → TEXT (`public`, `friends_only`, `private`)
+        - [X] `_2fa` → BOOLEAN
+        - [X] `_2fa_method` → TEXT (`email`, `app`)
+        - [X] `profile_visibility` → TEXT (`public`, `friends_only`, `private`)
+        - [X] `history_visibility` → TEXT (`public`, `friends_only`, `private`)
     - [X] **Methods**
         - [X] Create a new user
         - [X] Retrieve a user
@@ -254,7 +253,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Block a user
         - [ ] Unblock a user (removes the row, same as rejection)
         - [ ] Search for users (fetch from `Users` table, excluding blocked users)
-- [ ] **Game History Data**
+- [ ] **Game History Data** (@oussamakami)
     - [X] **Table Structure**
         - [X] `winner_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [X] `winner_nickname` → TEXT
@@ -287,7 +286,7 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] **Methods**
         - [ ] Send a message (`chat_id`, `sender_id`, `content`)
         - [ ] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
-- [ ] **Recovery Data**
+- [ ] **Account Recovery Data**
 *To be added soon*
 
 ### API URLS
