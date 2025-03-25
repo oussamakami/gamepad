@@ -208,7 +208,7 @@ This is a full-stack web development project focused on building a single-page a
 
 ## Back-End Code
 ### Database
-- [ ] **User Data** (working on it)
+- [ ] **User Data** (@oussamakami)
     - [ ] **Table Structure**
         - [X] `id` → INTEGER, PRIMARY KEY
         - [X] `username` → TEXT, UNIQUE
@@ -225,21 +225,21 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Retrieve all users
         - [X] Update user details
         - [X] Delete a user
-- [ ] **Session Data** (working on it)
-    - [ ] **Table Structure**
+- [X] **Session Data**
+    - [X] **Table Structure**
         - [X] `token_id` → TEXT, PRIMARY KEY
         - [X] `user_id` → INTEGER, FOREIGN KEY (references `Users.id`)
-        - [ ] `ip_address` → TEXT
-        - [ ] `browser` → TEXT
-        - [ ] `operating_system` → TEXT
+        - [X] `ip_address` → TEXT
+        - [X] `browser` → TEXT
+        - [X] `platform` → TEXT
         - [X] `expiration_date` → INTEGER (timestamp)
-    - [ ] **Methods**
+    - [X] **Methods**
         - [X] Create a new session
         - [X] Delete a session
         - [X] Delete all sessions for a user
         - [X] Retrieve a session by ID
         - [X] Retrieve all sessions for a user
-        - [ ] Validate a session
+        - [X] Validate a session
 - [ ] **Friend Requests Data**
     - [ ] **Table Structure**
         - [ ] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)

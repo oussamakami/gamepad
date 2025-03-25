@@ -38,7 +38,9 @@ class userData {
             CREATE TABLE IF NOT EXISTS sessions (
                 token_id TEXT PRIMARY KEY,
                 user_id INTEGER,
-                title TEXT NOT NULL,
+                ip_address TEXT NOT NULL,
+                browser TEXT NOT NULL,
+                platform TEXT NOT NULL,
                 expires_at INTEGER NOT NULL,
                 FOREIGN KEY ( user_id ) REFERENCES users ( id ) ON DELETE CASCADE
             );
@@ -168,21 +170,29 @@ class userData {
         return result
     }
 
-    createSession(userIdentifier, sessionTitle, rememberMe) {
+    createSession(userIdentifier, rememberMe, sessionData) {
         const result = {success: true, table: "sessions", action: "create"};
-        
-        const user = this.fetchUser(userIdentifier).data;
-        const token_id = this.generateTokenId();
-        const tokenExpiration = Math.floor(Date.now() / 1000) + (rememberMe ? 2592000 : 86400);
-        const tokenHeader = {jti: token_id, iss: "Gamepad-api"}
-        const tokenPayload = {user_id: user.id, exp: tokenExpiration};
-        
+        const userData = this.fetchUser(userIdentifier);
+        const rowData = {...sessionData};
+
         try {
+            if (!userData.success)
+                throw new Error(userData.error.message);
+            
+            rowData.user_id = userData.data.id;
+            rowData.token_id = this.generateTokenId();
+            rowData.tokenExpiration = Math.floor(Date.now() / 1000) + (rememberMe ? 2592000 : 86400);
+
+            const tokenHeader = {jti: rowData.token_id, iss: "Gamepad-api"}
+            const tokenPayload = {user_id: rowData.user_id, exp: rowData.tokenExpiration};
             const stmt = this.db.prepare(`
-                INSERT INTO sessions ( token_id, user_id, title, expires_at )
-                VALUES ( ?, ?, ?, ?) RETURNING *
+                INSERT INTO sessions (
+                token_id, user_id, ip_address,
+                browser, platform, expires_at )
+                VALUES ( @token_id, @user_id, @sessionIp,
+                @sessionBrowser, @sessionPlatform, @tokenExpiration) RETURNING *
             `);
-            result.data = stmt.get(token_id, user.id, sessionTitle, tokenExpiration);
+            result.data = stmt.get(rowData);
             result.data.token = JWT.sign(tokenPayload, JWT_SECRET, {header: tokenHeader});
         }
         catch (error) {
@@ -231,6 +241,7 @@ class userData {
             result.data = stmt.get(sessionTokenId);
             if (!result.data)
                 throw new Error("Session not found");
+            result.data.title = `${result.data.ip_address} on ${result.data.browser} (${result.data.platform})`
         }
         catch (error) {
             result.success = false;
@@ -254,6 +265,8 @@ class userData {
             if (!dbresult.success)
                 throw new Error(dbresult.error.message);
 
+            if (tokendata.payload.user_id != dbresult.data.user_id)
+                throw new Error("invalid Token");
             result.data = dbresult.data;
         }
         catch (error)

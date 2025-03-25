@@ -3,7 +3,7 @@ import userData from './database.js'
 
 const database = new userData("", false);
 
-function getSessionTitle(requestPacket) {
+function getSessionInfo(requestPacket) {
     const browserList = {
         "Firefox": "Firefox",
         "Chrome": "Chrome",
@@ -14,7 +14,7 @@ function getSessionTitle(requestPacket) {
         "MSIE": "IE",
         "SamsungBrowser": "Samsung Internet"
     };
-    const osList = {
+    const platformList = {
         "Android": "Android",
         "iOS": "iOS",
         "Linux": "Linux",
@@ -26,28 +26,29 @@ function getSessionTitle(requestPacket) {
         "Windows": "Win"
     };
 
-    let os = "N/A";
-    let browser = "N/A";
     const userAgent = requestPacket.headers["user-agent"]
-    const ip = requestPacket.headers["x-forwarded-for"] || requestPacket.ip;
+
+    const result = {sessionIp: "N/A", sessionBrowser: "N/A", sessionPlatform: "N/A"};
+    result.sessionIp = requestPacket.headers["x-forwarded-for"] || requestPacket.ip || "N/A";
 
     if (!userAgent)
-        return `${ip} on ${browser} ( ${os} )`;
+        return result;
 
     for (const [keyword, browserName] of Object.entries(browserList)) {
-        if (userAgent.includes(keyword)) {
-            browser = browserName;
-            break;
-        }
+        if (!userAgent.includes(keyword))
+            continue;
+        result.sessionBrowser = browserName;
+        break;
     }
 
-    for (const [keyword, osName] of Object.entries(osList)) {
-        if (userAgent.includes(keyword)) {
-            os = osName;
-            break;
-        }
+    for (const [keyword, platformName] of Object.entries(platformList)) {
+        if (!userAgent.includes(keyword))
+            continue;
+        result.sessionPlatform = platformName;
+        break;
     }
-    return `${ip} on ${browser} (${os})`;
+
+    return result;
 }
 
 function handleSignUp(request, reply) {
@@ -88,7 +89,7 @@ function handleLogIn(request, reply) {
 
     if (queryResponse.success) {
         if (queryResponse.data.password === password) {
-            const session = database.createSession(queryResponse.data.id, getSessionTitle(request), rememberSession);
+            const session = database.createSession(queryResponse.data.id, rememberSession, getSessionInfo(request));
             reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
             return reply.status(200).send({message: "Login successful!", id: queryResponse.data.id,
                 username: queryResponse.data.username, email: queryResponse.data.email});
