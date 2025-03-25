@@ -32,6 +32,7 @@ class FormHandler {
     private async establishLink(payload: string): Promise<string> {
         const response = await fetch(this.targetAPI, {
             method: this.targetMethod,
+            credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: payload
         })

@@ -13,7 +13,7 @@
 <body>
 
     <!-- Side Navigation -->
-    <nav id="side-nav" class="">
+    <nav id="side-nav" class="hidden">
         <a id="nav-logo" href="/">
             <h1 class="logo">gamepad</h1>
         </a>
@@ -38,7 +38,7 @@
     <div id="app-sections">
 
         <!-- Top Navigation -->
-        <header id="top-nav" class="">
+        <header id="top-nav" class="hidden">
             <button id="toggle-side-nav" class="top-nav-icon-btn">
                 <i class='bx bx-menu'></i>
             </button>
@@ -79,7 +79,7 @@
             </section>
 
             <!-- Login Section -->
-            <section id="login" class="auth-section hidden">
+            <section id="login" class="auth-section">
                 <div class="container card">
                     <a class="logo" href="/">gamepad</a>
 
@@ -98,8 +98,8 @@
                         
                         <p class="auth-status"></p>
 
-                        <label for="loginEmail">Email address</label>
-                        <input type="email" id="loginEmail" name="email" placeholder="Enter your email" required>
+                        <label for="loginName">Username / Email</label>
+                        <input type="text" id="loginName" name="identifer" placeholder="Enter your username or email" minlength="3" required>
                         
                         <label for="loginPass">Password</label>
                         <input type="password" id="loginPass" name="password" placeholder="Enter your password" minlength="8" required>
@@ -119,7 +119,7 @@
             </section>
 
             <!-- Signup Section -->
-            <section id="signup" class="auth-section hidden">
+            <section id="signup" class="auth-section">
                 <div class="container card">
                     <a class="logo" href="/">gamepad</a>
 
@@ -138,8 +138,8 @@
 
                         <p class="auth-status"></p>
 
-                        <label for="signupName">Full name</label>
-                        <input type="text" id="signupName" name="name" placeholder="Enter your name" maxlength="25" required>
+                        <label for="signupName">Username</label>
+                        <input type="text" id="signupName" name="username" placeholder="Enter your username" minlength="3" maxlength="20" required>
 
                         <label for="signupEmail">Email address</label>
                         <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required>
@@ -805,7 +805,7 @@
             </section>
 
             <!-- Chat Section -->
-            <section id="chat" class="dash-section">
+            <section id="chat" class="dash-section hidden">
                 <div class="section-title">
                     <h4>chat</h4>
                 </div>

@@ -6,7 +6,8 @@
   "main": "back-end/server.js",
   "scripts": {
     "build": "esbuild front-end/source/main.ts --bundle --outfile=front-end/assets/script.js --target=es6 --platform=browser --minify ",
-    "clean": "rm front-end/assets/script.js"
+    "clean": "rm front-end/assets/script.js",
+    "start": "npm run build && node --env-file=.env ."
   },
   "repository": {
     "type": "git",
@@ -19,10 +20,15 @@
   },
   "homepage": "https://github.com/oussamakami/gamepad#readme",
   "dependencies": {
+    "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.0.0",
     "apexcharts": "^4.5.0",
     "better-sqlite3": "^11.9.0",
-    "esbuild": "^0.25.0",
-    "fastify": "^5.2.1"
+    "fastify": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "nanoid": "^5.1.5"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.1"
   }
 }

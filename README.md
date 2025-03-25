@@ -21,7 +21,6 @@ This is a full-stack web development project focused on building a single-page a
 
 # Modules
 ## Design
-### Front-End
 - [X] **Navigation**
     - [X] **Top Navigation**
         - [X] Profile Name
@@ -91,7 +90,6 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] Update profile picture
     - [ ] Edit user name
     - [ ] Change email address
-    - [ ] Update gender information
     - [ ] Reset or change password
     - [ ] **Logged-in Sessions**
         - [ ] Display session name
@@ -169,19 +167,144 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Desktops (1367px – 1920px)
         - [X] Ultra-Wide Screens (≥ 1921px)
     - [ ] Check cross-browser compatibility for Chrome and Firefox
-## Code Structure
-### Front-End
-*To be added soon*
-### Back-End
-*To be added soon*
-## Database
-### Users Data
-*To be added soon*
-### Games Data
-*To be added soon*
-## Security
-*To be added soon*
-# License
-This Project Is Licensed Under **MIT**
 
- MIT &copy; [OussamaKamili](https://github.com/oussamakami/gamepad/blob/master/LICENSE)
+## Front-End Code
+- [ ] **Forms Module Implementation**
+    - [X] **Core Form Handling**
+        - [X] Specify `formId` to uniquely identify the form.
+        - [X] Define the HTTP request method (`GET`, `POST`, etc.).
+        - [X] Set the target API endpoint for data submission.
+    - [ ] **Optional Callbacks**
+        - [X] Execute a function after a successful form submission (`onSuccess`).
+        - [ ] Execute a function after a failed form submission (`onFailure`).
+    - [ ] **Forms to handle**
+        - [X] **Login Form**
+        - [X] **Signup Form**
+        - [ ] **Account Recovery Form**
+        - [ ] **Password Reset Form**
+        - [ ] **Two-Factor Authentication (2FA) Form**
+        - [ ] **User Settings Form**
+- [ ] **User Data Module Implementation**
+    - [ ] **Core User Handling**
+        - [ ] Process the API response object to manage user data.
+    - [ ] **Module Methods**
+        - [ ] Retrieve the user ID.
+        - [ ] Retrieve the user name.
+        - [ ] Retrieve the user theme preference.
+        - [ ] Retrieve the user email.
+        - [ ] Update the user name (send to server).
+        - [ ] Update the user email (send to server).
+        - [ ] Update the user password (send to server).
+        - [ ] Update the user theme (store in localStorage).
+- [ ] **SPA Navigation Module Implementation**
+    - [ ] *To be added soon*
+- [ ] **Charts Module Implementation**
+    - [ ] *To be added soon*
+- [ ] **Buttons Action Module Implementation**
+    - [ ] *To be added soon*
+
+### Games
+*To be added soon*
+
+## Back-End Code
+### Database
+- [ ] **User Data** (working on it)
+    - [ ] **Table Structure**
+        - [X] `id` → INTEGER, PRIMARY KEY
+        - [X] `username` → TEXT, UNIQUE
+        - [X] `email` → TEXT, UNIQUE
+        - [X] `password` → TEXT
+        - [ ] `2FA_enabled` → BOOLEAN
+        - [ ] `2FA_email` → BOOLEAN
+        - [ ] `2FA_auth_app` → BOOLEAN
+        - [ ] `profile_visibility` → TEXT (`public`, `friends_only`, `private`)
+        - [ ] `history_visibility` → TEXT (`public`, `friends_only`, `private`)
+    - [X] **Methods**
+        - [X] Create a new user
+        - [X] Retrieve a user
+        - [X] Retrieve all users
+        - [X] Update user details
+        - [X] Delete a user
+- [ ] **Session Data** (working on it)
+    - [ ] **Table Structure**
+        - [X] `token_id` → TEXT, PRIMARY KEY
+        - [X] `user_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [ ] `ip_address` → TEXT
+        - [ ] `browser` → TEXT
+        - [ ] `operating_system` → TEXT
+        - [X] `expiration_date` → INTEGER (timestamp)
+    - [ ] **Methods**
+        - [X] Create a new session
+        - [X] Delete a session
+        - [X] Delete all sessions for a user
+        - [X] Retrieve a session by ID
+        - [X] Retrieve all sessions for a user
+        - [ ] Validate a session
+- [ ] **Friend Requests Data**
+    - [ ] **Table Structure**
+        - [ ] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [ ] `recipient_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [ ] `status` → TEXT (`pending`, `accepted`, `blocked`)
+    - [ ] **Methods**
+        - [ ] Send a friend request
+        - [ ] Accept a friend request
+        - [ ] Reject a friend request (removes the row)
+        - [ ] Retrieve a user's friends list
+        - [ ] Retrieve all pending friend requests for a user
+        - [ ] Block a user
+        - [ ] Unblock a user (removes the row, same as rejection)
+        - [ ] Search for users (fetch from `Users` table, excluding blocked users)
+- [ ] **Game History Data**
+    - [X] **Table Structure**
+        - [X] `winner_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `winner_nickname` → TEXT
+        - [X] `loser_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `loser_nickname` → TEXT
+        - [X] `game_type` → TEXT (`ping-pong`, `rock-paper`, `tic-tac-toe`)
+        - [X] `date` → INTEGER (timestamp)
+    - [ ] **Methods**
+        - [ ] Create a new game record
+        - [ ] Fetch game records for a specific user (`user_id`)
+        - [ ] Fetch total **Ping-Pong** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
+        - [ ] Fetch total **Tic-Tac-Toe** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
+        - [ ] Fetch total **Rock-Paper-Scissors** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
+        - [ ] Fetch total **games played across all game types** (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
+- [ ] **Chat Data**
+    - [X] **Table Structure**
+        - [X] `id` → INTEGER, PRIMARY KEY
+        - [X] `user1_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `user2_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+    - [ ] **Methods**
+        - [ ] Create a new chat
+        - [ ] Fetch all chats for a specific user (`user_id`)
+        - [ ] Delete all chats for a specific user (`user_id`)
+- [ ] **Messages Data**
+    - [X] **Table Structure**
+        - [X] `chat_id` → INTEGER, FOREIGN KEY (references `Chat.id`)
+        - [X] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `content` → BLOB (message content)
+        - [X] `date` → INTEGER (timestamp)
+    - [ ] **Methods**
+        - [ ] Send a message (`chat_id`, `sender_id`, `content`)
+        - [ ] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
+- [ ] **Recovery Data**
+*To be added soon*
+
+### API URLS
+*To be added soon*
+        
+### Security
+*To be added soon*
+
+# Authors
+
+- Oussama Kamili [@oussamakami](https://github.com/oussamakami)
+
+- Salah Eddine Lazar [@slazar42](https://github.com/slazar42)
+
+- Abdellah amardoul [@loudrama](https://github.com/loudrama)
+
+- Anas Kheireddine
+
+# License
+This Project Is Licensed Under &copy; [**MIT**](./LICENSE)
