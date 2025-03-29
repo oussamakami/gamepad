@@ -196,7 +196,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Update the user email (send to server).
         - [ ] Update the user password (send to server).
         - [ ] Update the user theme (store in localStorage).
-- [ ] **SPA Navigation Module Implementation**
+- [ ] **SPA Navigation Module Implementation** (@oussamakami)
     - [ ] *To be added soon*
 - [ ] **Charts Module Implementation**
     - [ ] *To be added soon*
@@ -253,7 +253,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Block a user
         - [ ] Unblock a user (removes the row, same as rejection)
         - [ ] Search for users (fetch from `Users` table, excluding blocked users)
-- [ ] **Game History Data** (@oussamakami)
+- [ ] **Game History Data**
     - [X] **Table Structure**
         - [X] `winner_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [X] `winner_nickname` → TEXT
@@ -262,30 +262,34 @@ This is a full-stack web development project focused on building a single-page a
         - [X] `game_type` → TEXT (`ping-pong`, `rock-paper`, `tic-tac-toe`)
         - [X] `date` → INTEGER (timestamp)
     - [ ] **Methods**
-        - [ ] Create a new game record
+        - [X] Create a new game record
         - [ ] Fetch game records for a specific user (`user_id`)
         - [ ] Fetch total **Ping-Pong** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
         - [ ] Fetch total **Tic-Tac-Toe** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
         - [ ] Fetch total **Rock-Paper-Scissors** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
         - [ ] Fetch total **games played across all game types** (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
-- [ ] **Chat Data**
+- [X] **Chat Data**
     - [X] **Table Structure**
         - [X] `id` → INTEGER, PRIMARY KEY
         - [X] `user1_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [X] `user2_id` → INTEGER, FOREIGN KEY (references `Users.id`)
-    - [ ] **Methods**
-        - [ ] Create a new chat
-        - [ ] Fetch all chats for a specific user (`user_id`)
-        - [ ] Delete all chats for a specific user (`user_id`)
-- [ ] **Messages Data**
+    - [X] **Methods**
+        - [X] Create a new chat
+        - [X] Fetch all chats for a specific user
+        - [X] Fetch chat by Participants
+        - [X] Fetch chat by chat ID
+        - [X] Fetch all chats
+        - [X] Delete chat by chat ID
+        - [X] Delete user from a chat
+- [X] **Messages Data**
     - [X] **Table Structure**
         - [X] `chat_id` → INTEGER, FOREIGN KEY (references `Chat.id`)
         - [X] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [X] `content` → BLOB (message content)
         - [X] `date` → INTEGER (timestamp)
-    - [ ] **Methods**
-        - [ ] Send a message (`chat_id`, `sender_id`, `content`)
-        - [ ] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
+    - [X] **Methods**
+        - [X] Send a message (`chat_id`, `sender_id`, `content`)
+        - [X] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
 - [ ] **Account Recovery Data**
 *To be added soon*
 
