@@ -2,11 +2,14 @@ import { customAlphabet } from 'nanoid';
 import Database from "better-sqlite3";
 import Compressor from "zlib";
 import JWT from 'jsonwebtoken';
+import { clearInterval } from 'timers';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const allowedChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 class userData {
+    #cachedTokens = {}
+
     constructor(databaseFile, devMode) {
         if (devMode) {
             this.db = new Database(databaseFile, { verbose: console.log } );
@@ -27,7 +30,11 @@ class userData {
         this.generateUserId = customAlphabet("0123456789", 8);
         this.generateTokenId = customAlphabet(allowedChar, 10);
 
-        // this.setInterval()
+        //Schedule a task to clear expired cached sessions every hour (3600000 ms)
+        this.cacheClearingJob = setInterval(this.#clearExpiredCache, 3600000);
+
+        //Schedule a task to remove expired sessions from the database every hour (3600000 ms)
+        this.sessionsClearingJob = setInterval(this.#cleanExpiredSessions, 3600000);
     }
 
     initializeTables() {
@@ -248,6 +255,7 @@ class userData {
         try {
             const stmt = this.db.prepare(`DELETE FROM sessions WHERE token_id = ? RETURNING *`);
             result.data = stmt.get(tokenId);
+            delete this.#cachedTokens[tokenId];
         }
         catch (error) {
             result.success = false;
@@ -305,13 +313,53 @@ class userData {
         return (result);
     }
 
+    #addSessionToCache(token_id, sessionData) {
+        const now = Math.floor(Date.now() / 1000);
+
+        this.#cachedTokens[token_id] = {
+            data: sessionData,
+            cacheExpiration: (now + 300)
+        };
+    }
+    
+    #getCachedSession(token_id) {
+        const now = Math.floor(Date.now() / 1000);
+        const session = this.#cachedTokens[token_id];
+
+        if (session)
+        {
+            if (session.cacheExpiration > now)
+                return (session.data);
+            else
+                delete this.#cachedTokens[token_id];
+        }
+        return (undefined);
+    }
+
+    #clearExpiredCache() {
+        const now = Math.floor(Date.now() / 1000);
+
+        for (const token_id in this.#cachedTokens) {
+            if (this.#cachedTokens[token_id].cacheExpiration < now)
+                delete this.#cachedTokens[token_id]
+        }
+    }
+
     verifySession(token) {
-        const result = {success: true, table: "sessions", action: "verify"}; 
+        const result = {success: true, table: "sessions", action: "verify"};
+        let tokendata;
 
         try {
-            let tokendata = JWT.verify(token, JWT_SECRET, {complete: true});
+            tokendata = JWT.verify(token, JWT_SECRET, {complete: true});
             if (!tokendata.header.jti)
                 throw new Error("invalid Token");
+
+            const cacheData = this.#getCachedSession(tokendata.header.jti);
+
+            if (cacheData) {
+                result.data = cacheData;
+                return (result);
+            }
 
             const dbresult = this.fetchSession(tokendata.header.jti);
 
@@ -321,6 +369,7 @@ class userData {
             if (tokendata.payload.user_id != dbresult.data.user_id)
                 throw new Error("invalid Token");
             result.data = dbresult.data;
+            this.#addSessionToCache(tokendata.header.jti, result.data);
         }
         catch (error)
         {
@@ -686,6 +735,8 @@ class userData {
     }
 
     closeDataBase() {
+        clearInterval(this.cacheClearingJob);
+        clearInterval(this.sessionsClearingJob);
         this.db.close();
     }
 }
