@@ -1,5 +1,6 @@
 import { customAlphabet } from 'nanoid';
 import Database from "better-sqlite3";
+import Compressor from "zlib";
 import JWT from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -23,8 +24,10 @@ class userData {
             console.error("Failed to initialize the database: ", error);
             this.db.close();
         }
-        this.generateUserId = customAlphabet("0123456789", 6);
+        this.generateUserId = customAlphabet("0123456789", 8);
         this.generateTokenId = customAlphabet(allowedChar, 10);
+
+        // this.setInterval()
     }
 
     initializeTables() {
@@ -49,15 +52,15 @@ class userData {
                 FOREIGN KEY ( user_id ) REFERENCES users ( id ) ON DELETE CASCADE
             );
             CREATE TABLE IF NOT EXISTS games_history (
-                winner_id INTEGER,
-                winner_nickname TEXT NOT NULL,
-                loser_id INTEGER,
-                loser_nickname TEXT NOT NULL,
-                game_type TEXT NOT NULL CHECK ( game_type IN ( 'ping-pong', 'rock-paper', 'tic-tac-toe' ) ),
-                date INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY ( winner_id ) REFERENCES users ( id ) ON DELETE SET NULL,
-                FOREIGN KEY ( loser_id ) REFERENCES users ( id ) ON DELETE SET NULL,
-                CHECK ( winner_id <> loser_id )
+                win_id INTEGER,
+                win_name TEXT NOT NULL,
+                lose_id INTEGER,
+                lose_name TEXT NOT NULL,
+                game TEXT NOT NULL CHECK ( game IN ( 'ping-pong', 'rock-paper', 'tic-tac-toe' ) ),
+                date INTEGER NOT NULL,
+                FOREIGN KEY ( win_id ) REFERENCES users ( id ) ON DELETE SET NULL,
+                FOREIGN KEY ( lose_id ) REFERENCES users ( id ) ON DELETE SET NULL,
+                CHECK ( win_id <> lose_id )
             );
             CREATE TABLE IF NOT EXISTS chats (
                 id INTEGER PRIMARY KEY,
@@ -69,13 +72,31 @@ class userData {
                 UNIQUE ( user1_id, user2_id )
             );
             CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY,
                 chat_id INTEGER,
-                sender_id INTEGER NOT NULL,
+                sender_id INTEGER,
                 message BLOB NOT NULL,
-                date INTEGER NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                date INTEGER NOT NULL,
                 FOREIGN KEY ( chat_id ) REFERENCES chats ( id ) ON DELETE CASCADE,
                 FOREIGN KEY ( sender_id ) REFERENCES users ( id ) ON DELETE CASCADE
-            )
+            );
+            
+            CREATE TRIGGER IF NOT EXISTS update_messages_on_chat_user_null
+            AFTER UPDATE OF user1_id, user2_id ON chats
+            FOR EACH ROW
+            WHEN NEW.user1_id IS NULL OR NEW.user2_id IS NULL
+            BEGIN
+                UPDATE messages 
+                SET sender_id = NULL 
+                WHERE chat_id = NEW.id AND sender_id IN (OLD.user1_id, OLD.user2_id);
+            END;
+            CREATE TRIGGER IF NOT EXISTS delete_chat_when_users_null
+            AFTER UPDATE ON chats
+            FOR EACH ROW
+            WHEN NEW.user1_id IS NULL AND NEW.user2_id IS NULL
+            BEGIN
+                DELETE FROM chats WHERE id = NEW.id;
+            END;
         `);
     }
 
@@ -86,7 +107,7 @@ class userData {
         while (++attempts < 5)
         {
             try {
-                const stmt = this.db.prepare(`    
+                const stmt = this.db.prepare(`
                     INSERT INTO users (id, username, email, password )
                     VALUES ( ?, ?, ?, ? ) RETURNING *
                 `);
@@ -101,7 +122,7 @@ class userData {
                 break;
             }
         }
-        return result;
+        return (result);
     }
 
     deleteUser(userIdentifier) {
@@ -109,14 +130,14 @@ class userData {
         
         try {
             const stmt = this.db.prepare(`DELETE FROM users WHERE id = ? OR username = ? OR email = ? RETURNING *`);
-            result.data = stmt.get(userIdentifier, userIdentifier, userIdentifier);;
+            result.data = stmt.get(...Array(3).fill(userIdentifier));
         }
         catch (error) {
             result.success = false;
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
     fetchUser(userIdentifier) {
@@ -124,19 +145,22 @@ class userData {
         
         try {
             const stmt = this.db.prepare(`SELECT * FROM users WHERE id = ? OR username = ? OR email = ?`);
-            result.data = stmt.get(userIdentifier, userIdentifier, userIdentifier);
-            if (!result.data)
-                throw new Error("User not found");
+            result.data = stmt.get(...Array(3).fill(userIdentifier));
+
+            if (!result.data) {
+                delete result.data;
+                throw new Error("User does not exist");
+            }
         }
         catch (error) {
             result.success = false;
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
-    fetchAllUser() {
+    fetchAllUsers() {
         const result = {success: true, table: "users", action: "fetch"};
         
         try {
@@ -148,7 +172,7 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
     updateUser(userIdentifier, updateData) {
@@ -170,14 +194,19 @@ class userData {
                 history_privacy = COALESCE(@historyPrivacy, history_privacy)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
             `);
-            result.data = stmt.get(updateData, userIdentifier, userIdentifier, userIdentifier);;
+            result.data = stmt.get(updateData, ...Array(3).fill(userIdentifier));
+
+            if (!result.data) {
+                delete result.data;
+                throw new Error("User not found");
+            }
         }
         catch (error) {
             result.success = false;
             result.error = error;
         }
 
-        return result
+        return (result);
     }
 
     createSession(userIdentifier, rememberMe, sessionData) {
@@ -210,7 +239,7 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
     deleteSession(tokenId) {       
@@ -225,7 +254,18 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
+    }
+
+    #cleanExpiredSessions()
+    {
+        try {
+            const now = Math.floor(Date.now() / 1000);
+            const stmt = this.db.prepare(`DELETE FROM sessions WHERE expires_at < ?`);
+
+            stmt.set(now);
+        }
+        catch (error) {}
     }
 
     deleteAllSessions(userId) {
@@ -240,7 +280,7 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
     fetchSession(sessionTokenId) {
@@ -249,8 +289,12 @@ class userData {
         try {
             const stmt = this.db.prepare(`SELECT * FROM sessions WHERE token_id = ?`);
             result.data = stmt.get(sessionTokenId);
-            if (!result.data)
+
+            if (!result.data) {
+                delete result.data;
                 throw new Error("Session not found");
+            }
+
             result.data.title = `${result.data.ip_address} on ${result.data.browser} (${result.data.platform})`
         }
         catch (error) {
@@ -258,15 +302,14 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
     }
 
-    verifySession(token)
-    {
+    verifySession(token) {
         const result = {success: true, table: "sessions", action: "verify"}; 
-        let tokendata;
+
         try {
-            tokendata = JWT.verify(token, JWT_SECRET, {complete: true});
+            let tokendata = JWT.verify(token, JWT_SECRET, {complete: true});
             if (!tokendata.header.jti)
                 throw new Error("invalid Token");
 
@@ -288,7 +331,7 @@ class userData {
                 this.deleteSession(tokendata.header.jti);
         }
 
-        return result;
+        return (result);
     }
 
     fetchAllUserSessions(userId) {
@@ -303,7 +346,343 @@ class userData {
             result.error = error;
         }
 
-        return result;
+        return (result);
+    }
+
+    #prettifyDate(date)
+    {
+        const diff = Math.floor(Date.now() / 1000) - date;
+
+        const MINUTE = 60;
+        const HOUR = 3600;
+        const DAY = 86400;
+        const WEEK = 604800;
+        const MONTH = 2592000;
+
+        if (diff < MINUTE)
+            return (`${diff} second${diff === 1 ? '' : 's'} ago`);
+        if (diff < HOUR)
+            return (`${Math.floor(diff / MINUTE)} minute${Math.floor(diff / MINUTE) === 1 ? '' : 's'} ago`);
+        if (diff < DAY)
+            return (`${Math.floor(diff / HOUR)} hour${Math.floor(diff / HOUR) === 1 ? '' : 's'} ago`);
+        if (diff < WEEK)
+            return (`${Math.floor(diff / DAY)} day${Math.floor(diff / DAY) === 1 ? '' : 's'} ago`);
+        if (diff < MONTH)
+            return `${Math.floor(diff / WEEK)} week${Math.floor(diff / WEEK) === 1 ? '' : 's'} ago`;
+        else {
+            const dateObj = new Date(date * 1000);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return (dateObj.toLocaleDateString('en-US', options));
+        }
+    }
+
+    addGameRecord(matchData) {
+        const result = {success: true, table: "games_history", action: "create"};
+        const defaultKeys = ["win_id", "win_name", "lose_id", "lose_name","game"];
+
+        matchData = Object.fromEntries(defaultKeys.map(key => [key, matchData[key]]));
+        try {
+            const stmt = this.db.prepare(`
+                INSERT INTO games_history (
+                win_id, win_name,
+                lose_id, lose_name, game, date )
+                VALUES ( @win_id, @win_name, @lose_id,
+                @lose_name, @game, ? ) RETURNING *
+            `);
+            result.data = stmt.get(matchData, Math.floor(Date.now() / 1000));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    //the rest of games history goes here
+
+    createNewChat(userIdentifier1, userIdentifier2) {
+        const result = {success: true, table: "chats", action: "create"};
+        let user1 = this.fetchUser(userIdentifier1);
+        let user2 = this.fetchUser(userIdentifier2);
+
+        try {
+            const stmt = this.db.prepare(`
+                INSERT INTO chats ( user1_id, user2_id )
+                VALUES ( ?, ? ) RETURNING *
+            `);
+
+            if (!user1.success || !user2.success)
+                throw new Error(!user1.success ? user1.error.message : user2.error.message);
+
+            if (user1.data.id > user2.data.id)
+                [user1, user2] = [user2, user1];
+
+            if (user1.data.id === user2.data.id)
+                throw new Error("a user cannot create a chat with themselves")
+
+            result.data = stmt.get(user1.data.id, user2.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchUserChats(userIdentifier, pageNumber) {
+        const result = {success: true, table: "chats", action: "fetch", done: false};
+        const user = this.fetchUser(userIdentifier);
+        const valuePerPage = 20;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT c.id AS chat_id, u.username AS recipient_name,
+                (CASE
+                    WHEN c.user1_id = ? THEN c.user2_id
+                    ELSE c.user1_id
+                END) AS recipient_id
+                FROM chats c
+
+                JOIN users u ON
+                u.id = (CASE
+                            WHEN c.user1_id = ? THEN c.user2_id
+                            ELSE c.user1_id
+                        END)
+                WHERE c.user1_id = ? OR c.user2_id = ?
+                ORDER BY chat_id ASC
+                LIMIT ? OFFSET ?
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("invalid page number value");
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(...Array(4).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
+
+            if (result.data.length < valuePerPage)
+                result.done = true;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchChatByParticipants(userIdentifier1, userIdentifier2) {
+        const result = {success: true, table: "chats", action: "fetch"};
+        let user1 = this.fetchUser(userIdentifier1);
+        let user2 = this.fetchUser(userIdentifier2);
+
+        try {
+            const stmt = this.db.prepare(`SELECT * FROM chats WHERE user1_id = ? AND user2_id = ?`);
+
+            if (!user1.success || !user2.success)
+                throw new Error(!user1.success ? user1.error.message : user2.error.message);
+
+            if (user1.data.id > user2.data.id)
+                [user1, user2] = [user2, user1];
+
+            result.data = stmt.get(user1.data.id, user2.data.id);
+
+            if (!result.data) {
+                delete result.data;
+                throw new Error("Chat not found");
+            }
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchChat(chat_id) {
+        const result = {success: true, table: "chats", action: "fetch"};
+
+        try {
+            const stmt = this.db.prepare(`SELECT * FROM chats WHERE id = ?`);
+
+            result.data = stmt.get(chat_id);
+
+            if (!result.data) {
+                delete result.data;
+                throw new Error("Chat not found");
+            }
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchAllChats()
+    {
+        const result = {success: true, table: "chats", action: "fetch"};
+
+        try {
+            const stmt = this.db.prepare(`SELECT * FROM chats`);
+
+            result.data = stmt.all();
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    deleteChat(chat_id) {
+        const result = {success: true, table: "chats", action: "delete"};
+
+        try {
+            const stmt = this.db.prepare(`DELETE FROM chats WHERE id = ? RETURNING *`);
+
+            result.data = stmt.get(chat_id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    removeUserFromChat(chat_id, userIdentifier) {
+        const result = {success: true, table: "chats", action: "update"};
+        const user = this.fetchUser(userIdentifier);
+        const chat = this.fetchChat(chat_id);
+
+        try {
+            const stmt = this.db.prepare(`
+                UPDATE chats SET
+                user1_id = (CASE WHEN user1_id = ? THEN NULL ELSE user1_id END),
+                user2_id = (CASE WHEN user2_id = ? THEN NULL ELSE user2_id END)
+                WHERE (? IN ( user1_id, user2_id ) ) AND id = ? RETURNING *
+                `);
+
+            if (!user.success || !chat.success)
+                throw new Error(!user.success ? user.error.message : chat.error.message);
+
+            result.data = stmt.get(...Array(3).fill(user.data.id), chat_id);
+
+            if (!result.data) {
+                delete result.data;
+                throw new Error("User not found in chat")
+            }
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    sendMessage(chat_id, senderIdentifier, message) {
+        const result = { success: true, table: "messages", action: "create" };
+        const user = this.fetchUser(senderIdentifier);
+        const chat = this.fetchChat(chat_id);
+    
+        try {
+            const stmt = this.db.prepare(`
+                INSERT INTO messages (chat_id, sender_id, message, date)
+                VALUES (?, ?, ?, ?) RETURNING *
+            `);
+
+            if (!message || message.trim() === "")
+                throw new Error("Message cannot be empty.");
+            if (!chat.success || !user.success)
+                throw new Error(!chat.success ? chat.error.message : user.error.message);
+            if (chat.data.user1_id !== user.data.id && chat.data.user2_id !== user.data.id)
+                throw new Error("User is not a participant in this chat");
+
+            const content = message.trim();
+
+            result.data = stmt.get(chat_id, user.data.id, Compressor.deflateSync(content), Math.floor(Date.now() / 1000));
+            result.data.message = content;
+        } 
+        catch (error) {
+            result.success = false;
+            result.error = error.message;
+        }
+    
+        return (result);
+    }
+
+    deleteMessage(message_id)
+    {
+        const result = {success: true, table: "messages", action: "delete"};
+
+        try {
+            const stmt = this.db.prepare(`DELETE FROM messages WHERE id = ? RETURNING *`);
+
+            result.data = stmt.get(message_id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    #fetchCompressedChatMessages(chat_id, pageNumber) {
+        const result = {success: true, table: "messages", action: "fetch", done: false};
+        const chat = this.fetchChat(chat_id);
+        const valuePerPage = 20;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT * FROM messages WHERE chat_id = ?
+                ORDER BY date ASC LIMIT ? OFFSET ?
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("invalid page number value");
+
+            if (!chat.success)
+                throw new Error(chat.error.message);
+
+            result.data = stmt.all(chat_id, valuePerPage, ((pageNumber - 1) * valuePerPage));
+
+            if (result.data.length < valuePerPage)
+                result.done = true;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchChatMessages(chat_id, pageNumber) {
+        let result = this.#fetchCompressedChatMessages(chat_id, pageNumber);
+
+        if (!result.success)
+            return (result);
+
+        result.data = result.data.filter(row => {
+            try {
+                row.message = Compressor.inflateSync(row.message).toString();
+                row.date = this.#prettifyDate(row.date);
+                return true;
+            } catch (error) {
+                return false;
+            }
+        })
+
+        return (result);
     }
 
     closeDataBase() {
