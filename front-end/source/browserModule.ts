@@ -1,5 +1,5 @@
 interface sectionData {
-    id: string,
+    section: HTMLElement,
     load: () => Promise<number>
 }
 
@@ -20,10 +20,11 @@ class navigationHandler {
         sectionId: string,
         loadFunction: () => Promise<number> = async () => Promise.resolve(200)
     ): void {
-        if(!sectionPath.startsWith("/"))
-            sectionPath = "/" + sectionPath;
-
-        this.authSections[sectionPath] = {id: sectionId, load: loadFunction};
+        const sectionElem = document.getElementById(sectionId);
+        sectionPath = !sectionPath.startsWith("/") ? `/${sectionPath}` : sectionPath;
+        
+        if (sectionElem)
+            this.authSections[sectionPath] = {section: sectionElem, load: loadFunction};
     }
 
     public addDashSection(
@@ -31,17 +32,18 @@ class navigationHandler {
         sectionId: string,
         loadFunction: () => Promise<number> = async () => Promise.resolve(200)
     ): void {
-        if(!sectionPath.startsWith("/"))
-            sectionPath = "/" + sectionPath;
+        const sectionElem = document.getElementById(sectionId);
+        sectionPath = !sectionPath.startsWith("/") ? `/${sectionPath}` : sectionPath;
 
-        this.dashSections[sectionPath] = {id: sectionId, load: loadFunction};
+        if (sectionElem)
+            this.dashSections[sectionPath] = {section: sectionElem, load: loadFunction};
     }
 
     public setMainNavigation(navId: string): void {
         this.mainNavElem = document.getElementById(navId);
     }
 
-    public setSecondayNavigation(navId: string): void {
+    public setSecondaryNavigation(navId: string): void {
         this.secondaryNavElem = document.getElementById(navId);
     }
 
@@ -49,16 +51,16 @@ class navigationHandler {
         this.errorElem = document.getElementById(sectionId);
     }
 
-    public showNavigation(): void {
+    private showNavigation(): void {
         this.mainNavElem?.classList.remove("hidden");
     }
 
-    public hideNavigation(): void {
+    private hideNavigation(): void {
         this.mainNavElem?.classList.add("hidden");
         this.secondaryNavElem?.classList.add("hidden");
     }
 
-    public showErrorPage(code: number = 404, title: string = "page not found"): void {
+    private showErrorPage(code: number = 404, title: string = "page not found"): void {
         const errorCodeElem = this.errorElem?.querySelector("#error-code");
         const errorTitleElem = this.errorElem?.querySelector("#error-title");
 
@@ -70,9 +72,24 @@ class navigationHandler {
         this.errorElem?.classList.remove("hidden");
     }
 
-    public hideErrorPage(): void {
+    private hideErrorPage(): void {
         this.errorElem?.classList.add("hidden");
     }
+
+    private hideAllSections(): void {
+        const authkeys = Object.keys(this.authSections);
+        const dashKeys = Object.keys(this.dashSections);
+
+        for (const key of authkeys)
+            this.authSections[key].section.classList.add("hidden");
+
+        for (const key of dashKeys)
+            this.dashSections[key].section.classList.add("hidden");
+
+        this.hideNavigation();
+        this.hideErrorPage();
+    }
+
 }
 
 export default navigationHandler;
