@@ -96,6 +96,8 @@ class navigationHandler {
 
         if (isUserLoggedIn)
             this.showNavigation();
+        else
+            this.hideNavigation();
 
         if (!sectionData){
             this.showErrorPage();
@@ -116,6 +118,16 @@ class navigationHandler {
 
         if (location.pathname !== sectionPath)
             window.history.pushState({}, "", sectionPath);
+    }
+
+    public redirect(pathName: string) {
+        //Replace with a method that uses the userdata class to check if the user is logged in
+        const isUserLoggedIn = false;
+        pathName = pathName.startsWith("/") ? pathName : `/${pathName}`;
+
+        this.pushToHistory(pathName);
+        this.hideAllSections();
+        this.showSection(pathName, isUserLoggedIn);
     }
 }
 
