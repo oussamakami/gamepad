@@ -90,6 +90,27 @@ class navigationHandler {
         this.hideErrorPage();
     }
 
+    private showSection(sectionPath: string, isUserLoggedIn: boolean): void {
+        const sections = isUserLoggedIn? this.dashSections : this.authSections;
+        const sectionData = sections[sectionPath];
+
+        if (isUserLoggedIn)
+            this.showNavigation();
+
+        if (!sectionData){
+            this.showErrorPage();
+            return ;
+        }
+
+        sections[sectionPath].load()
+        .then(() => {
+            sectionData.section.classList.remove("hidden");
+        })
+        .catch(error => {
+            this.showErrorPage(error);
+        })
+    }
+    
 }
 
 export default navigationHandler;
