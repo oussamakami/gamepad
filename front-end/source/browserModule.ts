@@ -21,7 +21,7 @@ class navigationHandler {
         loadFunction: () => Promise<number> = async () => Promise.resolve(200)
     ): void {
         const sectionElem = document.getElementById(sectionId);
-        sectionPath = !sectionPath.startsWith("/") ? `/${sectionPath}` : sectionPath;
+        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
         
         if (sectionElem)
             this.authSections[sectionPath] = {section: sectionElem, load: loadFunction};
@@ -33,7 +33,7 @@ class navigationHandler {
         loadFunction: () => Promise<number> = async () => Promise.resolve(200)
     ): void {
         const sectionElem = document.getElementById(sectionId);
-        sectionPath = !sectionPath.startsWith("/") ? `/${sectionPath}` : sectionPath;
+        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
 
         if (sectionElem)
             this.dashSections[sectionPath] = {section: sectionElem, load: loadFunction};
@@ -110,7 +110,13 @@ class navigationHandler {
             this.showErrorPage(error);
         })
     }
-    
+
+    private pushToHistory(sectionPath: string): void {
+        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
+
+        if (location.pathname !== sectionPath)
+            window.history.pushState({}, "", sectionPath);
+    }
 }
 
 export default navigationHandler;
