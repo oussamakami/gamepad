@@ -7,7 +7,8 @@
   "scripts": {
     "build": "esbuild front-end/source/main.ts --bundle --outfile=front-end/assets/script.js --target=es6 --platform=browser --minify ",
     "clean": "rm front-end/assets/script.js",
-    "start": "npm run build && node --env-file=.env ."
+    "api": "npm run build && node --env-file=.env .",
+    "start": "npm run api & serve front-end/ -p 5500 --single"
   },
   "repository": {
     "type": "git",
@@ -29,6 +30,7 @@
     "nanoid": "^5.1.5"
   },
   "devDependencies": {
-    "esbuild": "^0.25.1"
+    "esbuild": "^0.25.1",
+    "serve": "^14.2.4"
   }
 }

@@ -131,7 +131,7 @@ class navigationHandler {
 
     public redirect(pathName: string) {
         //Replace with a method that uses the userdata class to check if the user is logged in
-        const isUserLoggedIn = true;
+        const isUserLoggedIn = false;
         pathName = pathName.startsWith("/") ? pathName : `/${pathName}`;
 
         this.pushToHistory(pathName);
