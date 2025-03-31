@@ -197,8 +197,8 @@ class userData {
                 password = COALESCE(@password, password),
                 _2fa = COALESCE(@enable2FA, _2fa),
                 _2fa_method = COALESCE(@method2FA, _2fa_method),
-                profile_privacy = COALESCE(@profilePrivacy, profile_privacy),
-                history_privacy = COALESCE(@historyPrivacy, history_privacy)
+                profile_priv = COALESCE(@profilePrivacy, profile_priv),
+                history_priv = COALESCE(@historyPrivacy, history_priv)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
             `);
             result.data = stmt.get(updateData, ...Array(3).fill(userIdentifier));
