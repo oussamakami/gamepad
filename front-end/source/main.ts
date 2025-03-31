@@ -16,8 +16,15 @@ navigation.addAuthSection("/recovery", "recovery");
 navigation.addAuthSection("/reset", "reset");
 navigation.addAuthSection("/twofa", "twofa");
 
+navigation.addDashSection("/", "dashboard");
+navigation.addDashSection("/dashboard", "dashboard");
+navigation.addDashSection("/friends", "friends");
+navigation.addDashSection("/search", "search");
+navigation.addDashSection("/profile", "profile");
+navigation.addDashSection("/chat", "chat");
+
 navigation.setMainNavigation("top-nav");
 navigation.setSecondaryNavigation("side-nav")
 navigation.setErrorsection("error");
 
-navigation.redirect("/");
+navigation.init();

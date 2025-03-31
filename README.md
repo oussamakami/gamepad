@@ -184,7 +184,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] **Password Reset Form**
         - [ ] **Two-Factor Authentication (2FA) Form**
         - [ ] **User Settings Form**
-- [ ] **User Data Module Implementation**
+- [ ] **User Data Module Implementation** (@oussamakami)
     - [ ] **Core User Handling**
         - [ ] Process the API response object to manage user data.
     - [ ] **Module Methods**
@@ -197,7 +197,33 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Update the user password (send to server).
         - [ ] Update the user theme (store in localStorage).
 - [ ] **SPA Navigation Module Implementation** (@oussamakami)
-    - [ ] *To be added soon*
+    - [ ] **Core User Handling**
+        - [ ] Reference to the `userdata` object
+        - [ ] Determine if the user is logged in to show appropriate sections
+    - [X] **Module Methods**
+        - [X] **Section & Path Mapping**
+            - [X] Map URL paths to website **auth sections**
+            - [X] Map URL paths to website **dashboard sections**
+            - [X] Enable support for custom on-load functions in mapped sections
+            - [X] Set the **error page section ID**
+            - [X] Set the **primary navigation bar ID**
+            - [X] Set the **secondary navigation bar ID**
+        - [X] **Section Visibility & Error Handling**
+            - [X] Show a **section** based on the URL path
+                - [X] Execute the custom on-load function (if specified) before displaying the section
+                - [X] Display the error page if the on-load function fails
+                - [ ] Clear userdata and redirect to / if the on-load function returns a 401 error response
+            - [X] Hide **all sections** (both auth and dashboard sections)
+            - [X] Show the **error page section** dynamically with an error code and message
+            - [X] Hide the **error page section**
+            - [X] Show the **navigation bar**
+            - [X] Hide the **navigation bar**
+        - [X] **Browser History & Redirection**
+            - [X] Add a **URL path** to the browser history (`pushToHistory`)
+            - [X] Redirect the user to another **URL path** (`redirect`)
+        - [X] **Event Handling for SPA Navigation**
+            - [X] Handle events for **anchor (`<a>`) links**
+            - [X] Initialize event listening on all **anchor links** for smooth SPA navigation
 - [ ] **Charts Module Implementation**
     - [ ] *To be added soon*
 - [ ] **Buttons Action Module Implementation**

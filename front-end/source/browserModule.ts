@@ -13,7 +13,11 @@ class navigationHandler {
     private mainNavElem: HTMLElement | null;
     private secondaryNavElem: HTMLElement | null;
     private errorElem: HTMLElement | null;
-    constructor (){}
+    private anchorLinks: HTMLAnchorElement[] = [];
+
+    constructor () {
+        this.anchorLinks = [...document.querySelectorAll("a")];
+    }
 
     public addAuthSection(
         sectionPath: string,
@@ -105,11 +109,16 @@ class navigationHandler {
         }
 
         sections[sectionPath].load()
-        .then(() => {
+        .then(_ => {
             sectionData.section.classList.remove("hidden");
         })
         .catch(error => {
-            this.showErrorPage(error);
+            if (error === 401) {
+                //clear the userdata object
+                this.redirect("/");
+            }
+            else
+                this.showErrorPage(error);
         })
     }
 
@@ -122,12 +131,34 @@ class navigationHandler {
 
     public redirect(pathName: string) {
         //Replace with a method that uses the userdata class to check if the user is logged in
-        const isUserLoggedIn = false;
+        const isUserLoggedIn = true;
         pathName = pathName.startsWith("/") ? pathName : `/${pathName}`;
 
         this.pushToHistory(pathName);
         this.hideAllSections();
         this.showSection(pathName, isUserLoggedIn);
+    }
+
+    private handleEvents(event: MouseEvent): void {
+        const targetAnchor = event.currentTarget as HTMLAnchorElement;
+        const targetPath = targetAnchor.getAttribute("href");
+
+        event.preventDefault();
+        if (targetPath)
+            this.redirect(targetPath);
+    }
+
+    public init(): void {
+        this.hideAllSections();
+        this.hideNavigation();
+        this.hideErrorPage();
+
+        this.anchorLinks.forEach(link => {
+            link.addEventListener("click", this.handleEvents.bind(this));
+            window.addEventListener("popstate", _ => this.redirect(location.pathname));
+            document.addEventListener("DOMContentLoaded", _ => this.redirect(location.pathname));
+        });
+        this.redirect("/");
     }
 }
 
