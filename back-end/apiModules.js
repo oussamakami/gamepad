@@ -97,6 +97,8 @@ function handleLogIn(request, reply) {
         else
             return reply.status(401).send({error: "Incorrect username or password"});
     }
+    if (!queryResponse.error.code)
+        return reply.status(401).send({error: "Incorrect username or password"});
     return reply.status(500).send({error: "Internal Server Error"});
 }
 
