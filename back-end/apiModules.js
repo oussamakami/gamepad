@@ -1,7 +1,7 @@
 import inputValidator from './inputValidator.js';
 import userData from './database.js'
 
-const database = new userData("", false);
+const database = new userData("", true);
 
 function getSessionInfo(requestPacket) {
     const browserList = {
@@ -51,6 +51,19 @@ function getSessionInfo(requestPacket) {
     return result;
 }
 
+function verifyRequestToken(request, reply, next) {
+    if (request.url.endsWith("/login") || request.url.endsWith("/signup"))
+        return (next());
+
+    const sessionToken = request.cookies.authToken;
+    const verification = database.verifySession(sessionToken);
+
+    if (!verification.success)
+        return reply.status(401).send({error: "Unauthorized Access"});
+
+    next();
+}
+
 function handleSignUp(request, reply) {
     const username = request.body.username;
     const password = request.body.password;
@@ -95,16 +108,16 @@ function handleLogIn(request, reply) {
                 username: queryResponse.data.username, email: queryResponse.data.email});
         }
         else
-            return reply.status(401).send({error: "Incorrect username or password"});
+            return reply.status(403).send({error: "Incorrect username or password"});
     }
     if (!queryResponse.error.code)
-        return reply.status(401).send({error: "Incorrect username or password"});
+        return reply.status(403).send({error: "Incorrect username or password"});
     return reply.status(500).send({error: "Internal Server Error"});
 }
 
-
 function apiRoutes(fastify, options, done)
 {
+    fastify.addHook("preHandler", verifyRequestToken);
     fastify.post("/signup", handleSignUp);
     fastify.post("/login", handleLogIn);
 
@@ -112,6 +125,5 @@ function apiRoutes(fastify, options, done)
 
     done();
 }
-
 
 export default apiRoutes;

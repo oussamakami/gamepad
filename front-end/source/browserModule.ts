@@ -114,7 +114,7 @@ class navigationHandler {
         })
         .catch(error => {
             if (error === 401) {
-                //clear the userdata object
+                localStorage.removeItem("userID");
                 this.redirect("/");
             }
             else
@@ -130,8 +130,7 @@ class navigationHandler {
     }
 
     public redirect(pathName: string) {
-        //Replace with a method that uses the userdata class to check if the user is logged in
-        const isUserLoggedIn = false;
+        const isUserLoggedIn = !!localStorage.getItem("userID");
         pathName = pathName.startsWith("/") ? pathName : `/${pathName}`;
 
         this.pushToHistory(pathName);
@@ -153,10 +152,11 @@ class navigationHandler {
         this.hideNavigation();
         this.hideErrorPage();
 
+        window.addEventListener("popstate", _ => this.redirect(location.pathname));
+        document.addEventListener("DOMContentLoaded", _ => this.redirect(location.pathname));
+
         this.anchorLinks.forEach(link => {
-            link.addEventListener("click", this.handleEvents.bind(this));
-            window.addEventListener("popstate", _ => this.redirect(location.pathname));
-            document.addEventListener("DOMContentLoaded", _ => this.redirect(location.pathname));
+            link.addEventListener("click", this.handleEvents.bind(this))
         });
         this.redirect("/");
     }

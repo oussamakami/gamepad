@@ -184,22 +184,18 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] **Password Reset Form**
         - [ ] **Two-Factor Authentication (2FA) Form**
         - [ ] **User Settings Form**
-- [ ] **User Data Module Implementation** (@oussamakami)
-    - [ ] **Core User Handling**
-        - [ ] Process the API response object to manage user data.
-    - [ ] **Module Methods**
-        - [ ] Retrieve the user ID.
-        - [ ] Retrieve the user name.
-        - [ ] Retrieve the user theme preference.
-        - [ ] Retrieve the user email.
-        - [ ] Update the user name (send to server).
-        - [ ] Update the user email (send to server).
-        - [ ] Update the user password (send to server).
-        - [ ] Update the user theme (store in localStorage).
-- [ ] **SPA Navigation Module Implementation** (@oussamakami)
-    - [ ] **Core User Handling**
-        - [ ] Reference to the `userdata` object
-        - [ ] Determine if the user is logged in to show appropriate sections
+- [X] **User Data Module Implementation**
+    - [X] **Core User Handling**
+        - [X] Process the API response object to manage user data.
+    - [X] **Module Methods**
+        - [X] Retrieve the user ID.
+        - [X] Retrieve the user name.
+        - [X] Retrieve the user theme preference.
+        - [X] Retrieve the user email.
+        - [X] Update the user theme (store in localStorage).
+- [X] **SPA Navigation Module Implementation**
+    - [X] **Core User Handling**
+        - [X] Determine if the user is logged in to show appropriate sections
     - [X] **Module Methods**
         - [X] **Section & Path Mapping**
             - [X] Map URL paths to website **auth sections**
@@ -212,7 +208,7 @@ This is a full-stack web development project focused on building a single-page a
             - [X] Show a **section** based on the URL path
                 - [X] Execute the custom on-load function (if specified) before displaying the section
                 - [X] Display the error page if the on-load function fails
-                - [ ] Clear userdata and redirect to / if the on-load function returns a 401 error response
+                - [X] Clear loginStatus and redirect to / if the on-load function returns a 401 error response
             - [X] Hide **all sections** (both auth and dashboard sections)
             - [X] Show the **error page section** dynamically with an error code and message
             - [X] Hide the **error page section**
@@ -306,7 +302,7 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Fetch chat by chat ID
         - [X] Fetch all chats
         - [X] Delete chat by chat ID
-        - [X] Delete user from a chat
+        - [X] Delete user from a chat (@oussamakami)
 - [X] **Messages Data**
     - [X] **Table Structure**
         - [X] `chat_id` → INTEGER, FOREIGN KEY (references `Chat.id`)
