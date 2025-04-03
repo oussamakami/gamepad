@@ -1,58 +1,90 @@
 type Theme = "light" | "dark";
 
 class UserData {
-    private userId: number = 0;
-    private userName: string = "";
-    private userEmail: string = "";
-    private webTheme: Theme;
+    private id: number;
+    private name: string;
+    private email: string;
+    private theme: Theme;
+    private sessionAPI: string;
+    private isLoggedIn: boolean;
+    private isSessionLoaded: boolean;
 
-    constructor(data?: Record<string, any>) {
-        this.webTheme = this.extractTheme();
-
-        if (data)
-            this.updateData(data);
+    constructor(sessionDataAPI: string) {
+        this.clear();
+        this.sessionAPI = sessionDataAPI;
+        this.theme = this.getCachedTheme();
+        this.isSessionLoaded = false;
     }
 
-    private extractTheme(): Theme {
-        const storedTheme = localStorage.getItem("theme");
-        if (storedTheme === "light" || storedTheme === "dark")
-            return storedTheme;
+    private getCachedTheme(): Theme {
+        const cachedTheme = localStorage.getItem("theme");
+
+        if (cachedTheme === "light" || cachedTheme === "dark")
+            return cachedTheme;
+
         localStorage.setItem("theme", "light");
         return "light";
     }
 
-    public updateData(data: Record<string, any>): void {
-        this.userId = data.id ?? 0;
-        this.userName = data.username ?? "";
-        this.userEmail = data.email ?? "";
-        
-        if (data.id)
-            localStorage.setItem("userID", data.id.toString());
-        else
-            localStorage.removeItem("userID");
+    public load(data: Record<string, any>): void {
+        if (!data.id || !data.username || !data.email)
+            return ;
+
+        this.id = data.id;
+        this.name = data.username;
+        this.email = data.email;
+        this.isLoggedIn = true;
     }
 
-    public updateTheme(newTheme: Theme) {
+    public clear(): void {
+        this.id = 0;
+        this.name = "";
+        this.email = "";
+        this.isLoggedIn = false;
+    }
+
+    public async fetchSessionData(): Promise<void> {
+        try {
+            const response = await fetch(this.sessionAPI, {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) throw new Error();
+
+            this.load(await response.json());
+        } catch {
+            this.clear();
+        }
+        this.isSessionLoaded = true;
+    }
+
+    public set setTheme(newTheme: Theme) {
         localStorage.setItem("theme", newTheme);
-        this.webTheme = newTheme;
+        this.theme = newTheme;
     }
 
-    public get id(): number {
-        return (this.userId);
+    public get userId(): number {
+        return (this.id);
     }
     
-    public get name(): string {
-        return (this.userName);
+    public get userName(): string {
+        return (this.name);
     }
 
-    public get email(): string {
-        return (this.userEmail);
+    public get userEmail(): string {
+        return (this.email);
     }
 
-    public get theme(): "light" | "dark" {
-        return (this.webTheme);
+    public get currentTheme(): "light" | "dark" {
+        return (this.theme);
     }
 
+    public async isAuthenticated(): Promise<boolean> {
+        if (!this.isSessionLoaded)
+            await this.fetchSessionData();
+        return (this.isLoggedIn);
+    }
 }
 
 export default UserData;

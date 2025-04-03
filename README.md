@@ -193,9 +193,11 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Retrieve the user theme preference.
         - [X] Retrieve the user email.
         - [X] Update the user theme (store in localStorage).
+        - [X] Determine if the user is logged in to show appropriate sections
+        - [X] Fetch userData using the session Token
 - [X] **SPA Navigation Module Implementation**
     - [X] **Core User Handling**
-        - [X] Determine if the user is logged in to show appropriate sections
+        - [X] Reference to the `userdata` object
     - [X] **Module Methods**
         - [X] **Section & Path Mapping**
             - [X] Map URL paths to website **auth sections**
@@ -216,7 +218,7 @@ This is a full-stack web development project focused on building a single-page a
             - [X] Hide the **navigation bar**
         - [X] **Browser History & Redirection**
             - [X] Add a **URL path** to the browser history (`pushToHistory`)
-            - [X] Redirect the user to another **URL path** (`redirect`)
+            - [X] Redirect the user to another **URL path** (`navigateTp`)
         - [X] **Event Handling for SPA Navigation**
             - [X] Handle events for **anchor (`<a>`) links**
             - [X] Initialize event listening on all **anchor links** for smooth SPA navigation

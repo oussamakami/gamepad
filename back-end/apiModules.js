@@ -1,7 +1,7 @@
 import inputValidator from './inputValidator.js';
 import userData from './database.js'
 
-const database = new userData("", true);
+const database = new userData("", false);
 
 function getSessionInfo(requestPacket) {
     const browserList = {
@@ -61,6 +61,8 @@ function verifyRequestToken(request, reply, next) {
     if (!verification.success)
         return reply.status(401).send({error: "Unauthorized Access"});
 
+    request.user = verification.data.user_id;
+
     next();
 }
 
@@ -115,13 +117,32 @@ function handleLogIn(request, reply) {
     return reply.status(500).send({error: "Internal Server Error"});
 }
 
+function fetchSessionData(request, reply) {
+    const queryResponse = database.fetchUser(request.user);
+
+    if (!queryResponse.success)
+        return reply.status(401).send({error: "Unauthorized Access"});
+
+    return reply.status(200).send({id: queryResponse.data.id,
+        username: queryResponse.data.username, email: queryResponse.data.email});
+}
+
+//this one for testing Unauthorized Access with session expiration
+function expired(request, reply) {
+    database.deleteAllSessions(request.user);
+    return reply.status(401).send({error: "Unauthorized Access"});
+}
+
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
     fastify.post("/signup", handleSignUp);
     fastify.post("/login", handleLogIn);
+    fastify.get("/sessionData", fetchSessionData);
 
-
+    //this one is for testing session expiration
+    fastify.get("/expired", expired);
 
     done();
 }

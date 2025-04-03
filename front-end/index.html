@@ -20,9 +20,9 @@
         <ul>
             <label>navigation</label>
             <li class="active"><a href=""><i class='bx bx-home-alt'></i> <span>dashboard</span></a></li>
-            <li><a href=""><i class='bx bx-chat'></i> <span>chat</span></a></li>
-            <li><a href=""><i class='bx bx-group'></i> <span>friends</span></a></li>
-            <li><a href=""><i class='bx bx-user-circle'></i> <span>profile</span></a></li>
+            <li><a href="/chat"><i class='bx bx-chat'></i> <span>chat</span></a></li>
+            <li><a href="/friends"><i class='bx bx-group'></i> <span>friends</span></a></li>
+            <li><a href="/profile"><i class='bx bx-user-circle'></i> <span>profile</span></a></li>
 
             <label>games</label>
             <li><a href=""><i class='bx bx-meteor'></i> <span>ping pong</span></a></li>
@@ -30,7 +30,7 @@
             <li><a href=""><i class='bx bx-cut'></i> <span>rock paper</span></a></li>
 
             <label>user</label>
-            <li><a href=""><i class='bx bx-cog'></i> <span>settings</span></a></li>
+            <li><a href="/settings"><i class='bx bx-cog'></i> <span>settings</span></a></li>
             <li><a href=""><i class='bx bx-exit'></i> <span>logout</span></a></li>
         </ul>
     </nav>
@@ -79,7 +79,7 @@
             </section>
 
             <!-- Login Section -->
-            <section id="login" class="auth-section hidden">
+            <section id="login" class="auth-section">
                 <div class="container card">
                     <a class="logo" href="/">gamepad</a>
 
@@ -96,7 +96,7 @@
                         
                         <p class="divider">or</p>
                         
-                        <p class="auth-status"></p>
+                        <p class="form-status"></p>
 
                         <label for="loginName">Username / Email</label>
                         <input type="text" id="loginName" name="identifer" placeholder="Enter your username or email" minlength="3" required>
@@ -136,7 +136,7 @@
 
                         <p class="divider">or</p>
 
-                        <p class="auth-status"></p>
+                        <p class="form-status"></p>
 
                         <label for="signupName">Username</label>
                         <input type="text" id="signupName" name="username" placeholder="Enter your username" minlength="3" maxlength="20" required>
@@ -172,7 +172,7 @@
 
                     <form id="recovery-form" class="container-form">
 
-                        <p class="auth-status"></p>
+                        <p class="form-status"></p>
 
                         <label for="accountEmail">Email address</label>
                         <input type="email" id="accountEmail" name="email" placeholder="Enter your email" required>
@@ -195,7 +195,7 @@
 
                     <form id="reset-form" class="container-form">
 
-                        <p class="auth-status"></p>
+                        <p class="form-status"></p>
 
                         <label for="resetPass">Password</label>
                         <input type="password" id="resetPass" name="new-password" placeholder="Enter your password" minlength="8" required>
@@ -221,7 +221,7 @@
 
                     <form id="twofa-form" class="container-form">
 
-                        <p class="auth-status"></p>
+                        <p class="form-status"></p>
 
                         <label for="twofaCode">Code</label>
                         <input type="number" id="twofaCode" name="verification-code" placeholder="6-digit code" required>

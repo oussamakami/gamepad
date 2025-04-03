@@ -250,8 +250,7 @@ class userData {
     }
 
     deleteSession(tokenId) {       
-        const result = {success: true, table: "sessions", action: "delete"}; 
-        
+        const result = {success: true, table: "sessions", action: "delete"};
         try {
             const stmt = this.db.prepare(`DELETE FROM sessions WHERE token_id = ? RETURNING *`);
             result.data = stmt.get(tokenId);
@@ -282,6 +281,7 @@ class userData {
         try {
             const stmt = this.db.prepare(`DELETE FROM sessions WHERE user_id = ? RETURNING *`);
             result.data = stmt.all(userId);
+            result.data.forEach(element => delete this.#cachedTokens[element.token_id]);
         }
         catch (error) {
             result.success = false;

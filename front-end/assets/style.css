@@ -454,7 +454,7 @@ section {
     justify-content: center;
 }
 
-.auth-status {
+.form-status {
     display: none;
     width: 100%;
     padding: .7rem .9rem;
@@ -467,12 +467,12 @@ section {
     text-transform: capitalize !important;
 }
 
-.auth-section .success {
+.form-status.success {
     display: block;
     background-color: var(--success-color) !important;
 }
 
-.auth-section .failure {
+.form-status.failure {
     display: block;
     background-color: var(--danger-color) !important;
 }

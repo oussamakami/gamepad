@@ -1,164 +1,181 @@
-interface sectionData {
-    section: HTMLElement,
-    load: () => Promise<number>
+import UserData from "./userModule"
+import FormHandler from "./formsModule"
+
+export type httpPromise = Promise<{httpCode: number, httpName: string}>
+
+interface SectionOptions {
+    formHander?: FormHandler,
+    onload?: () => httpPromise
 }
 
-interface sectionsList {
-    [key: string]: sectionData
+interface Section {
+    element: HTMLElement,
+    options: SectionOptions
 }
 
 class navigationHandler {
-    private authSections: sectionsList = {};
-    private dashSections: sectionsList = {};
-    private mainNavElem: HTMLElement | null;
-    private secondaryNavElem: HTMLElement | null;
-    private errorElem: HTMLElement | null;
-    private anchorLinks: HTMLAnchorElement[] = [];
+    private authSections: Map<string, Section> = new Map;
+    private dashSections: Map<string, Section> = new Map;
+    private mainNav?: HTMLElement;
+    private sideNav?: HTMLElement;
+    private errorPage?: HTMLElement;
+    private links: HTMLAnchorElement[] = [];
+    private user: UserData;
 
-    constructor () {
-        this.anchorLinks = [...document.querySelectorAll("a")];
+    constructor (user: UserData) {
+        this.user = user;
+        this.links = [...document.querySelectorAll("a")];
+    }
+
+    public configure(
+        mainNavId?:string,
+        sideNavId?: string,
+        errorPageId?: string
+    ): void {
+        if (mainNavId)
+            this.mainNav = document.getElementById(mainNavId) as HTMLElement | undefined;
+        if (sideNavId)
+            this.sideNav = document.getElementById(sideNavId) as HTMLElement | undefined;
+        if (errorPageId)
+            this.errorPage = document.getElementById(errorPageId) as HTMLElement | undefined;
+    }
+
+    private normalizePath(path: string): string {
+
+        if (path.endsWith("/") && path.length > 1)
+            path = path.slice(0, -1);
+
+        if (!path.startsWith("/"))
+            path = `/${path}`;
+
+        return (path.split('?')[0].split('#')[0]);
     }
 
     public addAuthSection(
-        sectionPath: string,
+        path: string,
         sectionId: string,
-        loadFunction: () => Promise<number> = async () => Promise.resolve(200)
+        options: SectionOptions = {}
     ): void {
-        const sectionElem = document.getElementById(sectionId);
-        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
-        
-        if (sectionElem)
-            this.authSections[sectionPath] = {section: sectionElem, load: loadFunction};
+        const element = document.getElementById(sectionId);
+
+        if (!element) return ;
+
+        if (!options.onload)
+            options.onload = () => Promise.resolve({httpCode: 200, httpName: "OK"});
+
+        this.authSections.set(this.normalizePath(path), {element, options});
     }
 
     public addDashSection(
-        sectionPath: string,
+        path: string,
         sectionId: string,
-        loadFunction: () => Promise<number> = async () => Promise.resolve(200)
+        options: SectionOptions = {}
     ): void {
-        const sectionElem = document.getElementById(sectionId);
-        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
+        const element = document.getElementById(sectionId);
 
-        if (sectionElem)
-            this.dashSections[sectionPath] = {section: sectionElem, load: loadFunction};
+        if (!element) return ;
+
+        if (!options.onload)
+            options.onload = () => Promise.resolve({httpCode: 200, httpName: "OK"});
+
+        this.dashSections.set(this.normalizePath(path), {element, options});
     }
 
-    public setMainNavigation(navId: string): void {
-        this.mainNavElem = document.getElementById(navId);
+    private showError(code: number, title: string): void {
+        if (!this.errorPage) return;
+
+        const codeElement = this.errorPage.querySelector("#error-code");
+        const titleElement = this.errorPage.querySelector("#error-title");
+
+        if (codeElement)
+            codeElement.textContent = code.toString();
+        if (titleElement)
+            titleElement.textContent = title;
+
+        this.errorPage.classList.remove("hidden");
     }
 
-    public setSecondaryNavigation(navId: string): void {
-        this.secondaryNavElem = document.getElementById(navId);
+    private hideError(): void {
+        this.errorPage?.classList.add("hidden");
     }
 
-    public setErrorsection(sectionId: string): void {
-        this.errorElem = document.getElementById(sectionId);
-    }
-
-    private showNavigation(): void {
-        this.mainNavElem?.classList.remove("hidden");
-    }
-
-    private hideNavigation(): void {
-        this.mainNavElem?.classList.add("hidden");
-        this.secondaryNavElem?.classList.add("hidden");
-    }
-
-    private showErrorPage(code: number = 404, title: string = "page not found"): void {
-        const errorCodeElem = this.errorElem?.querySelector("#error-code");
-        const errorTitleElem = this.errorElem?.querySelector("#error-title");
-
-        if (errorCodeElem)
-            errorCodeElem.textContent = code.toString();
-        if (errorTitleElem)
-            errorTitleElem.textContent = title;
-
-        this.errorElem?.classList.remove("hidden");
-    }
-
-    private hideErrorPage(): void {
-        this.errorElem?.classList.add("hidden");
-    }
-
-    private hideAllSections(): void {
-        const authkeys = Object.keys(this.authSections);
-        const dashKeys = Object.keys(this.dashSections);
-
-        for (const key of authkeys)
-            this.authSections[key].section.classList.add("hidden");
-
-        for (const key of dashKeys)
-            this.dashSections[key].section.classList.add("hidden");
-
-        this.hideNavigation();
-        this.hideErrorPage();
-    }
-
-    private showSection(sectionPath: string, isUserLoggedIn: boolean): void {
-        const sections = isUserLoggedIn? this.dashSections : this.authSections;
-        const sectionData = sections[sectionPath];
-
-        if (isUserLoggedIn)
-            this.showNavigation();
+    private toggleNavigation(isAuthenticated: boolean): void {
+        if (!isAuthenticated) {
+            this.mainNav?.classList.add("hidden");
+            this.sideNav?.classList.add("hidden");
+        }
         else
-            this.hideNavigation();
+            this.mainNav?.classList.remove("hidden");
+    }
 
-        if (!sectionData){
-            this.showErrorPage();
+    private hideAllSections(isAuthenticated: boolean): void {
+        const sections = [...this.authSections.values(), ...this.dashSections.values()]
+
+        sections.forEach(section => section.element.classList.add("hidden"));
+
+        this.hideError();
+        this.toggleNavigation(isAuthenticated);
+    }
+
+    private async showSection(path: string): Promise<void> {
+        const isLoggedIn = await this.user.isAuthenticated();
+        const sections = isLoggedIn? this.dashSections : this.authSections;
+        const section = sections.get(path);
+
+        this.toggleNavigation(isLoggedIn);
+
+        if (!section) {
+            this.showError(404, "page not found");
             return ;
         }
 
-        sections[sectionPath].load()
+        (section.options.onload as () => httpPromise)()
         .then(_ => {
-            sectionData.section.classList.remove("hidden");
+            this.hideAllSections(isLoggedIn);
+            section.element.classList.remove("hidden");
+            if (location.search.includes("expired=true"))
+                section.options.formHander?.showError("session expired");
         })
         .catch(error => {
-            if (error === 401) {
-                localStorage.removeItem("userID");
-                this.redirect("/");
+            if (error.httpCode === 401) {
+                this.user.clear();
+                this.navigateTo("/login?expired=true");
+            } else {
+                this.hideAllSections(isLoggedIn);
+                this.showError(error.httpCode, error.httpName);
             }
-            else
-                this.showErrorPage(error);
         })
     }
 
-    private pushToHistory(sectionPath: string): void {
-        sectionPath = sectionPath.startsWith("/") ? sectionPath : `/${sectionPath}`;
-
-        if (location.pathname !== sectionPath)
-            window.history.pushState({}, "", sectionPath);
+    private pushToHistory(path: string): void {
+        if (location.pathname + location.search !== path)
+            window.history.pushState({}, "", path);
     }
 
-    public redirect(pathName: string) {
-        const isUserLoggedIn = !!localStorage.getItem("userID");
-        pathName = pathName.startsWith("/") ? pathName : `/${pathName}`;
+    public navigateTo(path: string): void {
+        const location = this.normalizePath(path);
 
-        this.pushToHistory(pathName);
-        this.hideAllSections();
-        this.showSection(pathName, isUserLoggedIn);
+        this.pushToHistory(path);
+        this.showSection(location);
     }
 
     private handleEvents(event: MouseEvent): void {
         const targetAnchor = event.currentTarget as HTMLAnchorElement;
-        const targetPath = targetAnchor.getAttribute("href");
+        const targetPath = targetAnchor.getAttribute("href") || "/";
 
         event.preventDefault();
-        if (targetPath)
-            this.redirect(targetPath);
+        this.navigateTo(targetPath);
     }
 
-    public init(): void {
-        this.hideAllSections();
-        this.hideNavigation();
-        this.hideErrorPage();
-
-        window.addEventListener("popstate", _ => this.redirect(location.pathname));
-        document.addEventListener("DOMContentLoaded", _ => this.redirect(location.pathname));
-
-        this.anchorLinks.forEach(link => {
+    public initialize(): void {
+        this.hideAllSections(false);
+        
+        this.links.forEach(link => {
             link.addEventListener("click", this.handleEvents.bind(this))
         });
-        this.redirect("/");
+
+        window.addEventListener("popstate", _ => this.navigateTo(location.pathname));
+        this.navigateTo(location.pathname + location.search)
     }
 }
 

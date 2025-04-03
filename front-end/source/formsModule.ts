@@ -1,35 +1,44 @@
 class FormHandler {
-    private domElement: HTMLFormElement;
+    private fromElement: HTMLFormElement;
     private targetAPI: string;
     private targetMethod: string;
-    private successAction: (response: Record<string, any>) => void;
+    private onSuccess: (response: Record<string, any>) => void;
     private showStatus: boolean = true;
 
-    constructor(formId: string, method: string, api: string, successAction?: (response: Record<string, any>) => void) {
-        const formElement = document.getElementById(formId);
+    constructor(
+        formId: string,
+        method: string,
+        api: string,
+        onSuccess?: (response: Record<string, any>) => void
+    ) {
+        const element = document.getElementById(formId);
 
-        if (!formElement)
-            throw new Error(`Couldn't locate the form element.`);
+        if (!element)
+            throw new Error(`Form element with ID "${formId}" not found`);
 
-        if (formElement.tagName !== "FORM")
-            throw new Error(`The provided ID "${formId}" does not correspond to a <form> element.`);
+        if (element.tagName !== "FORM")
+            throw new Error(`Element with ID "${formId}" is not a form`);
         
-        this.domElement = formElement as HTMLFormElement;
+        this.fromElement = element as HTMLFormElement;
         this.targetMethod = method.toUpperCase();
         this.targetAPI = api;
-        this.successAction = successAction || (data => console.log(data));
+        this.onSuccess = onSuccess || (data => {});
 
-        this.init();
+        this.initialize();
+    }
+
+    private initialize(): void {
+        this.fromElement.addEventListener("submit", this.handleSubmit.bind(this));
     }
 
     private getEntries(): string {
-        const formData = new FormData(this.domElement);
+        const formData = new FormData(this.fromElement);
         const entries = Object.fromEntries(formData.entries());
 
         return (JSON.stringify(entries));
     }
 
-    private async establishLink(payload: string): Promise<string> {
+    private async sendRequest(payload: string): Promise<string> {
         const response = await fetch(this.targetAPI, {
             method: this.targetMethod,
             credentials: "include",
@@ -40,82 +49,57 @@ class FormHandler {
 
         const responseData = await response.text();
         if (!response.ok)
-            throw new Error(`${responseData.length ? JSON.parse(responseData).error : "Unknown error occurred"}`);
+            throw new Error(responseData.length ? JSON.parse(responseData).error : "Unknown error occurred");
 
         return (responseData);
     }
 
-    private handleForm(event: SubmitEvent): void {
+    private handleSubmit(event: SubmitEvent): void {
         event.preventDefault();
+        this.resetStatus();
 
-        this.statusReset();
 
-        this.establishLink(this.getEntries())
-
+        this.sendRequest(this.getEntries())
         .then(response => {
             const responseObj = response.length ? JSON.parse(response) : {};
 
-            this.statusSuccess(responseObj.message || "");
-            this.successAction(responseObj)
+            this.showSuccess(responseObj.message || "Success");
+            this.onSuccess(responseObj)
         })
-
-        .catch(error => this.statusFailure(error.message));
+        .catch(error => this.showError(error.message));
     }
 
-    public statusSuccess(message: string): void
+    public showSuccess(message: string): void
     {
-        console.log(`Status: ${message}`);
-
-        const formStatus = this.domElement.querySelector(".auth-status") as HTMLElement;
-
-        if (!formStatus || !this.showStatus)
-            return ;
-
-        formStatus.innerHTML = message;
-        formStatus.classList.remove("failure");
-        formStatus.classList.add("success");
+        this.updateStatus(message, "success");
     }
 
-    public statusFailure(message: string): void
+    public showError(message: string): void
     {
-        console.error(`Status: ${message}`);
-
-        const formStatus = this.domElement.querySelector(".auth-status") as HTMLElement;
-
-        if (!formStatus || !this.showStatus)
-            return ;
-
-        formStatus.innerHTML = "Error - ".concat(message);
-        formStatus.classList.remove("success");
-        formStatus.classList.add("failure");
+        this.updateStatus(message, "failure");
     }
 
-    public statusReset(): void
+    public resetStatus(): void
     {
-        const formStatus = this.domElement.querySelector(".auth-status") as HTMLElement;
-
-        if (!formStatus)
-            return ;
-
-        formStatus.innerHTML = "";
-        formStatus.classList.remove("success");
-        formStatus.classList.remove("failure");
+        this.updateStatus("");
     }
 
-    public statusEnable(): void {
-        this.showStatus = true;
+    private updateStatus(message: string, type?: "success" | "failure"): void {
+        const statusElement = this.fromElement.querySelector(".form-status") as HTMLElement;
+
+        if (!this.showStatus || !statusElement) return ;
+        
+        statusElement.textContent = message;
+        statusElement.className = "form-status";
+        if (type) statusElement.classList.add(type);
     }
 
-    public statusDisable(): void {
-        this.showStatus = false;
+    public set setStatusVisibility(visible: boolean) {
+        this.showStatus = visible;
     }
 
-    public get status(): boolean {
+    public get statusVisibility(): boolean {
         return (this.showStatus);
-    }
-
-    private init(): void {
-        this.domElement.addEventListener("submit", this.handleForm.bind(this));
     }
 }
 
