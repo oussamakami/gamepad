@@ -1,5 +1,5 @@
 class FormHandler {
-    private fromElement: HTMLFormElement;
+    private formElement: HTMLFormElement;
     private targetAPI: string;
     private targetMethod: string;
     private onSuccess: (response: Record<string, any>) => void;
@@ -19,7 +19,7 @@ class FormHandler {
         if (element.tagName !== "FORM")
             throw new Error(`Element with ID "${formId}" is not a form`);
         
-        this.fromElement = element as HTMLFormElement;
+        this.formElement = element as HTMLFormElement;
         this.targetMethod = method.toUpperCase();
         this.targetAPI = api;
         this.onSuccess = onSuccess || (data => {});
@@ -28,14 +28,30 @@ class FormHandler {
     }
 
     private initialize(): void {
-        this.fromElement.addEventListener("submit", this.handleSubmit.bind(this));
+        this.formElement.addEventListener("submit", this.handleSubmit.bind(this));
     }
 
     private getEntries(): string {
-        const formData = new FormData(this.fromElement);
+        const formData = new FormData(this.formElement);
         const entries = Object.fromEntries(formData.entries());
 
         return (JSON.stringify(entries));
+    }
+
+    public addToPayload(key: string, value: string): void {
+        const input = document.createElement("input");
+
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+
+        this.formElement.appendChild(input);
+    }
+
+    public resetPasswordFields(): void {
+        const passwordInputs = this.formElement.querySelectorAll<HTMLInputElement>('input[type="password"]');
+        
+        passwordInputs.forEach(input => input.value = "");
     }
 
     private async sendRequest(payload: string): Promise<string> {
@@ -85,7 +101,7 @@ class FormHandler {
     }
 
     private updateStatus(message: string, type?: "success" | "failure"): void {
-        const statusElement = this.fromElement.querySelector(".form-status") as HTMLElement;
+        const statusElement = this.formElement.querySelector(".form-status") as HTMLElement;
 
         if (!this.showStatus || !statusElement) return ;
         

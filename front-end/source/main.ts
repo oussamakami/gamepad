@@ -14,16 +14,28 @@ const loginForm = new FormHandler("login-form", "POST", "http://127.0.0.1:3000/a
     navigation.navigateTo("/dashboard");
 });
 
+function expiredNotice(formHander?: FormHandler): httpPromise {
+    const url = new URLSearchParams(location.search);
+    const expired = url.get("expired");
 
-function containsSerial(): httpPromise {
-    if (location.search.includes("serial="))
-        return Promise.resolve({httpCode: 200, httpName: "OK"});
-    return Promise.reject({httpCode: 404, httpName: "page not found"});
+    if (expired)
+        formHander?.showError("session expired");
+
+    return Promise.resolve({httpCode: 200, httpName: "OK"});
+}
+function containsSerial(formHander?: FormHandler): httpPromise {
+    const url = new URLSearchParams(location.search);
+    const serial = url.get("serial");
+    if (!serial)
+        return Promise.reject({httpCode: 404, httpName: "page not found"});
+
+    formHander?.addToPayload("serial", serial);
+    return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
 
 navigation.configure("top-nav", "side-nav", "error");
-navigation.addAuthSection("/", "login", {formHander: loginForm});
-navigation.addAuthSection("/login", "login", {formHander: loginForm});
+navigation.addAuthSection("/", "login", {formHander: loginForm, onload: expiredNotice});
+navigation.addAuthSection("/login", "login", {formHander: loginForm, onload: expiredNotice});
 navigation.addAuthSection("/signup", "signup", {formHander: signupForm});
 navigation.addAuthSection("/recovery", "recovery", {formHander: recoveryForm});
 navigation.addAuthSection("/reset", "reset", {formHander: resetForm, onload: containsSerial});

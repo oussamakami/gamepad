@@ -5,7 +5,7 @@ export type httpPromise = Promise<{httpCode: number, httpName: string}>
 
 interface SectionOptions {
     formHander?: FormHandler,
-    onload?: () => httpPromise
+    onload?: (formHander?: FormHandler) => httpPromise
 }
 
 interface Section {
@@ -104,8 +104,11 @@ class navigationHandler {
             this.mainNav?.classList.add("hidden");
             this.sideNav?.classList.add("hidden");
         }
-        else
+        else {
+            if (this.mainNav?.classList.contains("hidden"))
+                this.sideNav?.classList.remove("hidden");
             this.mainNav?.classList.remove("hidden");
+        }
     }
 
     private hideAllSections(isAuthenticated: boolean): void {
@@ -129,12 +132,12 @@ class navigationHandler {
             return ;
         }
 
-        (section.options.onload as () => httpPromise)()
+        section.options.formHander?.resetPasswordFields();
+        section.options.formHander?.resetStatus();
+        section.options.onload!(section.options.formHander)
         .then(_ => {
             this.hideAllSections(isLoggedIn);
             section.element.classList.remove("hidden");
-            if (location.search.includes("expired=true"))
-                section.options.formHander?.showError("session expired");
         })
         .catch(error => {
             if (error.httpCode === 401) {
@@ -175,7 +178,7 @@ class navigationHandler {
         });
 
         window.addEventListener("popstate", _ => this.navigateTo(location.pathname));
-        this.navigateTo(location.pathname + location.search)
+        window.addEventListener("DOMContentLoaded", _ => this.navigateTo(location.pathname + location.search));
     }
 }
 

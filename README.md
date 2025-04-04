@@ -174,9 +174,8 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Specify `formId` to uniquely identify the form.
         - [X] Define the HTTP request method (`GET`, `POST`, etc.).
         - [X] Set the target API endpoint for data submission.
-    - [ ] **Optional Callbacks**
+    - [X] **Optional Callbacks**
         - [X] Execute a function after a successful form submission (`onSuccess`).
-        - [ ] Execute a function after a failed form submission (`onFailure`).
     - [ ] **Forms to handle**
         - [X] **Login Form**
         - [X] **Signup Form**
@@ -285,7 +284,7 @@ This is a full-stack web development project focused on building a single-page a
         - [X] `loser_nickname` → TEXT
         - [X] `game_type` → TEXT (`ping-pong`, `rock-paper`, `tic-tac-toe`)
         - [X] `date` → INTEGER (timestamp)
-    - [ ] **Methods**
+    - [ ] **Methods** (@oussamakami)
         - [X] Create a new game record
         - [ ] Fetch game records for a specific user (`user_id`)
         - [ ] Fetch total **Ping-Pong** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
@@ -304,7 +303,7 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Fetch chat by chat ID
         - [X] Fetch all chats
         - [X] Delete chat by chat ID
-        - [X] Delete user from a chat (@oussamakami)
+        - [X] Delete user from a chat
 - [X] **Messages Data**
     - [X] **Table Structure**
         - [X] `chat_id` → INTEGER, FOREIGN KEY (references `Chat.id`)
