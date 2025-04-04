@@ -99,7 +99,17 @@ class navigationHandler {
         this.errorPage?.classList.add("hidden");
     }
 
-    private toggleNavigation(isAuthenticated: boolean): void {
+    private highLightNavSection(sectionId?: string): void {
+        if (!sectionId) return ;
+
+        const navButtonId = "#" + sectionId + "-nav";
+        const navButtons = this.sideNav?.querySelectorAll("li");
+
+        navButtons?.forEach(button => button.classList.remove("active"));
+        this.sideNav?.querySelector(navButtonId)?.classList.add("active");
+    }
+
+    private toggleNavigation(isAuthenticated: boolean, sectionId?: string): void {
         if (!isAuthenticated) {
             this.mainNav?.classList.add("hidden");
             this.sideNav?.classList.add("hidden");
@@ -108,6 +118,7 @@ class navigationHandler {
             if (this.mainNav?.classList.contains("hidden"))
                 this.sideNav?.classList.remove("hidden");
             this.mainNav?.classList.remove("hidden");
+            this.highLightNavSection(sectionId);
         }
     }
 
@@ -125,7 +136,7 @@ class navigationHandler {
         const sections = isLoggedIn? this.dashSections : this.authSections;
         const section = sections.get(path);
 
-        this.toggleNavigation(isLoggedIn);
+        this.toggleNavigation(isLoggedIn, section?.element.id);
 
         if (!section) {
             this.showError(404, "page not found");

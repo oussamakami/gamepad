@@ -43,9 +43,13 @@ navigation.addAuthSection("/twofa", "twofa", {formHander: twoFAForm, onload: con
 
 navigation.addDashSection("/", "dashboard");
 navigation.addDashSection("/dashboard", "dashboard");
-navigation.addDashSection("/profile", "profile");
-navigation.addDashSection("/settings", "settings");
 navigation.addDashSection("/chat", "chat");
+navigation.addDashSection("/friends", "friends");
+navigation.addDashSection("/profile", "profile");
+navigation.addDashSection("/pong", "pong");
+navigation.addDashSection("/tic-tac", "tic-tac");
+navigation.addDashSection("/rps", "rps");
+navigation.addDashSection("/settings", "settings");
 
 //this one for testing Unauthorized Access with session expiration
 async function notauthorizedTesting(): httpPromise {
