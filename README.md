@@ -221,8 +221,26 @@ This is a full-stack web development project focused on building a single-page a
         - [X] **Event Handling for SPA Navigation**
             - [X] Handle events for **anchor (`<a>`) links**
             - [X] Initialize event listening on all **anchor links** for smooth SPA navigation
-- [ ] **Charts Module Implementation**
-    - [ ] *To be added soon*
+- [X] **Charts Module Implementation**
+    - [X] **Core User Handling**
+        - [X] Specify the `elementId` of the DOM element that will contain the chart
+    - [X] **Module Methods**
+        - [X] **Chart Configuration – Getters**
+            - [X] Get the chart `theme`
+            - [X] Get the chart `text color`
+            - [X] Get the chart `bars color`
+            - [X] Get the chart `categories`
+            - [X] Get the chart `dataset`
+        - [X] **Chart Configuration – Setters**
+            - [X] Set the chart `theme`
+            - [X] Set the chart `text color`
+            - [X] Set the chart `bars color`
+            - [X] Set the chart `categories`
+            - [X] Set the chart `dataset`
+        - [X] **Chart Rendering & Lifecycle**
+            - [X] Render or update the chart in the DOM
+            - [X] Destroy the chart instance
+        - [X] Support CSS variables as valid color inputs
 - [ ] **Buttons Action Module Implementation**
     - [ ] *To be added soon*
 

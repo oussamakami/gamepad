@@ -139,6 +139,7 @@ class navigationHandler {
         this.toggleNavigation(isLoggedIn, section?.element.id);
 
         if (!section) {
+            this.hideAllSections(isLoggedIn);
             this.showError(404, "page not found");
             return ;
         }

@@ -1,6 +1,7 @@
 import UserData from "./userModule";
 import FormHandler from "./formsModule";
 import navigationHandler, {httpPromise} from "./browserModule";
+import Chart from "./chartModule";
 
 const user = new UserData("http://127.0.0.1:3000/api/sessionData");
 const navigation = new navigationHandler(user);
