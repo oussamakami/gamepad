@@ -118,7 +118,7 @@ class userData {
                     INSERT INTO users (id, username, email, password )
                     VALUES ( ?, ?, ?, ? ) RETURNING *
                 `);
-                result.data = stmt.get(this.generateUserId(), username, email, password);
+                result.data = stmt.get(this.generateUserId(), username.toLowerCase(), email.toLowerCase(), password);
                 break;
             }
             catch (error) {
@@ -134,6 +134,9 @@ class userData {
 
     deleteUser(userIdentifier) {
         const result = {success: true, table: "users", action: "delete"};
+
+        if (typeof userIdentifier === "string")
+            userIdentifier = userIdentifier.toLowerCase();
         
         try {
             const stmt = this.db.prepare(`DELETE FROM users WHERE id = ? OR username = ? OR email = ? RETURNING *`);
@@ -149,6 +152,9 @@ class userData {
 
     fetchUser(userIdentifier) {
         const result = {success: true, table: "users", action: "fetch"};
+
+        if (typeof userIdentifier === "string")
+            userIdentifier = userIdentifier.toLowerCase();
         
         try {
             const stmt = this.db.prepare(`SELECT * FROM users WHERE id = ? OR username = ? OR email = ?`);
@@ -189,6 +195,11 @@ class userData {
             "method2FA", "profilePrivacy", "historyPrivacy"];
         
         updateData = Object.fromEntries(defaultKeys.map(key => [key, updateData[key]]));
+        updateData.username = updateData.username.toLowerCase();
+        updateData.email = updateData.email.toLowerCase();
+
+        if (typeof userIdentifier === "string")
+            userIdentifier = userIdentifier.toLowerCase();
         
         try {
             const stmt = this.db.prepare(`UPDATE users SET 

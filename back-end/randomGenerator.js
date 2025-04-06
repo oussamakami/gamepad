@@ -20,6 +20,10 @@ class RecordGenerator {
             const password = faker.internet.password();
             
             const user = this.#database.createUser(username, email, password);
+            if (!user.success) {
+                i--;
+                continue;
+            }
             this.#users.push(user.data);
         }
     }
@@ -33,8 +37,8 @@ class RecordGenerator {
         }
         
         return {
-            winner: this.#users[winnerIndex].id,
-            loser: this.#users[loserIndex].id
+            winner: (this.#users[winnerIndex]).id,
+            loser: (this.#users[loserIndex]).id
         };
     }
 
