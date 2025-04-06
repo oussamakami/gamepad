@@ -3,8 +3,6 @@ import Database from "better-sqlite3";
 import Compressor from "zlib";
 import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
-import { count } from 'console';
-import { homedir } from 'os';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const allowedChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -429,18 +427,22 @@ class userData {
 
     addGameRecord(matchData) {
         const result = {success: true, table: "games_history", action: "create"};
-        const defaultKeys = ["win_id", "win_name", "lose_id", "lose_name","game_type"];
+        const defaultKeys = ["win_id", "win_name", "lose_id", "lose_name","game_type", "date"];
 
         matchData = Object.fromEntries(defaultKeys.map(key => [key, matchData[key]]));
+
+        if (!matchData.date)
+            matchData.date = Math.floor(Date.now() / 1000);
+
         try {
             const stmt = this.db.prepare(`
                 INSERT INTO games_history (
                 win_id, win_name,
                 lose_id, lose_name, game_type, date )
                 VALUES ( @win_id, @win_name, @lose_id,
-                @lose_name, @game_type, ? ) RETURNING *
+                @lose_name, @game_type, @date ) RETURNING *
             `);
-            result.data = stmt.get(matchData, Math.floor(Date.now() / 1000));
+            result.data = stmt.get(matchData);
         }
         catch (error) {
             result.success = false;

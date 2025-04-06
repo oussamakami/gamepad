@@ -3,6 +3,21 @@ import userData from './database.js'
 
 const database = new userData("", false);
 
+//generate random data for testing
+
+import RecordGenerator from './randomGenerator.js';
+
+const numberOfUsersToGenerate = 39;
+const numberOfRecordsToGenerate = 9869;
+const generator = new RecordGenerator(database);
+
+generator.generate(numberOfUsersToGenerate, numberOfRecordsToGenerate);
+// console.log(database.fetchGlobalStats().data);
+
+//generate random data for testing
+
+
+
 function getSessionInfo(requestPacket) {
     const browserList = {
         "Firefox": "Firefox",
