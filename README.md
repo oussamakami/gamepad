@@ -286,7 +286,13 @@ This is a full-stack web development project focused on building a single-page a
         - [X] `date` → INTEGER (timestamp)
     - [ ] **Methods** (@oussamakami)
         - [X] Create a new game record
-        - [ ] Fetch game records for a specific user (`user_id`)
+        - [X] Fetch game records for the website stats (`page_number`)
+        - [X] Fetch game records for a specific user (`user_id`, `page_number`)
+        - [X] Fetch website leaderBoard
+        - [X] Fetch website total records count
+        - [X] Fetch website total records count for one day
+        - [X] Fetch website records count for the last 7 days
+        - [X] Fetch website dashboard statistics
         - [ ] Fetch total **Ping-Pong** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
         - [ ] Fetch total **Tic-Tac-Toe** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
         - [ ] Fetch total **Rock-Paper-Scissors** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)

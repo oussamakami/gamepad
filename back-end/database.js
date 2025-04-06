@@ -3,6 +3,8 @@ import Database from "better-sqlite3";
 import Compressor from "zlib";
 import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
+import { count } from 'console';
+import { homedir } from 'os';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const allowedChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -63,7 +65,7 @@ class userData {
                 win_name TEXT NOT NULL,
                 lose_id INTEGER,
                 lose_name TEXT NOT NULL,
-                game TEXT NOT NULL CHECK ( game IN ( 'ping-pong', 'rock-paper', 'tic-tac-toe' ) ),
+                game_type TEXT NOT NULL CHECK ( game_type IN ( 'ping-pong', 'rock-paper', 'tic-tac-toe' ) ),
                 date INTEGER NOT NULL,
                 FOREIGN KEY ( win_id ) REFERENCES users ( id ) ON DELETE SET NULL,
                 FOREIGN KEY ( lose_id ) REFERENCES users ( id ) ON DELETE SET NULL,
@@ -427,18 +429,252 @@ class userData {
 
     addGameRecord(matchData) {
         const result = {success: true, table: "games_history", action: "create"};
-        const defaultKeys = ["win_id", "win_name", "lose_id", "lose_name","game"];
+        const defaultKeys = ["win_id", "win_name", "lose_id", "lose_name","game_type"];
 
         matchData = Object.fromEntries(defaultKeys.map(key => [key, matchData[key]]));
         try {
             const stmt = this.db.prepare(`
                 INSERT INTO games_history (
                 win_id, win_name,
-                lose_id, lose_name, game, date )
+                lose_id, lose_name, game_type, date )
                 VALUES ( @win_id, @win_name, @lose_id,
-                @lose_name, @game, ? ) RETURNING *
+                @lose_name, @game_type, ? ) RETURNING *
             `);
             result.data = stmt.get(matchData, Math.floor(Date.now() / 1000));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchGameRecords(pageNumber = 1) {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const valuePerPage = 20;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    u1.username AS winner_username,
+                    g.win_name AS winner_nickname,
+                    u2.username AS loser_username,
+                    g.lose_name AS loser_nickname,
+                    g.game_type, g.date
+                FROM games_history g
+                JOIN users u1 ON (u1.id = g.win_id)
+                JOIN users u2 ON (u2.id = g.lose_id)
+                ORDER BY g.date DESC LIMIT ? OFFSET ?
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("invalid page number value");
+
+            result.data = stmt.all(valuePerPage, ((pageNumber - 1) * valuePerPage));
+            result.data.forEach(row => row.date = this.#prettifyDate(row.date));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchUserGameRecords(userIdentifier, pageNumber = 1) {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const user = this.fetchUser(userIdentifier);
+        const valuePerPage = 20;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    u1.username AS user_username,
+                    (CASE
+                        WHEN g.win_id = ? THEN g.win_name
+                        ELSE g.lose_name
+                    END) AS user_nickname,
+                    u2.username AS enemy_username,
+                    (CASE
+                        WHEN g.win_id = ? THEN g.lose_name
+                        ELSE g.win_name
+                    END) AS enemy_nickname,
+                    (g.win_id = ?) AS isWinner,
+                    g.game_type, g.date
+                FROM games_history g
+                JOIN users u1 ON (u1.id = ?)
+                JOIN users u2 ON (u2.id = (
+                    CASE
+                        WHEN g.win_id = ? THEN g.lose_id
+                        ELSE g.win_id
+                    END))
+                WHERE g.win_id = ? OR g.lose_id = ?
+                ORDER BY g.date DESC LIMIT ? OFFSET ?
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("invalid page number value");
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(...Array(7).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
+            result.data.forEach(row => row.date = this.#prettifyDate(row.date));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchLeaderBoard() {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    g.win_id AS userId,
+                    u.username,
+                    COUNT(*) AS wins
+                FROM games_history g
+                JOIN users u ON u.id = g.win_id
+                GROUP BY g.win_id
+                ORDER BY wins DESC
+                LIMIT 10
+            `);
+            
+            result.data = stmt.all();
+        } catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+        
+        return (result);
+    }
+
+    fetchTotalGameCounts() {
+        const result = {success: true, table: "games_history", action: "fetch"};
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    COUNT( * ) AS global,
+                    SUM( game_type = 'ping-pong' ) AS 'ping-pong',
+                    SUM( game_type = 'tic-tac-toe' ) AS 'tic-tac-toe',
+                    SUM( game_type = 'rock-paper' ) AS 'rock-paper'
+                FROM games_history
+            `);
+    
+            result.data = stmt.get();
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchTodayGameCounts() {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const date = new Date();
+        date.setHours(0, 0, 0, 0);
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    COUNT( * ) AS global,
+                    SUM( game_type = 'ping-pong' ) AS 'ping-pong',
+                    SUM( game_type = 'tic-tac-toe' ) AS 'tic-tac-toe',
+                    SUM( game_type = 'rock-paper' ) AS 'rock-paper'
+                FROM games_history
+                WHERE date >= ?
+            `);
+    
+            result.data = stmt.get(Math.floor(date.getTime() / 1000));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    #generateWeekTimeStamps() {
+        const result = {labels: [], timestamps: []}
+        const labelFormat = {month: 'short', day: 'numeric'}; // (e.g. "Feb 22")
+        
+        for (let count = 6; count >= 0; count--) {
+            const date = new Date();
+            date.setDate(date.getDate() - count);
+            date.setHours(0, 0, 0, 0);
+
+            result.labels.push(date.toLocaleString('default', labelFormat));
+            result.timestamps.push(Math.floor(date.getTime() / 1000));
+        }
+
+        return (result);
+    }
+    fetchProjection() {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const weekData = this.#generateWeekTimeStamps();
+        const gamesCount = [];
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    COUNT( * ) AS count
+                FROM games_history
+                WHERE date >= ? AND date < ?
+            `);
+
+            for (let index = 0; index < weekData.timestamps.length; index++) {
+                let dayStart = weekData.timestamps[index];
+                let dayEnd = dayStart + 86400;
+                gamesCount.push(stmt.get(dayStart, dayEnd).count || 0);
+            }
+
+            result.data = {dates: weekData.labels, values: gamesCount};
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchGlobalStats() {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const total = this.fetchTotalGameCounts();
+        const today = this.fetchTodayGameCounts();
+        const projections = this.fetchProjection();
+        const leaderBoard = this.fetchLeaderBoard();
+        const history = this.fetchGameRecords(1);
+        const data = {};
+
+        try {
+            if (!total.success)
+                throw new Error("total => " + total.error.message);
+            if (!today.success)
+                throw new Error("today => " + today.error.message);
+            if (!projections.success)
+                throw new Error("projection => " + projections.error.message);
+            if (!leaderBoard.success)
+                throw new Error("leaderBoard => " + leaderBoard.error.message);
+            if (!history.success)
+                throw new Error("history => " + history.error.message);
+
+            data.total = total.data;
+            data.today = today.data;
+            data.projections = projections.data;
+            data.leaderBoard = leaderBoard.data;
+            data.history = history.data;
+
+            result.data = data;
         }
         catch (error) {
             result.success = false;
@@ -480,7 +716,7 @@ class userData {
         return (result);
     }
 
-    fetchUserChats(userIdentifier, pageNumber) {
+    fetchUserChats(userIdentifier, pageNumber = 1) {
         const result = {success: true, table: "chats", action: "fetch", done: false};
         const user = this.fetchUser(userIdentifier);
         const valuePerPage = 20;
@@ -614,10 +850,10 @@ class userData {
         try {
             const stmt = this.db.prepare(`
                 UPDATE chats SET
-                user1_id = (CASE WHEN user1_id = ? THEN NULL ELSE user1_id END),
-                user2_id = (CASE WHEN user2_id = ? THEN NULL ELSE user2_id END)
+                    user1_id = (CASE WHEN user1_id = ? THEN NULL ELSE user1_id END),
+                    user2_id = (CASE WHEN user2_id = ? THEN NULL ELSE user2_id END)
                 WHERE (? IN ( user1_id, user2_id ) ) AND id = ? RETURNING *
-                `);
+            `);
 
             if (!user.success || !chat.success)
                 throw new Error(!user.success ? user.error.message : chat.error.message);
@@ -685,7 +921,7 @@ class userData {
         return (result);
     }
 
-    #fetchCompressedChatMessages(chat_id, pageNumber) {
+    #fetchCompressedChatMessages(chat_id, pageNumber = 1) {
         const result = {success: true, table: "messages", action: "fetch", done: false};
         const chat = this.fetchChat(chat_id);
         const valuePerPage = 20;
@@ -715,7 +951,7 @@ class userData {
         return (result);
     }
 
-    fetchChatMessages(chat_id, pageNumber) {
+    fetchChatMessages(chat_id, pageNumber = 1) {
         let result = this.#fetchCompressedChatMessages(chat_id, pageNumber);
 
         if (!result.success)
