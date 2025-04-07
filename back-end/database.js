@@ -1,11 +1,12 @@
 import { customAlphabet } from 'nanoid';
-import Database from "better-sqlite3";
-import Compressor from "zlib";
+import Database from 'better-sqlite3';
+import Compressor from 'zlib';
 import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const allowedChar = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"]
+const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 class userData {
     #cachedTokens = {}
@@ -47,7 +48,8 @@ class userData {
                 _2fa BOOLEAN DEFAULT false CHECK ( _2fa IN ( true, false ) ),
                 _2fa_method TEXT NOT NULL DEFAULT 'email' CHECK ( _2fa_method IN ( 'email', 'app' ) ),
                 profile_priv TEXT NOT NULL DEFAULT 'public' CHECK ( profile_priv IN ( 'public', 'friends', 'private' ) ),
-                history_priv TEXT NOT NULL DEFAULT 'public' CHECK ( history_priv IN ( 'public', 'friends', 'private' ) )
+                history_priv TEXT NOT NULL DEFAULT 'public' CHECK ( history_priv IN ( 'public', 'friends', 'private' ) ),
+                picture TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS sessions (
                 token_id TEXT PRIMARY KEY,
@@ -109,16 +111,17 @@ class userData {
 
     createUser(username, email, password) {
         const result = {success: true, table: "users", action: "create"};
+        const picture = DEFAULT_PICTURES[Math.random() * DEFAULT_PICTURES.length | 0]
         let attempts = 0;
         
         while (++attempts < 5)
         {
             try {
                 const stmt = this.db.prepare(`
-                    INSERT INTO users (id, username, email, password )
-                    VALUES ( ?, ?, ?, ? ) RETURNING *
+                    INSERT INTO users (id, username, email, password, picture)
+                    VALUES ( ?, ?, ?, ?, ? ) RETURNING *
                 `);
-                result.data = stmt.get(this.generateUserId(), username.toLowerCase(), email.toLowerCase(), password);
+                result.data = stmt.get(this.generateUserId(), username, email, password, picture);
                 break;
             }
             catch (error) {
@@ -135,9 +138,6 @@ class userData {
     deleteUser(userIdentifier) {
         const result = {success: true, table: "users", action: "delete"};
 
-        if (typeof userIdentifier === "string")
-            userIdentifier = userIdentifier.toLowerCase();
-        
         try {
             const stmt = this.db.prepare(`DELETE FROM users WHERE id = ? OR username = ? OR email = ? RETURNING *`);
             result.data = stmt.get(...Array(3).fill(userIdentifier));
@@ -153,9 +153,6 @@ class userData {
     fetchUser(userIdentifier) {
         const result = {success: true, table: "users", action: "fetch"};
 
-        if (typeof userIdentifier === "string")
-            userIdentifier = userIdentifier.toLowerCase();
-        
         try {
             const stmt = this.db.prepare(`SELECT * FROM users WHERE id = ? OR username = ? OR email = ?`);
             result.data = stmt.get(...Array(3).fill(userIdentifier));
@@ -192,15 +189,8 @@ class userData {
         const result = {success: true, table: "users", action: "update"};
         const defaultKeys = [
             "username", "email", "password", "enable2FA",
-            "method2FA", "profilePrivacy", "historyPrivacy"];
-        
+            "method2FA", "profilePrivacy", "historyPrivacy", "picture"];
         updateData = Object.fromEntries(defaultKeys.map(key => [key, updateData[key]]));
-        updateData.username = updateData.username.toLowerCase();
-        updateData.email = updateData.email.toLowerCase();
-
-        if (typeof userIdentifier === "string")
-            userIdentifier = userIdentifier.toLowerCase();
-        
         try {
             const stmt = this.db.prepare(`UPDATE users SET 
                 username = COALESCE(@username, username), 
@@ -209,7 +199,8 @@ class userData {
                 _2fa = COALESCE(@enable2FA, _2fa),
                 _2fa_method = COALESCE(@method2FA, _2fa_method),
                 profile_priv = COALESCE(@profilePrivacy, profile_priv),
-                history_priv = COALESCE(@historyPrivacy, history_priv)
+                history_priv = COALESCE(@historyPrivacy, history_priv),
+                picture = COALESCE(@picture, picture)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
             `);
             result.data = stmt.get(updateData, ...Array(3).fill(userIdentifier));

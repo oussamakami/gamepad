@@ -3,7 +3,7 @@ import FormHandler from "./formsModule";
 import navigationHandler, {httpPromise} from "./browserModule";
 import Chart from "./chartModule";
 
-const user = new UserData("http://127.0.0.1:3000/api/sessionData");
+const user = new UserData("http://127.0.0.1:3000/api/sessionData", "http://127.0.0.1:3000/api/picture");
 const navigation = new navigationHandler(user);
 
 const signupForm = new FormHandler("signup-form", "POST","http://127.0.0.1:3000/api/signup");

@@ -13,7 +13,9 @@ class inputValidator {
     }
 
     validateUserName(userName){
-        return (typeof userName === "string") ? (userName.length >= 3 && userName.length <= 20) : false;
+        const usernameRegex = /^[^\s]{3,20}$/;
+
+        return (typeof userName === "string") ? usernameRegex.test(userName) : false;
     }
 
     validatePassword(userPass) {

@@ -66,8 +66,8 @@
                 <li>
                     <a href="/profile">
                         <figure class="nav-profile">
-                            <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture" data-profile-img>
-                            <figcaption data-profile-name>oussama kamili</figcaption>
+                            <img alt="profile picture" data-nav-user-img>
+                            <figcaption data-nav-user-name></figcaption>
                         </figure>
                     </a>
                 </li>
@@ -150,7 +150,8 @@
                         <p class="form-status"></p>
 
                         <label for="signupName">Username</label>
-                        <input type="text" id="signupName" name="username" placeholder="Enter your username" minlength="3" maxlength="20" required>
+                        <input type="text" id="signupName" name="username" placeholder="Enter your username" pattern="^[^\s]{3,20}$"
+                        title="Username must be between 3 and 20 characters and cannot contain spaces." required>
 
                         <label for="signupEmail">Email address</label>
                         <input type="email" id="signupEmail" name="email" placeholder="Enter your email" required>

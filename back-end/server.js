@@ -1,6 +1,6 @@
-import Fastify from "fastify";
-import fastifyCors from "@fastify/cors";
-import fastifyCookie from "@fastify/cookie";
+import Fastify from 'fastify';
+import fastifyCors from '@fastify/cors';
+import fastifyCookie from '@fastify/cookie';
 import apiRoutes from './apiModules.js'
 
 const fastify = Fastify();

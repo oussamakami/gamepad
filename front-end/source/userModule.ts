@@ -6,12 +6,14 @@ class UserData {
     private email: string;
     private theme: Theme;
     private sessionAPI: string;
+    private pictureAPI: string
     private isLoggedIn: boolean;
     private isSessionLoaded: boolean;
 
-    constructor(sessionDataAPI: string) {
+    constructor(sessionDataAPI: string, pictureAPI: string) {
         this.clear();
         this.sessionAPI = sessionDataAPI;
+        this.pictureAPI = pictureAPI.endsWith("/") ? pictureAPI : pictureAPI + "/";
         this.theme = this.getCachedTheme();
         this.isSessionLoaded = false;
     }
@@ -34,6 +36,14 @@ class UserData {
         this.name = data.username;
         this.email = data.email;
         this.isLoggedIn = true;
+
+        const picture = document.querySelector("[data-nav-user-img]") as HTMLImageElement;
+        const displayname = document.querySelector("[data-nav-user-name]");
+
+        if (picture)
+            picture.src = this.pictureAPI + this.id;
+        if (displayname)
+            displayname.textContent = this.name;
     }
 
     public clear(): void {

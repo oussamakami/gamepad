@@ -1,6 +1,10 @@
 import inputValidator from './inputValidator.js';
 import userData from './database.js'
+import { readFile } from 'fs/promises'
+import { join } from 'path';
 
+const VALIDEXT = ["png", "jpg", "jpeg", "webp"];
+const PICTURES_PATH = process.env.PICTURES_PATH;
 const database = new userData("", false);
 
 //generate random data for testing
@@ -24,15 +28,16 @@ if (randomUsers.success) {
         let username = randomUsers.data[i].username;
         let email = randomUsers.data[i].email;
         let password = randomUsers.data[i].password;
+        let picture = randomUsers.data[i].picture;
         console.log(`\x1b[36mUser ${i}\x1b[0m:`);
         console.log(`\t\x1b[32mid      \x1b[0m: \x1b[33m${id}\x1b[0m`);
         console.log(`\t\x1b[32musername\x1b[0m: ${username}`);
         console.log(`\t\x1b[32memail   \x1b[0m: ${email}`);
-        console.log(`\t\x1b[32mpassword\x1b[0m: ${password}\n`);
+        console.log(`\t\x1b[32mpassword\x1b[0m: ${password}`);
+        console.log(`\t\x1b[32mpicture \x1b[0m: ${picture}\n`);
     }
     console.log("\n\x1b[31m#############################################################\x1b[0m\n\n");
 }
-// console.log(database.fetchGlobalStats().data);
 
 //generate random data for testing
 
@@ -162,6 +167,30 @@ function fetchSessionData(request, reply) {
         username: queryResponse.data.username, email: queryResponse.data.email});
 }
 
+async function fetchProfilePicture(request, reply) {
+    const queryResponse = database.fetchUser(request.params.userId);
+
+    if (!queryResponse.success)
+        reply.status(404).send({error: queryResponse.error.message});
+
+    const filename = queryResponse.data.picture;
+    const path = join(PICTURES_PATH, filename);
+    const extention = filename.split(".").pop();
+
+    if (!VALIDEXT.includes(extention))
+        return reply.status(500).send({error: "Internal Server Error"});
+
+    try {
+        const image = await readFile(path);
+
+        reply.header('Content-Type', `image/${extention}`);
+        return reply.send(image);
+    }
+    catch (error) {
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+}
+
 //this one for testing Unauthorized Access with session expiration
 function expired(request, reply) {
     database.deleteAllSessions(request.user);
@@ -175,6 +204,7 @@ function apiRoutes(fastify, options, done)
     fastify.post("/signup", handleSignUp);
     fastify.post("/login", handleLogIn);
     fastify.get("/sessionData", fetchSessionData);
+    fastify.get("/picture/:userId", fetchProfilePicture);
 
     //this one is for testing session expiration
     fastify.get("/expired", expired);
