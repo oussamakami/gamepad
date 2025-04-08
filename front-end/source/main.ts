@@ -1,10 +1,14 @@
 import UserData from "./userModule";
 import FormHandler from "./formsModule";
+import DashboardLoader from "./dashboardModule";
 import navigationHandler, {httpPromise} from "./browserModule";
-import Chart from "./chartModule";
 
 const user = new UserData("http://127.0.0.1:3000/api/sessionData", "http://127.0.0.1:3000/api/picture");
+const dashboard = new DashboardLoader("http://127.0.0.1:3000/api/stats", "http://127.0.0.1:3000/api/picture");
 const navigation = new navigationHandler(user);
+
+dashboard.setChartBarColors = ["--primary-brand-color"];
+dashboard.setChartTextColor = "--primary-text-color";
 
 const signupForm = new FormHandler("signup-form", "POST","http://127.0.0.1:3000/api/signup");
 const recoveryForm = new FormHandler("recovery-form", "POST", "http://127.0.0.1:3000/api/recovery");
@@ -34,6 +38,11 @@ function containsSerial(formHander?: FormHandler): httpPromise {
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
 
+function fetchDashboardData(): httpPromise {
+    dashboard.load();
+    return Promise.resolve({httpCode: 200, httpName: "OK"});
+}
+
 navigation.configure("top-nav", "side-nav", "error");
 navigation.addAuthSection("/", "login", {formHander: loginForm, onload: expiredNotice});
 navigation.addAuthSection("/login", "login", {formHander: loginForm, onload: expiredNotice});
@@ -43,7 +52,7 @@ navigation.addAuthSection("/reset", "reset", {formHander: resetForm, onload: con
 navigation.addAuthSection("/twofa", "twofa", {formHander: twoFAForm, onload: containsSerial});
 
 navigation.addDashSection("/", "dashboard");
-navigation.addDashSection("/dashboard", "dashboard");
+navigation.addDashSection("/dashboard", "dashboard", {onload: fetchDashboardData});
 navigation.addDashSection("/chat", "chat");
 navigation.addDashSection("/friends", "friends");
 navigation.addDashSection("/profile", "profile");

@@ -184,11 +184,19 @@ async function fetchProfilePicture(request, reply) {
         const image = await readFile(path);
 
         reply.header('Content-Type', `image/${extention}`);
-        return reply.send(image);
+        return reply.status(200).send(image);
     }
     catch (error) {
         return reply.status(500).send({error: "Internal Server Error"});
     }
+}
+
+function fetchDashBoardStats(request, reply) {
+    const queryResponse = database.fetchGlobalStats();
+
+    if (!queryResponse.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+    return reply.status(200).send(queryResponse.data);
 }
 
 //this one for testing Unauthorized Access with session expiration
@@ -205,6 +213,7 @@ function apiRoutes(fastify, options, done)
     fastify.post("/login", handleLogIn);
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
+    fastify.get("/stats", fetchDashBoardStats);
 
     //this one is for testing session expiration
     fastify.get("/expired", expired);

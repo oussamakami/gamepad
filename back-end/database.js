@@ -456,7 +456,7 @@ class userData {
 
     fetchGameRecords(pageNumber = 1) {
         const result = {success: true, table: "games_history", action: "fetch"};
-        const valuePerPage = 20;
+        const valuePerPage = 12;
 
         try {
             const stmt = this.db.prepare(`
