@@ -191,6 +191,19 @@ async function fetchProfilePicture(request, reply) {
     }
 }
 
+function fetchUserData(request, reply) {
+    const queryResponse = database.fetchUser(request.params.userId);
+    
+    if (!queryResponse.success)
+        reply.status(404).send({error: queryResponse.error.message});
+    
+    const stats = database.fetchUserGlobalStats(queryResponse.data.id);
+
+    if (!stats.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+    return reply.status(200).send(stats.data);
+}
+
 function fetchDashBoardStats(request, reply) {
     const queryResponse = database.fetchGlobalStats();
 
@@ -214,6 +227,7 @@ function apiRoutes(fastify, options, done)
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
     fastify.get("/stats", fetchDashBoardStats);
+    fastify.get("/users/:userId", fetchUserData);
 
     //this one is for testing session expiration
     fastify.get("/expired", expired);

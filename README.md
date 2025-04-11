@@ -280,7 +280,7 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Retrieve a session by ID
         - [X] Retrieve all sessions for a user
         - [X] Validate a session
-- [ ] **Friend Requests Data**
+- [ ] **Friend Requests Data** (@oussamakami)
     - [ ] **Table Structure**
         - [ ] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [ ] `recipient_id` → INTEGER, FOREIGN KEY (references `Users.id`)
@@ -294,7 +294,7 @@ This is a full-stack web development project focused on building a single-page a
         - [ ] Block a user
         - [ ] Unblock a user (removes the row, same as rejection)
         - [ ] Search for users (fetch from `Users` table, excluding blocked users)
-- [ ] **Game History Data**
+- [X] **Game History Data**
     - [X] **Table Structure**
         - [X] `winner_id` → INTEGER, FOREIGN KEY (references `Users.id`)
         - [X] `winner_nickname` → TEXT
@@ -302,7 +302,7 @@ This is a full-stack web development project focused on building a single-page a
         - [X] `loser_nickname` → TEXT
         - [X] `game_type` → TEXT (`ping-pong`, `rock-paper`, `tic-tac-toe`)
         - [X] `date` → INTEGER (timestamp)
-    - [ ] **Methods** (@oussamakami)
+    - [X] **Methods**
         - [X] Create a new game record
         - [X] Fetch game records for the website stats (`page_number`)
         - [X] Fetch game records for a specific user (`user_id`, `page_number`)
@@ -311,10 +311,9 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Fetch website total records count for one day
         - [X] Fetch website records count for the last 7 days
         - [X] Fetch website dashboard statistics
-        - [ ] Fetch total **Ping-Pong** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
-        - [ ] Fetch total **Tic-Tac-Toe** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
-        - [ ] Fetch total **Rock-Paper-Scissors** games played (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
-        - [ ] Fetch total **games played across all game types** (won/lost/both) for a specific user (`user_id`, `start_date?`, `end_date?`)
+        - [X] Fetch user total wins count (`user_id`)
+        - [X] Fetch user total loses count (`user_id`)
+        - [X] Fetch user Profile statistics (`user_id`)
 - [X] **Chat Data**
     - [X] **Table Structure**
         - [X] `id` → INTEGER, PRIMARY KEY
@@ -337,14 +336,49 @@ This is a full-stack web development project focused on building a single-page a
     - [X] **Methods**
         - [X] Send a message (`chat_id`, `sender_id`, `content`)
         - [X] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
-- [ ] **Account Recovery Data**
-*To be added soon*
 
 ### API URLS
-*To be added soon*
+- [X] signup **POST**
+    - [X] Takes user data (`username`, `email`, `password`)  
+    - [X] Validates all fields are present  
+    - [X] Checks if username/email already exists  
+    - [X] Creates new user if validation passes  
+    - [X] Returns appropriate success/error response  
+- [ ] login **POST**  
+    - [X] Takes user credentials (`username`/`email` and `password`)  
+    - [X] Verifies credentials match existing user  
+    - [ ] Sets up HTTP-only session cookie if valid  
+    - [X] Returns appropriate success/error response  
+- [X] sessionData **GET**  
+    - [X] Checks for valid session cookie  
+    - [X] Returns current user's basic info if valid  
+    - [X] Returns error if session invalid/expired  
+- [ ] picture/`:userId` **GET**  
+    - [X] Takes target user ID in URL  
+    - [X] Verifies requesting user has valid session  
+    - [ ] Checks if requesting user is blocked by target  
+    - [X] Returns profile picture if authorized  
+    - [X] Returns appropriate error if not found/blocked  
+- [X] stats **GET**  
+    - [X] Requires valid session  
+    - [X] Returns global website statistics  
+    - [X] Includes total games, game-type breakdowns  
+    - [X] Shows weekly trends and today's activity  
+    - [X] Returns recent match history  
+- [ ] users/`:userId` **GET**  
+    - [X] Takes target user ID in URL  
+    - [X] Verifies requesting user has valid session  
+    - [ ] Checks if requesting user is blocked  
+    - [X] Returns target user's game statistics if authorized  
+    - [X] Shows win/loss records per game type  
+    - [X] Includes recent match history with opponents  
+    - [X] Returns appropriate error if not found/blocked
         
 ### Security
-*To be added soon*
+- [ ] Pretect against **Cross-Site Scripting (XSS)**
+- [X] Pretect against **SQL Injection**
+- [ ] Implement a custom hashing algorithm
+- [ ] Implement/Enforce **HTTPS** communication
 
 # Authors
 

@@ -581,6 +581,62 @@ class userData {
         return (result);
     }
 
+    fetchUserWinCounts(userIdentifier) {
+        const result = {success: true, table: "games_history", action: "fetch"};
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    COUNT( * ) AS total,
+                    SUM( game_type = 'ping-pong' ) AS 'ping-pong',
+                    SUM( game_type = 'tic-tac-toe' ) AS 'tic-tac-toe',
+                    SUM( game_type = 'rock-paper' ) AS 'rock-paper'
+                FROM games_history
+                WHERE win_id = ?
+            `);
+
+            const queryResponse = this.fetchUser(userIdentifier);
+
+            if (!queryResponse.success)
+                throw new Error(queryResponse.error.message);
+    
+            result.data = stmt.get(queryResponse.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+        return (result);
+    }
+
+    fetchUserLoseCounts(userIdentifier) {
+        const result = {success: true, table: "games_history", action: "fetch"};
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT
+                    COUNT( * ) AS total,
+                    SUM( game_type = 'ping-pong' ) AS 'ping-pong',
+                    SUM( game_type = 'tic-tac-toe' ) AS 'tic-tac-toe',
+                    SUM( game_type = 'rock-paper' ) AS 'rock-paper'
+                FROM games_history
+                WHERE lose_id = ?
+            `);
+
+            const queryResponse = this.fetchUser(userIdentifier);
+
+            if (!queryResponse.success)
+                throw new Error(queryResponse.error.message);
+    
+            result.data = stmt.get(queryResponse.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+        return (result);
+    }
+
     fetchTodayGameCounts() {
         const result = {success: true, table: "games_history", action: "fetch"};
         const date = new Date();
@@ -688,7 +744,45 @@ class userData {
         return (result);
     }
 
-    //the rest of games history goes here
+    fetchUserGlobalStats(userIdentifier) {
+        const result = {success: true, table: "games_history", action: "fetch"};
+        const user = this.fetchUser(userIdentifier);
+        const wins = this.fetchUserWinCounts(userIdentifier);
+        const loses = this.fetchUserLoseCounts(userIdentifier);
+        const history = this.fetchUserGameRecords(userIdentifier, 1);
+        const data = {};
+
+        try {
+            if (!user.success)
+                throw new Error("user => " + user.error.message);
+            if (!wins.success)
+                throw new Error("wins => " + wins.error.message);
+            if (!loses.success)
+                throw new Error("loses => " + loses.error.message);
+            if (!history.success)
+                throw new Error("history => " + history.error.message);
+
+            data.id = user.data.id;
+            data.username = user.data.username;
+            data.email = user.data.email;
+            data.total = {};
+            data.total.total = wins.data.total + loses.data.total;
+            data.total['ping-pong'] = wins.data['ping-pong'] + loses.data['ping-pong'];
+            data.total['tic-tac-toe'] = wins.data['tic-tac-toe'] + loses.data['tic-tac-toe'];
+            data.total['rock-paper'] = wins.data['rock-paper'] + loses.data['rock-paper'];
+            data.wins = wins.data;
+            data.loses = loses.data;
+            data.history = history.data;
+
+            result.data = data;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
 
     createNewChat(userIdentifier1, userIdentifier2) {
         const result = {success: true, table: "chats", action: "create"};
