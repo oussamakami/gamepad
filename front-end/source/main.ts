@@ -51,7 +51,7 @@ navigation.addAuthSection("/recovery", "recovery", {formHander: recoveryForm});
 navigation.addAuthSection("/reset", "reset", {formHander: resetForm, onload: containsSerial});
 navigation.addAuthSection("/twofa", "twofa", {formHander: twoFAForm, onload: containsSerial});
 
-navigation.addDashSection("/", "dashboard");
+navigation.addDashSection("/", "dashboard", {onload: fetchDashboardData});
 navigation.addDashSection("/dashboard", "dashboard", {onload: fetchDashboardData});
 navigation.addDashSection("/chat", "chat");
 navigation.addDashSection("/friends", "friends");

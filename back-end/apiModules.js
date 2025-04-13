@@ -2,7 +2,9 @@ import inputValidator from './inputValidator.js';
 import userData from './database.js'
 import { readFile } from 'fs/promises'
 import { join } from 'path';
+import Dotenv from 'dotenv';
 
+Dotenv.config();
 const VALIDEXT = ["png", "jpg", "jpeg", "webp"];
 const PICTURES_PATH = process.env.PICTURES_PATH;
 const database = new userData("", false);

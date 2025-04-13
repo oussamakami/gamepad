@@ -3,7 +3,9 @@ import Database from 'better-sqlite3';
 import Compressor from 'zlib';
 import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
+import Dotenv from 'dotenv';
 
+Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"]
 const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
