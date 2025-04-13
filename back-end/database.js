@@ -4,6 +4,7 @@ import Compressor from 'zlib';
 import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
 import Dotenv from 'dotenv';
+import { error } from 'console';
 
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -90,6 +91,15 @@ class userData {
                 date INTEGER NOT NULL,
                 FOREIGN KEY ( chat_id ) REFERENCES chats ( id ) ON DELETE CASCADE,
                 FOREIGN KEY ( sender_id ) REFERENCES users ( id ) ON DELETE CASCADE
+            );
+            CREATE TABLE IF NOT EXISTS friends_requests (
+                sender_id INTEGER NOT NULL,
+                target_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending' CHECK ( status IN ( 'pending', 'accepted', 'blocked' ) ),
+                FOREIGN KEY ( sender_id ) REFERENCES users ( id ) ON DELETE CASCADE,
+                FOREIGN KEY ( target_id ) REFERENCES users ( id ) ON DELETE CASCADE,
+                CHECK ( sender_id <> target_id ),
+                UNIQUE ( sender_id, target_id )
             );
             
             CREATE TRIGGER IF NOT EXISTS update_messages_on_chat_user_null
@@ -356,7 +366,7 @@ class userData {
         try {
             tokendata = JWT.verify(token, JWT_SECRET, {complete: true});
             if (!tokendata.header.jti)
-                throw new Error("invalid Token");
+                throw new Error("Invalid Token");
 
             const cacheData = this.#getCachedSession(tokendata.header.jti);
 
@@ -371,7 +381,7 @@ class userData {
                 throw new Error(dbresult.error.message);
 
             if (tokendata.payload.user_id != dbresult.data.user_id)
-                throw new Error("invalid Token");
+                throw new Error("Invalid Token");
             result.data = dbresult.data;
             this.#addSessionToCache(tokendata.header.jti, result.data);
         }
@@ -475,7 +485,7 @@ class userData {
             `);
 
             if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("invalid page number value");
+                throw new Error("Invalid page number value");
 
             result.data = stmt.all(valuePerPage, ((pageNumber - 1) * valuePerPage));
             result.data.forEach(row => row.date = this.#prettifyDate(row.date));
@@ -520,7 +530,7 @@ class userData {
             `);
 
             if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("invalid page number value");
+                throw new Error("Invalid page number value");
             if (!user.success)
                 throw new Error(user.error.message);
 
@@ -720,15 +730,15 @@ class userData {
 
         try {
             if (!total.success)
-                throw new Error("total => " + total.error.message);
+                throw new Error("Total => " + total.error.message);
             if (!today.success)
-                throw new Error("today => " + today.error.message);
+                throw new Error("Today => " + today.error.message);
             if (!projections.success)
-                throw new Error("projection => " + projections.error.message);
+                throw new Error("Projection => " + projections.error.message);
             if (!leaderBoard.success)
-                throw new Error("leaderBoard => " + leaderBoard.error.message);
+                throw new Error("LeaderBoard => " + leaderBoard.error.message);
             if (!history.success)
-                throw new Error("history => " + history.error.message);
+                throw new Error("History => " + history.error.message);
 
             data.total = total.data;
             data.today = today.data;
@@ -804,7 +814,7 @@ class userData {
                 [user1, user2] = [user2, user1];
 
             if (user1.data.id === user2.data.id)
-                throw new Error("a user cannot create a chat with themselves")
+                throw new Error("Users cannot create a chat with themselves")
 
             result.data = stmt.get(user1.data.id, user2.data.id);
         }
@@ -841,15 +851,13 @@ class userData {
             `);
 
             if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("invalid page number value");
+                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
             result.data = stmt.all(...Array(4).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
-
-            if (result.data.length < valuePerPage)
-                result.done = true;
+            result.done = result.data.length < valuePerPage;
         }
         catch (error) {
             result.success = false;
@@ -998,7 +1006,7 @@ class userData {
         } 
         catch (error) {
             result.success = false;
-            result.error = error.message;
+            result.error = error;
         }
     
         return (result);
@@ -1033,15 +1041,13 @@ class userData {
             `);
 
             if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("invalid page number value");
+                throw new Error("Invalid page number value");
 
             if (!chat.success)
                 throw new Error(chat.error.message);
 
             result.data = stmt.all(chat_id, valuePerPage, ((pageNumber - 1) * valuePerPage));
-
-            if (result.data.length < valuePerPage)
-                result.done = true;
+            result.done = result.data.length < valuePerPage;
         }
         catch (error) {
             result.success = false;
@@ -1062,10 +1068,411 @@ class userData {
                 row.message = Compressor.inflateSync(row.message).toString();
                 row.date = this.#prettifyDate(row.date);
                 return true;
-            } catch (error) {
+            }
+            catch (error) {
                 return false;
             }
         })
+
+        return (result);
+    }
+
+    #getFriendshipStatus(user1_id, user2_id) {
+        const stmt = this.db.prepare(`
+            SELECT * FROM friends_requests WHERE
+            (
+                ( sender_id = ? AND target_id = ? )
+                OR
+                ( sender_id = ? AND target_id = ? )
+            )
+        `);
+
+        return (stmt.get(user1_id, user2_id, user2_id, user1_id));
+    }
+
+    sendFriendRequest(senderIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "create"};
+        const sender = this.fetchUser(senderIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                INSERT INTO friends_requests (sender_id, target_id)
+                VALUES ( ?, ? ) RETURNING *
+            `);
+
+            if (!sender.success || !target.success)
+                throw new Error(!sender.success ? sender.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+
+            if (existing) {
+                if (existing.status === "accepted")
+                    throw new error("Already friends");
+                if (existing.status === "blocked") {
+                    if (existing.sender_id === sender.data.id)
+                        throw new Error("You have blocked this user");
+                    else
+                        throw new Error("This user does not exist");
+                }
+                if (existing.status === "pending") {
+                    if (existing.sender_id === sender.data.id)
+                        throw new Error("Request already sent");
+                    else
+                        return (this.acceptFriendRequest(sender.data.id, target.data.id));
+                }
+            }
+            result.data = stmt.get(sender.data.id, target.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    acceptFriendRequest(userIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "update"};
+        const user = this.fetchUser(userIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                UPDATE friends_requests SET status = 'accepted'
+                WHERE sender_id = ? AND target_id = ?
+                AND status = 'pending' RETURNING *
+            `);
+
+            if (!user.success || !target.success)
+                throw new Error(!user.success ? user.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(user.data.id, target.data.id);
+
+            if (!existing)
+                throw new Error("No pending friend request found");
+            if (existing.status === "pending" && existing.sender_id != target.data.id)
+                throw new Error("No pending friend request found");
+            if (existing.status === "accepted")
+                throw new Error("Cannot accept - already friends");
+            if (existing.status === "blocked") {
+                if (existing.sender_id === user.data.id)
+                    throw new Error("You have blocked this user");
+                else
+                    throw new Error("This user does not exist");
+            }
+
+            result.data = stmt.get(target.data.id, user.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    rejectFriendRequest(senderIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "delete"};
+        const sender = this.fetchUser(senderIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                DELETE FROM friends_requests WHERE status = 'pending' AND
+                (
+                    ( sender_id = ? AND target_id = ? )
+                    OR
+                    ( sender_id = ? AND target_id = ? )
+                )
+                RETURNING *
+            `);
+
+            if (!sender.success || !target.success)
+                throw new Error(!sender.success ? sender.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+
+            if (!existing)
+                throw new Error("No pending friend request found");
+            if (existing.status === "accepted")
+                throw new error("Cannot reject/cancel - already friends");
+            if (existing.status === "blocked") {
+                if (existing.sender_id === sender.data.id)
+                    throw new Error("You have blocked this user");
+                else
+                    throw new Error("This user does not exist");
+            }
+
+            result.data = stmt.get(sender.data.id, target.data.id, target.data.id, sender.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    unfriendUser(senderIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "delete"};
+        const sender = this.fetchUser(senderIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                DELETE FROM friends_requests WHERE status = 'accepted' AND
+                (
+                    ( sender_id = ? AND target_id = ? )
+                    OR
+                    ( sender_id = ? AND target_id = ? )
+                )
+                RETURNING *
+            `);
+
+            if (!sender.success || !target.success)
+                throw new Error(!sender.success ? sender.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+
+            if (!existing)
+                throw new Error("No friendship found");
+            if (existing.status === "pending")
+                throw new Error("No friendship found");
+            if (existing.status === "blocked") {
+                if (existing.sender_id === sender.data.id)
+                    throw new Error("You have blocked this user");
+                else
+                    throw new Error("This user does not exist");
+            }
+
+            result.data = stmt.get(sender.data.id, target.data.id, target.data.id, sender.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    blockUser(senderIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "update"};
+        const sender = this.fetchUser(senderIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                INSERT INTO friends_requests (sender_id, target_id, status)
+                VALUES ( ?, ?, 'blocked' ) RETURNING *
+            `);
+
+            if (!sender.success || !target.success)
+                throw new Error(!sender.success ? sender.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+
+            if (existing) {
+                if (existing.status === 'blocked')
+                    if (existing.sender_id === sender.data.id)
+                        throw new Error("User is already blocked");
+                    else
+                        throw new Error("This user does not exist");
+                if (existing.status === 'pending')
+                    this.rejectFriendRequest(senderIdentifier, targetIdentifier);
+                else if (existing.status === 'accepted')
+                    this.unfriendUser(senderIdentifier, targetIdentifier);
+            }
+
+            result.data = stmt.get(sender.data.id, target.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    unblockUser(senderIdentifier, targetIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "delete"};
+        const sender = this.fetchUser(senderIdentifier);
+        const target = this.fetchUser(targetIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                DELETE FROM friends_requests WHERE status = 'blocked'
+                AND sender_id = ? AND target_id = ? RETURNING *
+            `);
+
+            if (!sender.success || !target.success)
+                throw new Error(!sender.success ? sender.error.message : target.error.message);
+
+            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+
+            if (!existing || (existing && existing.status !== 'blocked'))
+                throw new Error('User is not blocked');
+            if (existing.status === "blocked" && existing.sender_id !== sender.data.id)
+                    throw new Error("This user does not exist");
+
+            result.data = stmt.get(sender.data.id, target.data.id);
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchUserFriends(userIdentifier, pageNumber = 1) {
+        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+        const user = this.fetchUser(userIdentifier);
+        const valuePerPage = 8;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT u.id, u.username, u.email, fr.status
+                FROM friends_requests fr
+                JOIN users u ON (
+                    ( fr.sender_id = ? AND fr.target_id = u.id )
+                    OR
+                    ( fr.target_id = ? AND fr.sender_id = u.id )
+                )
+                WHERE fr.status = 'accepted' OR fr.status = 'pending'
+                ORDER BY ( fr.status = 'accepted' ) ASC, u.username ASC
+                LIMIT ? OFFSET ?
+            `);
+            
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("Invalid page number value");
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(...Array(2).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
+            result.done = result.data.length < valuePerPage;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchAcceptedFriends(userIdentifier, pageNumber = 1) {
+        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+        const user = this.fetchUser(userIdentifier);
+        const valuePerPage = 8;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT u.id, u.username, u.email
+                FROM friends_requests fr
+                JOIN users u ON (
+                    ( fr.sender_id = ? AND fr.target_id = u.id )
+                    OR
+                    ( fr.target_id = ? AND fr.sender_id = u.id )
+                )
+                WHERE fr.status = 'accepted'
+                ORDER BY u.username ASC
+                LIMIT ? OFFSET ?
+            `);
+            
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("Invalid page number value");
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(...Array(2).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
+            result.done = result.data.length < valuePerPage;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchPendingFriend(userIdentifier, pageNumber = 1) {
+        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+        const user = this.fetchUser(userIdentifier);
+        const valuePerPage = 8;
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT u.id, u.username, u.email
+                FROM friends_requests fr
+                JOIN users u ON fr.sender_id = u.id
+                WHERE fr.target_id = ? AND fr.status = 'pending'
+                ORDER BY u.username ASC
+                LIMIT ? OFFSET ?
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("Invalid page number value");
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(user.data.id, valuePerPage, ((pageNumber - 1) * valuePerPage));
+            result.done = result.data.length < valuePerPage;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    searchForUsers(searchingUserIdentifier, searchQuery, pageNumber = 1) {
+        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+        const user = this.fetchUser(searchingUserIdentifier);
+        const valuePerPage = 8;
+        const temp = {limit: valuePerPage, offset: ((pageNumber - 1) * valuePerPage), search: searchQuery};
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT u.id, u.username, u.email, u.picture,
+                COALESCE (
+                    ( SELECT status FROM friends_requests WHERE (
+                        ( sender_id = @userid AND target_id = u.id )
+                        OR ( sender_id = u.id AND target_id = @userid )
+                )), 'unknown' ) AS relation
+                FROM users u WHERE u.id != @userid
+                AND (
+                    u.id = @search
+                    OR u.username LIKE '%' || @search || '%'
+                    OR u.email LIKE '%' || @search || '%'
+                ) AND NOT EXISTS (
+                    SELECT 1 FROM friends_requests
+                    WHERE status = 'blocked' AND
+                    (
+                        ( sender_id = @userid AND target_id = u.id )
+                        OR ( sender_id = u.id AND target_id = @userid )
+                    )
+                )
+                ORDER BY u.username LIMIT @limit OFFSET @offset
+            `);
+
+            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
+                throw new Error("Invalid page number value");
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            temp.userid = user.data.id;
+            result.data = stmt.all(temp);
+            result.done = result.data.length < valuePerPage;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
 
         return (result);
     }

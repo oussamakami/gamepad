@@ -280,20 +280,22 @@ This is a full-stack web development project focused on building a single-page a
         - [X] Retrieve a session by ID
         - [X] Retrieve all sessions for a user
         - [X] Validate a session
-- [ ] **Friend Requests Data** (@oussamakami)
-    - [ ] **Table Structure**
-        - [ ] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
-        - [ ] `recipient_id` → INTEGER, FOREIGN KEY (references `Users.id`)
-        - [ ] `status` → TEXT (`pending`, `accepted`, `blocked`)
-    - [ ] **Methods**
-        - [ ] Send a friend request
-        - [ ] Accept a friend request
-        - [ ] Reject a friend request (removes the row)
-        - [ ] Retrieve a user's friends list
-        - [ ] Retrieve all pending friend requests for a user
-        - [ ] Block a user
-        - [ ] Unblock a user (removes the row, same as rejection)
-        - [ ] Search for users (fetch from `Users` table, excluding blocked users)
+- [X] **Friend Requests Data**
+    - [X] **Table Structure**
+        - [X] `sender_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `recipient_id` → INTEGER, FOREIGN KEY (references `Users.id`)
+        - [X] `status` → TEXT (`pending`, `accepted`, `blocked`)
+    - [X] **Methods**
+        - [X] Send a friend request
+        - [X] Accept a friend request
+        - [X] Reject a friend request (removes the row)
+        - [X] Unfriend a user (removes the row)
+        - [X] Retrieve a user's friends list (includes both pending and accepted)
+        - [X] Retrieve all accepted friend requests for a user
+        - [X] Retrieve all pending friend requests for a user
+        - [X] Block a user
+        - [X] Unblock a user (removes the row, same as rejection)
+        - [X] Search for users (fetch from `Users` table, excluding blocked users)
 - [X] **Game History Data**
     - [X] **Table Structure**
         - [X] `winner_id` → INTEGER, FOREIGN KEY (references `Users.id`)
@@ -339,41 +341,41 @@ This is a full-stack web development project focused on building a single-page a
 
 ### API URLS
 - [X] signup **POST**
-    - [X] Takes user data (`username`, `email`, `password`)  
-    - [X] Validates all fields are present  
-    - [X] Checks if username/email already exists  
-    - [X] Creates new user if validation passes  
-    - [X] Returns appropriate success/error response  
-- [ ] login **POST**  
-    - [X] Takes user credentials (`username`/`email` and `password`)  
-    - [X] Verifies credentials match existing user  
-    - [ ] Sets up HTTP-only session cookie if valid  
-    - [X] Returns appropriate success/error response  
-- [X] sessionData **GET**  
-    - [X] Checks for valid session cookie  
-    - [X] Returns current user's basic info if valid  
-    - [X] Returns error if session invalid/expired  
-- [ ] picture/`:userId` **GET**  
-    - [X] Takes target user ID in URL  
-    - [X] Verifies requesting user has valid session  
-    - [ ] Checks if requesting user is blocked by target  
-    - [X] Returns profile picture if authorized  
-    - [X] Returns appropriate error if not found/blocked  
-- [X] stats **GET**  
-    - [X] Requires valid session  
-    - [X] Returns global website statistics  
-    - [X] Includes total games, game-type breakdowns  
-    - [X] Shows weekly trends and today's activity  
-    - [X] Returns recent match history  
-- [ ] users/`:userId` **GET**  
-    - [X] Takes target user ID in URL  
-    - [X] Verifies requesting user has valid session  
-    - [ ] Checks if requesting user is blocked  
-    - [X] Returns target user's game statistics if authorized  
-    - [X] Shows win/loss records per game type  
-    - [X] Includes recent match history with opponents  
+    - [X] Takes user data (`username`, `email`, `password`)
+    - [X] Validates all fields are present
+    - [X] Checks if username/email already exists
+    - [X] Creates new user if validation passes
+    - [X] Returns appropriate success/error response
+- [ ] login **POST**
+    - [X] Takes user credentials (`username`/`email` and `password`)
+    - [X] Verifies credentials match existing user
+    - [ ] Sets up HTTP-only session cookie if valid
+    - [X] Returns appropriate success/error response
+- [X] sessionData **GET**
+    - [X] Checks for valid session cookie
+    - [X] Returns current user's basic info if valid
+    - [X] Returns error if session invalid/expired
+- [ ] picture/`:userId` **GET**
+    - [X] Takes target user ID in URL
+    - [X] Verifies requesting user has valid session
+    - [ ] Checks if requesting user is blocked by target
+    - [X] Returns profile picture if authorized
     - [X] Returns appropriate error if not found/blocked
-        
+- [X] stats **GET**
+    - [X] Requires valid session
+    - [X] Returns global website statistics
+    - [X] Includes total games, game-type breakdowns
+    - [X] Shows weekly trends and today's activity
+    - [X] Returns recent match history
+- [ ] users/`:userId` **GET**
+    - [X] Takes target user ID in URL
+    - [X] Verifies requesting user has valid session
+    - [ ] Checks if requesting user is blocked
+    - [X] Returns target user's game statistics if authorized
+    - [X] Shows win/loss records per game type
+    - [X] Includes recent match history with opponents
+    - [X] Returns appropriate error if not found/blocked
+
 ### Security
 - [ ] Pretect against **Cross-Site Scripting (XSS)**
 - [X] Pretect against **SQL Injection**
