@@ -38,6 +38,8 @@ if (randomUsers.success) {
         console.log(`\t\x1b[32mpassword\x1b[0m: ${password}`);
         console.log(`\t\x1b[32mpicture \x1b[0m: ${picture}\n`);
     }
+    console.log(`making \x1b[36mUser 0\x1b[0m block \x1b[36mUser 1\x1b[0m:`);
+    console.log(database.blockUser(randomUsers.data[0].id, randomUsers.data[1].id).data);
     console.log("\n\x1b[31m#############################################################\x1b[0m\n\n");
 }
 
@@ -198,6 +200,11 @@ function fetchUserData(request, reply) {
     
     if (!queryResponse.success)
         reply.status(404).send({error: queryResponse.error.message});
+
+    const relation = database.fetchFriendshipData(request.user, queryResponse.data.id);
+
+    if (relation && relation.status === 'blocked')
+        reply.status(404).send({error: "User does not exist"});
     
     const stats = database.fetchUserGlobalStats(queryResponse.data.id);
 

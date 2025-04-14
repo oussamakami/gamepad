@@ -1077,7 +1077,7 @@ class userData {
         return (result);
     }
 
-    #getFriendshipStatus(user1_id, user2_id) {
+    fetchFriendshipData(user1_id, user2_id) {
         const stmt = this.db.prepare(`
             SELECT * FROM friends_requests WHERE
             (
@@ -1104,7 +1104,7 @@ class userData {
             if (!sender.success || !target.success)
                 throw new Error(!sender.success ? sender.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(sender.data.id, target.data.id);
 
             if (existing) {
                 if (existing.status === "accepted")
@@ -1147,7 +1147,7 @@ class userData {
             if (!user.success || !target.success)
                 throw new Error(!user.success ? user.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(user.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(user.data.id, target.data.id);
 
             if (!existing)
                 throw new Error("No pending friend request found");
@@ -1191,7 +1191,7 @@ class userData {
             if (!sender.success || !target.success)
                 throw new Error(!sender.success ? sender.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(sender.data.id, target.data.id);
 
             if (!existing)
                 throw new Error("No pending friend request found");
@@ -1233,7 +1233,7 @@ class userData {
             if (!sender.success || !target.success)
                 throw new Error(!sender.success ? sender.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(sender.data.id, target.data.id);
 
             if (!existing)
                 throw new Error("No friendship found");
@@ -1270,7 +1270,7 @@ class userData {
             if (!sender.success || !target.success)
                 throw new Error(!sender.success ? sender.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(sender.data.id, target.data.id);
 
             if (existing) {
                 if (existing.status === 'blocked')
@@ -1308,7 +1308,7 @@ class userData {
             if (!sender.success || !target.success)
                 throw new Error(!sender.success ? sender.error.message : target.error.message);
 
-            const existing = this.#getFriendshipStatus(sender.data.id, target.data.id);
+            const existing = this.fetchFriendshipData(sender.data.id, target.data.id);
 
             if (!existing || (existing && existing.status !== 'blocked'))
                 throw new Error('User is not blocked');

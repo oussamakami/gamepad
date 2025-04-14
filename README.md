@@ -367,10 +367,10 @@ This is a full-stack web development project focused on building a single-page a
     - [X] Includes total games, game-type breakdowns
     - [X] Shows weekly trends and today's activity
     - [X] Returns recent match history
-- [ ] users/`:userId` **GET**
+- [X] users/`:userId` **GET**
     - [X] Takes target user ID in URL
     - [X] Verifies requesting user has valid session
-    - [ ] Checks if requesting user is blocked
+    - [X] Checks if requesting user is blocked
     - [X] Returns target user's game statistics if authorized
     - [X] Shows win/loss records per game type
     - [X] Includes recent match history with opponents
