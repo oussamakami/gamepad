@@ -1,4 +1,5 @@
 import Chart from "./chartModule";
+import {httpPromise} from "./browserModule";
 
 class DashboardLoader {
     private statsAPI: string;
@@ -43,20 +44,19 @@ class DashboardLoader {
         this.projection.setTheme = newTheme;
     }
 
-    private async fetchStats(): Promise<void> {
-        try {
-            const response = await fetch(this.statsAPI, {
-                method: "GET",
-                credentials: "include"
-            });
+    private async fetchStats(): httpPromise {
+        const response = await fetch(this.statsAPI, {
+            method: "GET",
+            credentials: "include"
+        }).catch(error => {throw new Error("Unknown error occurred")});
 
-            if (!response.ok) throw new Error();
-
-            this.statsData = (await response.json());
-        } catch {
-            console.error("Error loading Dashboard data");
+        if (!response.ok) {
             this.statsData = undefined;
+            return Promise.reject({httpCode: response.status, httpName: response.statusText})
         }
+
+        this.statsData = (await response.json());
+        return Promise.resolve({httpCode: response.status, httpName: response.statusText});
     }
 
     private updateStatsCards(): void {
@@ -169,16 +169,14 @@ class DashboardLoader {
         });
     }
 
-    public async load(): Promise<void> {
-        await this.fetchStats();
-
-        if (!this.statsData)
-            return ;
-
-        this.updateStatsCards();
-        this.updateProjection();
-        this.updateLeaderBoard();
-        this.updateActivities();
+    public async load(): httpPromise {
+        return this.fetchStats().then(result => {
+            this.updateStatsCards();
+            this.updateProjection();
+            this.updateLeaderBoard();
+            this.updateActivities();
+            return result;
+        }).catch(error => {throw error});
     }
 }
 
