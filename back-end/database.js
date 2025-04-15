@@ -158,7 +158,7 @@ class userData {
             if (!result.success)
                 return (result);
 
-            const passHash = this.hasher.smartHash(result.data.id, password);
+            const passHash = this.hasher.smartHash(password, result.data.id);
 
             if (passHash != result.data.password)
                 throw new Error("Incorrect username or password");
