@@ -18,33 +18,9 @@ const numberOfRecordsToGenerate = 9869;
 const generator = new RecordGenerator(database);
 
 generator.generate(numberOfUsersToGenerate, numberOfRecordsToGenerate);
-
-//print the first 3 random generated accounts
-const randomUsers = database.fetchAllUsers();
-
-if (randomUsers.success) {
-    console.log("\n\n\x1b[31m#############################################################");
-    console.log("THESE ARE THE CREDENTIALS OF THE FIRST 3 RANDOMLY GENERATED USERS\x1b[0m\n");
-    for (let i = 0; i < 3; i++) {
-        let id = randomUsers.data[i].id;
-        let username = randomUsers.data[i].username;
-        let email = randomUsers.data[i].email;
-        let password = randomUsers.data[i].password;
-        let picture = randomUsers.data[i].picture;
-        console.log(`\x1b[36mUser ${i}\x1b[0m:`);
-        console.log(`\t\x1b[32mid      \x1b[0m: \x1b[33m${id}\x1b[0m`);
-        console.log(`\t\x1b[32musername\x1b[0m: ${username}`);
-        console.log(`\t\x1b[32memail   \x1b[0m: ${email}`);
-        console.log(`\t\x1b[32mpassword\x1b[0m: ${password}`);
-        console.log(`\t\x1b[32mpicture \x1b[0m: ${picture}\n`);
-    }
-    console.log(`making \x1b[36mUser 0\x1b[0m block \x1b[36mUser 1\x1b[0m:`);
-    console.log(database.blockUser(randomUsers.data[0].id, randomUsers.data[1].id).data);
-    console.log("\n\x1b[31m#############################################################\x1b[0m\n\n");
-}
+generator.showGeneratedUsers(3);
 
 //generate random data for testing
-
 
 
 function getSessionInfo(requestPacket) {
@@ -142,22 +118,18 @@ function handleLogIn(request, reply) {
     if (!inputValidator.validateIdentifier(userIdentifier) ||
     !inputValidator.validatePassword(password)) {
         return reply.status(400).send({error: "Invalid Request"});
-    }   
-    
-    const queryResponse = database.fetchUser(userIdentifier);
+    }
+
+    const queryResponse = database.checkCredentials(userIdentifier, password);
 
     if (queryResponse.success) {
-        if (queryResponse.data.password === password) {
-            const session = database.createSession(queryResponse.data.id, rememberSession, getSessionInfo(request));
-            reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
-            return reply.status(200).send({message: "Login successful!", id: queryResponse.data.id,
-                username: queryResponse.data.username, email: queryResponse.data.email});
-        }
-        else
-            return reply.status(403).send({error: "Incorrect username or password"});
+        const session = database.createSession(queryResponse.data.id, rememberSession, getSessionInfo(request));
+
+        reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+        return reply.status(200).send({message: "Login successful!", ...queryResponse.data});
     }
     if (!queryResponse.error.code)
-        return reply.status(403).send({error: "Incorrect username or password"});
+        return reply.status(403).send({error: queryResponse.error.message});
     return reply.status(500).send({error: "Internal Server Error"});
 }
 

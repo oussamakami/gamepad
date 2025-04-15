@@ -24,6 +24,7 @@ class RecordGenerator {
                 i--;
                 continue;
             }
+            user.data.password = password;
             this.#users.push(user.data);
         }
     }
@@ -85,6 +86,26 @@ class RecordGenerator {
         this.#generateUsers(numberOfUsers);
         this.#generateGameRecords(numberOfRecords);
         return numberOfRecords;
+    }
+
+    showGeneratedUsers(numberOfUsers) {
+
+        if (numberOfUsers > this.#users.length)
+            numberOfUsers = this.#users.length;
+
+        console.log(`\n\n\x1b[31m#############################################################`);
+        console.log(`THESE ARE THE CREDENTIALS OF ${numberOfUsers} RANDOMLY GENERATED USERS\x1b[0m\n`);
+
+        for (let i = 0; i < numberOfUsers; i++) {
+            console.log(`\x1b[36mUser ${i}\x1b[0m:`);
+            console.log(`\t\x1b[32mid      \x1b[0m: \x1b[33m${this.#users[i].id}\x1b[0m`);
+            console.log(`\t\x1b[32musername\x1b[0m: ${this.#users[i].username}`);
+            console.log(`\t\x1b[32memail   \x1b[0m: ${this.#users[i].email}`);
+            console.log(`\t\x1b[32mpassword\x1b[0m: ${this.#users[i].password}`);
+            console.log(`\t\x1b[32mpicture \x1b[0m: ${this.#users[i].picture}\n`);
+        }
+
+        console.log(`\n\x1b[31m#############################################################\x1b[0m\n\n`);
     }
 }
 

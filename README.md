@@ -379,7 +379,7 @@ This is a full-stack web development project focused on building a single-page a
 ### Security
 - [ ] Pretect against **Cross-Site Scripting (XSS)**
 - [X] Pretect against **SQL Injection**
-- [ ] Implement a custom hashing algorithm
+- [X] Implement a custom hashing algorithm
 - [ ] Implement/Enforce **HTTPS** communication
 
 # Authors

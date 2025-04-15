@@ -5,6 +5,7 @@ import JWT from 'jsonwebtoken';
 import { clearInterval } from 'timers';
 import Dotenv from 'dotenv';
 import { error } from 'console';
+import PasswordHasher from './passwordHasher.js';
 
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -14,7 +15,7 @@ const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456
 class userData {
     #cachedTokens = {}
 
-    constructor(databaseFile, devMode) {
+    constructor(databaseFile, devMode = true, hashPrefix = "GK_", hashLenght = 64) {
         if (devMode) {
             this.db = new Database(databaseFile, { verbose: console.log } );
             this.db.pragma('foreign_keys = ON');
@@ -31,6 +32,7 @@ class userData {
             console.error("Failed to initialize the database: ", error);
             this.db.close();
         }
+        this.hasher = new PasswordHasher(hashPrefix, hashLenght);
         this.generateUserId = customAlphabet("0123456789", 8);
         this.generateTokenId = customAlphabet(allowedChar, 10);
 
@@ -133,7 +135,8 @@ class userData {
                     INSERT INTO users (id, username, email, password, picture)
                     VALUES ( ?, ?, ?, ?, ? ) RETURNING *
                 `);
-                result.data = stmt.get(this.generateUserId(), username, email, password, picture);
+                const userId = this.generateUserId();
+                result.data = stmt.get(userId, username, email, this.hasher.smartHash(password, userId), picture);
                 break;
             }
             catch (error) {
@@ -144,6 +147,34 @@ class userData {
                 break;
             }
         }
+        return (result);
+    }
+
+    checkCredentials(userIdentifier, password) {
+        const result = this.fetchUser(userIdentifier);
+        const newData = {};
+
+        try {
+            if (!result.success)
+                return (result);
+
+            const passHash = this.hasher.smartHash(result.data.id, password);
+
+            if (passHash != result.data.password)
+                throw new Error("Incorrect username or password");
+
+            newData.id = result.data.id;
+            newData.username = result.data.username;
+            newData.email = result.data.email;
+
+            result.data = newData;
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+            delete result.data;
+        }
+
         return (result);
     }
 
