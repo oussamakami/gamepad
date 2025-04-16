@@ -566,7 +566,7 @@
                             <img alt="profile picture" data-user-img>
                             <figcaption>
                                 <h5 data-user-name></h5>
-                                <p>id: <span data-user-id></span></p>
+                                <p>ID: <span data-user-id></span></p>
                                 <p>status: <span data-user-status><i class="user-offline"></i></span></p>
                                 <p>email: <span data-user-email></span></p>
                                 <div class="btn-container hidden">
@@ -630,17 +630,73 @@
                 </div>
                 <div class="cards-container" id="chat-list">
                     <div class="card">
-                        <ul class="users-list">
-                        
+                        <div class="card-title">
+                            <h4>active chats</h4>
+                            <i class='bx bx-conversation card-icon'></i>
+                        </div>
+                        <ul class="chat-list">
+                            <li class="chat-item active">
+                                <a href="/chat?chatid=295023">
+                                    <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                                    <div class="info">
+                                        <h5>oussama kamili <span class="notification">5</span></h5>
+                                        <p>hey thre how are you doing righ tnow?</p>
+                                    </div>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
                 <div class="cards-container" id="chat-box">
                     <div class="card">
+                        <div class="card-title">
+                            <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                            <h5 data-chat-partner-name>oussama kamili</h5>
+                            <i data-chat-partner-status class="user-online"></i>
+                            <div class="chat-actions">
+                                <button class="btn" data-game="pong"><i class="bx bx-meteor"></i></button>
+                                <button class="btn" data-game="tic-tac"><i class="bx bx-circle"></i></button>
+                                <button class="btn" data-game="rps"><i class="bx bx-cut"></i></button>
+                                <button class="btn danger-btn" id="delete-chat"><i class="bx bx-trash"></i></button>
+                            </div>
+                        </div>
+                        <ul class="chat-messages">
+                            <li class="message sent">
+                                <p>hey there how are you doing right now?</p>
+                                <span>29 seconds</span>
+                            </li>
+                            <li class="message receive">
+                                <p>hey there how are you doing right now?</p>
+                                <span>29 seconds</span>
+                            </li>
+                        </ul>
+                        <div class="chat-input">
+                            <input id="message-input" type="text" placeholder="Type your Message...">
+                            <button class="btn" id="send-message"><i class="bx bx-send"></i></button>
+                        </div>
                     </div>
                 </div>
                 <div class="cards-container" id="chat-info">
                     <div class="card">
+                        <div class="card-title">
+                            <h4>user info</h4>
+                            <i class='bx bx-info-circle card-icon'></i>
+                        </div>
+                        <div class="partner-info">
+                            <img src="https://img.freepik.com/free-psd/3d-illustration-human-avatar-profile_23-2150671142.jpg" alt="profile picture">
+                            <h5 data-chat-partner-name>oussama kamili</h5>
+                            <i data-chat-partner-status class="user-online"></i>
+                            <ul class="partner-stats">
+                                <li>ID: <span data-chat-partner-id></span></li>
+                                <li>email: <span data-chat-partner-email></span></li>
+                                <li>games won: <span data-chat-partner-wins>0</span></li>
+                                <li>games lost: <span data-chat-partner-loses>0</span></li>
+                            </ul>
+                            <div class="btn-container">
+                                <a class="btn"><i class='bx bx-user'></i> view profile</a>
+                                <button class="danger-btn"><i class='bx bx-block'></i> block</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

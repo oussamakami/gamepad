@@ -454,15 +454,15 @@ class userData {
         const MONTH = 2592000;
 
         if (diff < MINUTE)
-            return (`${diff} second${diff === 1 ? '' : 's'} ago`);
+            return (`${diff} second${diff === 1 ? '' : 's'}`);
         if (diff < HOUR)
-            return (`${Math.floor(diff / MINUTE)} minute${Math.floor(diff / MINUTE) === 1 ? '' : 's'} ago`);
+            return (`${Math.floor(diff / MINUTE)} minute${Math.floor(diff / MINUTE) === 1 ? '' : 's'}`);
         if (diff < DAY)
-            return (`${Math.floor(diff / HOUR)} hour${Math.floor(diff / HOUR) === 1 ? '' : 's'} ago`);
+            return (`${Math.floor(diff / HOUR)} hour${Math.floor(diff / HOUR) === 1 ? '' : 's'}`);
         if (diff < WEEK)
-            return (`${Math.floor(diff / DAY)} day${Math.floor(diff / DAY) === 1 ? '' : 's'} ago`);
+            return (`${Math.floor(diff / DAY)} day${Math.floor(diff / DAY) === 1 ? '' : 's'}`);
         if (diff < MONTH)
-            return `${Math.floor(diff / WEEK)} week${Math.floor(diff / WEEK) === 1 ? '' : 's'} ago`;
+            return `${Math.floor(diff / WEEK)} week${Math.floor(diff / WEEK) === 1 ? '' : 's'}`;
         else {
             const dateObj = new Date(date * 1000);
             const options = { year: 'numeric', month: 'short', day: 'numeric' };
