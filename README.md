@@ -45,15 +45,15 @@ This is a full-stack web development project focused on building a single-page a
     - [X] History of the last games played
     - [X] Leaderboard showcasing the top 10 players
     - [X] Refresh Button for updating dashboard statistics
-- [ ] **Live Chat**
-    - [ ] Display list of active chats
-    - [ ] Interactive chat box
-    - [ ] Start **Ping Pong** game button
-    - [ ] Start **Tic-Tac-Toe** game button
-    - [ ] Start **Rock-Paper-Scissors** game button
-    - [ ] Delete conversation option
-    - [ ] Show basic user report
-    - [ ] Option to block a user
+- [X] **Live Chat**
+    - [X] Display list of active chats
+    - [X] Interactive chat box
+    - [X] Start **Ping Pong** game button
+    - [X] Start **Tic-Tac-Toe** game button
+    - [X] Start **Rock-Paper-Scissors** game button
+    - [X] Delete conversation option
+    - [X] Show basic user report
+    - [X] Option to block a user
 - [X] **Friends List**
     - [X] Display user profile picture
     - [X] Show user name
