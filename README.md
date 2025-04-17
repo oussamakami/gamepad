@@ -108,7 +108,7 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] **Account & Data Management**
         - [ ] Clear game history
         - [ ] Permanently delete account
-- [x] **Games** (slzazar)
+- [ ] **Games** (@slazar42)
     - [ ] **Ping Pong**
         - [ ] Set user nickname
         - [ ] Generate a unique game ID
@@ -241,7 +241,7 @@ This is a full-stack web development project focused on building a single-page a
             - [X] Render or update the chart in the DOM
             - [X] Destroy the chart instance
         - [X] Support CSS variables as valid color inputs
-- [ ] **Buttons Action Module Implementation**
+- [ ] **Buttons Action Module Implementation** (@oussamakami)
     - [ ] *To be added soon*
 
 ### Games
