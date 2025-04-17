@@ -108,7 +108,7 @@ This is a full-stack web development project focused on building a single-page a
     - [ ] **Account & Data Management**
         - [ ] Clear game history
         - [ ] Permanently delete account
-- [ ] **Games**
+- [x] **Games** (slzazar)
     - [ ] **Ping Pong**
         - [ ] Set user nickname
         - [ ] Generate a unique game ID
