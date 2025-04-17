@@ -11,6 +11,7 @@
     /* Text Colors */
     --primary-text-color: rgb(108, 117, 125);
     --secondary-text-color: rgb(66, 64, 75);
+    --google-text-color: var(--primary-text-color);
 
     /* Navigation Colors */
     --active-nav-color: rgb(var(--primary-brand-color-rgb));
@@ -22,8 +23,8 @@
     --card-bg: rgb(255, 255, 255);
     --input-bg: rgb(240, 243, 248);
     --border-color: rgb(223, 223, 223);
-    --primary-google-btn-bg: rgb(255, 255, 255);
-    --secondary-google-btn-bg: rgb(244, 245, 255);
+    --google-btn-bg: rgb(255, 255, 255);
+    --google-btn-hover-bg: rgb(244, 245, 255);
 
     /* Status Colors */
     --danger-color-rgb: 250, 92, 124;
@@ -38,6 +39,28 @@
     --section-title-height: 30px;
 
     --box-shadow: 0px 0px 35px 0px rgba(154, 161, 171, .15);
+}
+
+[data-theme="dark"] {
+    /* Text Colors */
+    --primary-text-color: rgb(170, 184, 197);
+    --secondary-text-color: rgb(131, 145, 162);
+    --google-text-color: rgb(255, 255, 255);
+
+    /* Navigation Colors */
+    --active-nav-color: rgb(255, 255, 255);
+    --top-nav-bg: rgb(58, 68, 78);
+    --side-nav-bg: rgb(58, 68, 78);
+
+    /* Background Colors */
+    --body-bg: rgb(52, 58, 64);
+    --card-bg: rgb(58, 68, 78);
+    --input-bg: rgb(70, 83, 100);
+    --border-color: rgb(86, 102, 121);
+    --google-btn-bg: var(--input-bg);
+    --google-btn-hover-bg: var(--body-bg);
+
+    --box-shadow: 0px 0px 35px 0px rgba(49, 57, 66, .5);
 }
 
 * {
@@ -128,10 +151,10 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 
 .google-btn {
-    color: var(--primary-text-color);
+    color: var(--google-text-color);
     width: 100%;
     margin: 1rem 0;
-    background-color: var(--primary-google-btn-bg);
+    background-color: var(--google-btn-bg);
     border: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
@@ -145,7 +168,7 @@ input[type="submit"]:hover {
 }
 
 .google-btn:hover {
-    background-color: var(--secondary-google-btn-bg);
+    background-color: var(--google-btn-hover-bg);
 }
 
 .hidden {

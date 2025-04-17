@@ -30,23 +30,34 @@ class Chart {
     }
 
     private generateChartOptions() {
+        let textColor = this.chartTextColor;
+        let barColors = this.chartBarColors;
+
+        if (textColor.startsWith("--"))
+            textColor = this.fetchCSSColorVariable(textColor);
+
+        barColors.forEach((color, index, list) => {
+            if (color.startsWith("--"))
+                list[index] = this.fetchCSSColorVariable(color);
+        });
+
         return {
             fill: { opacity: 1},
             tooltip: { theme: this.chartTheme },
             dataLabels: { enabled: false },
             stroke: { width: 2, colors: "#fff0"},
             plotOptions: { bar: { columnWidth: "20%" } },
-            legend: { labels: { colors: this.chartTextColor } },
-            yaxis: { labels: { style: { colors: this.chartTextColor } }},
+            legend: { labels: { colors: textColor } },
+            yaxis: { labels: { style: { colors: textColor } }},
             xaxis: {
                 categories: this.chartCategories,
-                labels: { style: { colors: this.chartTextColor } }
+                labels: { style: { colors: textColor } }
             },
             chart: {
                 width: "100%", height: "100%",
                 type: "bar", toolbar: { show: false }
             },
-            colors: this.chartBarColors,
+            colors: barColors,
             series: this.chartDataSet
         }
     }
@@ -86,17 +97,10 @@ class Chart {
     }
 
     public set setTextColor(newTextColor: string) {
-        if (newTextColor.startsWith("--"))
-            newTextColor = this.fetchCSSColorVariable(newTextColor);
         this.chartTextColor = newTextColor;
     }
 
     public set setBarColors(newColors: Array<string>) {
-        newColors.forEach((color, index, list) => {
-            if (color.startsWith("--"))
-                list[index] = this.fetchCSSColorVariable(color);
-        });
-
         this.chartBarColors = newColors;
     }
 
@@ -112,6 +116,10 @@ class Chart {
         if (!this.chartElem) {
             this.chartElem = new ApexCharts(this.htmlElem, this.generateChartOptions());
             this.chartElem?.render();
+            document.addEventListener("user: themeChanged", (e) => {
+                this.setTheme = (e as CustomEvent).detail;
+                this.render();
+            });
         }
         else
             this.chartElem?.updateOptions(this.generateChartOptions());
@@ -120,6 +128,10 @@ class Chart {
     public destroy(): void {
         this.chartElem?.destroy();
         this.chartElem = undefined;
+        document.removeEventListener("user: themeChanged", (e) => {
+            this.setTheme = (e as CustomEvent).detail;
+            this.render();
+        });
     }
 }
 

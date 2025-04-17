@@ -91,7 +91,7 @@ function handleSignUp(request, reply) {
     const username = request.body.username;
     const password = request.body.password;
     const useTerms = request.body.useTerms;
-    const email = inputValidator.normalizeEmail(request.body.email)
+    const email = inputValidator.normalizeEmail(request.body.email);
 
     if (!inputValidator.validateUserName(username) ||
         !inputValidator.validateEmail(email) ||

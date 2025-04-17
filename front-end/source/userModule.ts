@@ -9,13 +9,27 @@ class UserData {
     private pictureAPI: string
     private isLoggedIn: boolean;
     private isSessionLoaded: boolean;
+    private themeButton: HTMLElement | null;
 
-    constructor(sessionDataAPI: string, pictureAPI: string) {
+    constructor(sessionDataAPI: string, pictureAPI: string, themeToggleButtonID: string) {
         this.clear();
         this.sessionAPI = sessionDataAPI;
         this.pictureAPI = pictureAPI.endsWith("/") ? pictureAPI : pictureAPI + "/";
         this.theme = this.getCachedTheme();
         this.isSessionLoaded = false;
+        this.themeButton = document.getElementById(themeToggleButtonID);
+
+        this.themeButton?.addEventListener("click", (e) => {
+            this.setTheme = this.theme === "light" ? "dark" : "light";
+        });
+
+        this.updateBrowserTheme();
+    }
+
+    private getSystemTheme(): Theme {
+        const systemTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        return systemTheme ? "dark" : "light";
     }
 
     private getCachedTheme(): Theme {
@@ -23,9 +37,11 @@ class UserData {
 
         if (cachedTheme === "light" || cachedTheme === "dark")
             return cachedTheme;
+        
+        const systemTheme = this.getSystemTheme();
 
-        localStorage.setItem("theme", "light");
-        return "light";
+        localStorage.setItem("theme", systemTheme);
+        return systemTheme;
     }
 
     public load(data: Record<string, any>): void {
@@ -72,6 +88,7 @@ class UserData {
     public set setTheme(newTheme: Theme) {
         localStorage.setItem("theme", newTheme);
         this.theme = newTheme;
+        this.updateBrowserTheme();
     }
 
     public get userId(): number {
@@ -88,6 +105,24 @@ class UserData {
 
     public get currentTheme(): "light" | "dark" {
         return (this.theme);
+    }
+
+    private broadcastEvent(eventName: string, eventPayload: any) {
+        eventName = "user: " + eventName;
+        const event = new CustomEvent(eventName, {detail: eventPayload});
+        document.dispatchEvent(event);
+    }
+
+    private updateBrowserTheme() {
+        if (this.themeButton) {
+            if (this.theme === "light")
+                this.themeButton.innerHTML = "<i class='bx bx-moon'></i>";
+            else
+            this.themeButton.innerHTML = "<i class='bx bx-sun'></i>";
+        }
+
+        document.documentElement.setAttribute('data-theme', this.theme);
+        this.broadcastEvent("themeChanged", this.theme);
     }
 
     public async isAuthenticated(): Promise<boolean> {

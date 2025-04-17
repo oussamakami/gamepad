@@ -4,7 +4,7 @@ import DashboardLoader from "./dashboardModule";
 import ProfileLoader from "./profileModule";
 import navigationHandler, {httpPromise} from "./browserModule";
 
-const user = new UserData("http://127.0.0.1:3000/api/sessionData", "http://127.0.0.1:3000/api/picture");
+const user = new UserData("http://127.0.0.1:3000/api/sessionData", "http://127.0.0.1:3000/api/picture", "mode-toggle");
 const dashboard = new DashboardLoader("http://127.0.0.1:3000/api/stats", "http://127.0.0.1:3000/api/picture");
 const profile = new ProfileLoader("http://127.0.0.1:3000/api/users/", "http://127.0.0.1:3000/api/picture", user);
 const navigation = new navigationHandler(user);
