@@ -186,7 +186,7 @@ class navigationHandler {
         this.hideAllSections(false);
 
         document.addEventListener("click", this.handleEvents.bind(this));
-        window.addEventListener("popstate", _ => this.navigateTo(location.pathname));
+        window.addEventListener("popstate", _ => this.navigateTo(location.pathname + location.search));
         window.addEventListener("DOMContentLoaded", _ => this.navigateTo(location.pathname + location.search));
     }
 }
