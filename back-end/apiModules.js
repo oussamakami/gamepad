@@ -82,6 +82,7 @@ function verifyRequestToken(request, reply, next) {
         return reply.status(401).send({error: "Unauthorized Access"});
 
     request.user = verification.data.user_id;
+    request.token_id = verification.data.token_id;
 
     next();
 }
@@ -193,10 +194,15 @@ function fetchDashBoardStats(request, reply) {
     return reply.status(200).send(queryResponse.data);
 }
 
-//this one for testing Unauthorized Access with session expiration
-function expired(request, reply) {
-    database.deleteAllSessions(request.user);
-    return reply.status(401).send({error: "Unauthorized Access"});
+function handleLogout(request, reply) {
+    if (!request.token_id)
+        return reply.status(401).send({error: "Unauthorized Access"});
+
+    const { success } = database.deleteSession(request.token_id);
+
+    if (!success)
+        return reply.status(500).send({error: "Internal Server Error"});
+    return reply.status(200).send({message: "Logged out Successfully"});
 }
 
 
@@ -209,9 +215,7 @@ function apiRoutes(fastify, options, done)
     fastify.get("/picture/:userId", fetchProfilePicture);
     fastify.get("/stats", fetchDashBoardStats);
     fastify.get("/users/:userId", fetchUserData);
-
-    //this one is for testing session expiration
-    fastify.get("/expired", expired);
+    fastify.get("/logout", handleLogout);
 
     done();
 }

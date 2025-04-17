@@ -19,12 +19,10 @@ class navigationHandler {
     private mainNav?: HTMLElement;
     private sideNav?: HTMLElement;
     private errorPage?: HTMLElement;
-    private links: HTMLAnchorElement[] = [];
     private user: UserData;
 
     constructor (user: UserData) {
         this.user = user;
-        this.links = [...document.querySelectorAll("a")];
     }
 
     public configure(
@@ -175,8 +173,10 @@ class navigationHandler {
     }
 
     private handleEvents(event: MouseEvent): void {
-        const targetAnchor = event.currentTarget as HTMLAnchorElement;
-        const targetPath = targetAnchor.getAttribute("href") || "/";
+        const targetAnchor = (event.target as HTMLElement).closest('a');
+        if (!targetAnchor) return ;
+
+        const targetPath = (targetAnchor as HTMLAnchorElement).getAttribute("href") || "/";
 
         event.preventDefault();
         this.navigateTo(targetPath);
@@ -184,11 +184,8 @@ class navigationHandler {
 
     public initialize(): void {
         this.hideAllSections(false);
-        
-        this.links.forEach(link => {
-            link.addEventListener("click", this.handleEvents.bind(this))
-        });
 
+        document.addEventListener("click", this.handleEvents.bind(this));
         window.addEventListener("popstate", _ => this.navigateTo(location.pathname));
         window.addEventListener("DOMContentLoaded", _ => this.navigateTo(location.pathname + location.search));
     }
