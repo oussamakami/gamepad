@@ -37,7 +37,7 @@ class userData {
         this.generateTokenId = customAlphabet(allowedChar, 10);
 
         //Schedule a task to clear expired cached sessions every hour (3600000 ms)
-        this.cacheClearingJob = setInterval(this.#clearExpiredCache, 3600000);
+        this.cacheClearingJob = setInterval(this.#clearExpiredCache.bind(this), 3600000);
 
         //Schedule a task to remove expired sessions from the database every hour (3600000 ms)
         this.sessionsClearingJob = setInterval(this.#cleanExpiredSessions, 3600000);
