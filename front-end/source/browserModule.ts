@@ -172,6 +172,10 @@ class navigationHandler {
         this.showSection(location);
     }
 
+    public reloadPage(): void {
+        this.navigateTo(location.pathname + location.search);
+    }
+
     private handleEvents(event: MouseEvent): void {
         const targetAnchor = (event.target as HTMLElement).closest('a');
         if (!targetAnchor) return ;
@@ -186,8 +190,8 @@ class navigationHandler {
         this.hideAllSections(false);
 
         document.addEventListener("click", this.handleEvents.bind(this));
-        window.addEventListener("popstate", _ => this.navigateTo(location.pathname + location.search));
-        window.addEventListener("DOMContentLoaded", _ => this.navigateTo(location.pathname + location.search));
+        window.addEventListener("popstate", _ => this.reloadPage());
+        window.addEventListener("DOMContentLoaded", _ => this.reloadPage());
     }
 }
 

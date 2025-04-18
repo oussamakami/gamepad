@@ -169,20 +169,22 @@ async function fetchProfilePicture(request, reply) {
 }
 
 function fetchUserData(request, reply) {
-    const queryResponse = database.fetchUser(request.params.userId);
-    
-    if (!queryResponse.success)
-        reply.status(404).send({error: queryResponse.error.message});
+    const currentUser = request.user;
+    let targetUser = database.fetchUser(request.params.userId);
 
-    const relation = database.fetchFriendshipData(request.user, queryResponse.data.id);
+    if (!targetUser.success)
+        reply.status(404).send({error: targetUser.error.message});
+    targetUser = targetUser.data.id;
 
-    if (relation && relation.status === 'blocked')
+    const relation = database.fetchFriendshipData(currentUser, targetUser);
+    if (relation?.status === "blocked")
         reply.status(404).send({error: "User does not exist"});
-    
-    const stats = database.fetchUserGlobalStats(queryResponse.data.id);
 
+    const stats = database.fetchUserGlobalStats(targetUser);
     if (!stats.success)
         return reply.status(500).send({error: "Internal Server Error"});
+
+    if (relation) stats.data.friendship = relation;
     return reply.status(200).send(stats.data);
 }
 
