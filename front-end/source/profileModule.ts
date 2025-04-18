@@ -1,6 +1,7 @@
 import Chart from "./chartModule";
 import UserData from "./userModule";
 import {httpPromise} from "./browserModule";
+import NavigationHandler from "./browserModule";
 
 class ProfileLoader {
     private statsAPI: string;
@@ -8,20 +9,24 @@ class ProfileLoader {
     private projection: Chart;
     private profile: HTMLElement;
     private currentUser: UserData;
+    private navigation: NavigationHandler;
     private profileData: Record<string, any> | undefined;
     private profileUserId: number;
 
-    constructor(statsAPI: string, pictureAPI: string, currentUser: UserData) {
-        const elem = document.getElementById("profile");
+    constructor(baseAPI: string, navigationModule: NavigationHandler) {
+        if (baseAPI.endsWith("/"))
+            baseAPI = baseAPI.slice(0, -1);
 
+        const elem = document.getElementById("profile");
         if (!elem)
             throw new Error("Profile element not found");
 
         this.profile = elem;
         this.projection = new Chart("user-projection-chart");
-        this.statsAPI = statsAPI.endsWith("/") ? statsAPI : statsAPI + "/";
-        this.pictureAPI = pictureAPI.endsWith("/") ? pictureAPI : pictureAPI + "/";
-        this.currentUser = currentUser;
+        this.statsAPI = baseAPI + "/users/";
+        this.pictureAPI = baseAPI + "/picture/";
+        this.navigation = navigationModule;
+        this.currentUser = navigationModule.userData;
         this.profileUserId = -1;
     }
 
@@ -75,7 +80,8 @@ class ProfileLoader {
         const name = this.profile.querySelector("[data-user-name]");
         const id = this.profile.querySelector("[data-user-id]");
         const email = this.profile.querySelector("[data-user-email]");
-        const actionButtons = this.profile.querySelector(".btn-container");
+
+        this.profile.querySelector(".btn-container")?.remove();
 
         if (picture)
             picture.src = this.pictureAPI + this.profileUserId
@@ -85,12 +91,6 @@ class ProfileLoader {
             id.textContent = this.profileData?.id;
         if (email)
             email.textContent = this.profileData?.email
-        if (actionButtons) {
-            if (this.profileData?.id != this.currentUser.userId)
-                actionButtons.classList.remove("hidden");
-            else
-                actionButtons.classList.add("hidden");
-        }
     }
 
     private updateStats(): void {

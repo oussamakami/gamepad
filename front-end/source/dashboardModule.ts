@@ -1,23 +1,33 @@
 import Chart from "./chartModule";
 import {httpPromise} from "./browserModule";
+import NavigationHandler from "./browserModule";
 
 class DashboardLoader {
     private statsAPI: string;
     private pictureAPI: string;
     private projection: Chart;
     private dashboard: HTMLElement;
+    private navigation: NavigationHandler;
     private statsData: Record<string, any> | undefined;
 
-    constructor(statsAPI: string, pictureAPI: string) {
-        const elem = document.getElementById("dashboard");
+    constructor(baseAPI: string, navigationModule: NavigationHandler) {
+        if (baseAPI.endsWith("/"))
+            baseAPI = baseAPI.slice(0, -1);
 
+        const elem = document.getElementById("dashboard");
         if (!elem)
             throw new Error("Dashboard element not found");
 
         this.dashboard = elem;
         this.projection = new Chart("projection-chart");
-        this.statsAPI = statsAPI;
-        this.pictureAPI = pictureAPI.endsWith("/") ? pictureAPI : pictureAPI + "/";
+        this.statsAPI = baseAPI + "/stats";
+        this.pictureAPI = baseAPI + "/picture/";
+        this.navigation = navigationModule;
+
+        elem.querySelector("#dash-refresh")?.addEventListener("click", (event) => {
+            this.projection.destroy();
+            this.load();
+        });
     }
 
     public get chartTextColor(): string {

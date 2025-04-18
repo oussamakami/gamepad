@@ -11,17 +11,20 @@ class UserData {
     private isSessionLoaded: boolean;
     private themeButton: HTMLElement | null;
 
-    constructor(sessionDataAPI: string, pictureAPI: string, themeToggleButtonID: string) {
+    constructor(baseAPI: string) {
+        if (baseAPI.endsWith("/"))
+            baseAPI = baseAPI.slice(0, -1);
+
         this.clear();
-        this.sessionAPI = sessionDataAPI;
-        this.pictureAPI = pictureAPI.endsWith("/") ? pictureAPI : pictureAPI + "/";
+        this.sessionAPI = baseAPI + "/sessionData";
+        this.pictureAPI = baseAPI + "/picture/";
         this.theme = this.getCachedTheme();
         this.isSessionLoaded = false;
-        this.themeButton = document.getElementById(themeToggleButtonID);
+        // this.themeButton = document.getElementById(themeToggleButtonID);
 
-        this.themeButton?.addEventListener("click", (e) => {
-            this.setTheme = this.theme === "light" ? "dark" : "light";
-        });
+        // this.themeButton?.addEventListener("click", (e) => {
+        //     this.setTheme = this.theme === "light" ? "dark" : "light";
+        // });
 
         this.updateBrowserTheme();
     }

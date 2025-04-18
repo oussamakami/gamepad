@@ -2,27 +2,7 @@ import UserData from "./userModule";
 import FormHandler from "./formsModule";
 import DashboardLoader from "./dashboardModule";
 import ProfileLoader from "./profileModule";
-import navigationHandler, {httpPromise} from "./browserModule";
-
-const user = new UserData("http://127.0.0.1:3000/api/sessionData", "http://127.0.0.1:3000/api/picture", "mode-toggle");
-const dashboard = new DashboardLoader("http://127.0.0.1:3000/api/stats", "http://127.0.0.1:3000/api/picture");
-const profile = new ProfileLoader("http://127.0.0.1:3000/api/users/", "http://127.0.0.1:3000/api/picture", user);
-const navigation = new navigationHandler(user);
-
-dashboard.setChartBarColors = ["--primary-brand-color"];
-dashboard.setChartTextColor = "--primary-text-color";
-
-profile.setChartBarColors = ["--primary-brand-color", "#4f55a6"];
-profile.setChartTextColor = "--primary-text-color";
-
-const signupForm = new FormHandler("signup-form", "POST","http://127.0.0.1:3000/api/signup");
-const recoveryForm = new FormHandler("recovery-form", "POST", "http://127.0.0.1:3000/api/recovery");
-const resetForm = new FormHandler("reset-form", "POST", "http://127.0.0.1:3000/api/pass_reset");
-const twoFAForm = new FormHandler("twofa-form", "POST", "http://127.0.0.1:3000/api/twofa");
-const loginForm = new FormHandler("login-form", "POST", "http://127.0.0.1:3000/api/login", (data: Record<string, any>) => {
-    user.load(data);
-    navigation.navigateTo("/dashboard");
-});
+import NavigationHandler, {httpPromise} from "./browserModule";
 
 function expiredNotice(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
@@ -43,22 +23,50 @@ function containsSerial(formHander?: FormHandler): httpPromise {
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
 
-navigation.configure("top-nav", "side-nav", "error");
-navigation.addAuthSection("/", "login", {formHander: loginForm, onload: expiredNotice});
-navigation.addAuthSection("/login", "login", {formHander: loginForm, onload: expiredNotice});
-navigation.addAuthSection("/signup", "signup", {formHander: signupForm});
-navigation.addAuthSection("/recovery", "recovery", {formHander: recoveryForm});
-navigation.addAuthSection("/reset", "reset", {formHander: resetForm, onload: containsSerial});
-navigation.addAuthSection("/twofa", "twofa", {formHander: twoFAForm, onload: containsSerial});
 
-navigation.addDashSection("/", "dashboard", {onload: () => dashboard.load()});
-navigation.addDashSection("/dashboard", "dashboard", {onload: () => dashboard.load()});
-navigation.addDashSection("/chat", "chat");
-navigation.addDashSection("/friends", "friends");
-navigation.addDashSection("/profile", "profile", {onload: () => profile.load()});
-navigation.addDashSection("/pong", "pong");
-navigation.addDashSection("/tic-tac", "tic-tac");
-navigation.addDashSection("/rps", "rps");
-navigation.addDashSection("/settings", "settings");
+const API_BASE   = "http://127.0.0.1:3000/api";
 
-navigation.initialize();
+const USER       = new UserData(API_BASE);
+const NAVIGATION = new NavigationHandler(USER);
+const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
+const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
+
+const FORMS = {
+    LOGIN  : new FormHandler("login-form",    `${API_BASE}/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
+    SIGNUP : new FormHandler("signup-form",   `${API_BASE}/signup`),
+    RECOVER: new FormHandler("recovery-form", `${API_BASE}/`),
+    RESET  : new FormHandler("reset-form",    `${API_BASE}/`),
+    TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/`)
+}
+
+const AUTHSECTIONS = [
+    {path: "/",        view: "login",    options: {formHander: FORMS.LOGIN,   onload: expiredNotice}},
+    {path: "/login",   view: "login",    options: {formHander: FORMS.LOGIN,   onload: expiredNotice}},
+    {path: "/reset",   view: "reset",    options: {formHander: FORMS.RESET,   onload: containsSerial}},
+    {path: "/twofa",   view: "twofa",    options: {formHander: FORMS.TWOFA,   onload: containsSerial}},
+    {path: "/signup",  view: "signup",   options: {formHander: FORMS.SIGNUP   }},
+    {path: "/recover", view: "recovery", options: {formHander: FORMS.RECOVER  }}
+]
+const DASHSECTIONS = [
+    {path: "/",          view: "dashboard", options: {onload: () => DASHBOARD.load()}},
+    {path: "/dashboard", view: "dashboard", options: {onload: () => DASHBOARD.load()}},
+    {path: "/profile",   view: "profile",   options: {onload: () => PROFILE.load()}},
+    {path: "/search",    view: "search",    options: {}},
+    {path: "/friends",   view: "friends",   options: {}},
+    {path: "/chat",      view: "chat",      options: {}},
+    {path: "/settings",  view: "settings",  options: {}},
+    {path: "/pong",      view: "pong",      options: {}},
+    {path: "/tictac",    view: "tic-tac",   options: {}},
+    {path: "/rps",       view: "rps",       options: {}},
+]
+
+DASHBOARD.setChartTextColor = "--primary-text-color";
+DASHBOARD.setChartBarColors = ["--primary-brand-color"];
+PROFILE.setChartTextColor = "--primary-text-color";
+PROFILE.setChartBarColors = ["--primary-brand-color", "#4f55a6"];
+
+AUTHSECTIONS.forEach(section => NAVIGATION.addAuthSection(section.path, section.view, section.options));
+DASHSECTIONS.forEach(section => NAVIGATION.addDashSection(section.path, section.view, section.options));
+
+NAVIGATION.configure("top-nav", "side-nav", "error");
+NAVIGATION.initialize();

@@ -13,7 +13,7 @@ interface Section {
     options: SectionOptions
 }
 
-class navigationHandler {
+class NavigationHandler {
     private authSections: Map<string, Section> = new Map;
     private dashSections: Map<string, Section> = new Map;
     private mainNav?: HTMLElement;
@@ -21,8 +21,12 @@ class navigationHandler {
     private errorPage?: HTMLElement;
     private user: UserData;
 
-    constructor (user: UserData) {
-        this.user = user;
+    constructor (USER: UserData) {
+        this.user = USER;
+    }
+
+    public get userData(): UserData {
+        return (this.user);
     }
 
     public configure(
@@ -195,4 +199,4 @@ class navigationHandler {
     }
 }
 
-export default navigationHandler;
+export default NavigationHandler;

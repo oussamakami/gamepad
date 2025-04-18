@@ -1,14 +1,12 @@
 class FormHandler {
     private formElement: HTMLFormElement;
     private targetAPI: string;
-    private targetMethod: string;
     private onSuccess: (response: Record<string, any>) => void;
     private showStatus: boolean = true;
 
     constructor(
         formId: string,
-        method: string,
-        api: string,
+        endPointAPI: string,
         onSuccess?: (response: Record<string, any>) => void
     ) {
         const element = document.getElementById(formId);
@@ -20,8 +18,7 @@ class FormHandler {
             throw new Error(`Element with ID "${formId}" is not a form`);
         
         this.formElement = element as HTMLFormElement;
-        this.targetMethod = method.toUpperCase();
-        this.targetAPI = api;
+        this.targetAPI = endPointAPI;
         this.onSuccess = onSuccess || (data => {});
 
         this.initialize();
@@ -56,7 +53,7 @@ class FormHandler {
 
     private async sendRequest(payload: string): Promise<string> {
         const response = await fetch(this.targetAPI, {
-            method: this.targetMethod,
+            method: "POST",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: payload
