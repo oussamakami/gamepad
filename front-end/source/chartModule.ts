@@ -27,6 +27,9 @@ class Chart {
         this.chartBarColors = ["#000000"];
         this.chartCategories = [];
         this.chartDataSet = [];
+
+        if (localStorage.getItem("theme") === "dark")
+            this.chartTheme = "dark";
     }
 
     private generateChartOptions() {
@@ -116,7 +119,7 @@ class Chart {
         if (!this.chartElem) {
             this.chartElem = new ApexCharts(this.htmlElem, this.generateChartOptions());
             this.chartElem?.render();
-            document.addEventListener("user: themeChanged", (e) => {
+            document.addEventListener("themeChanged", (e) => {
                 this.setTheme = (e as CustomEvent).detail;
                 this.render();
             });
@@ -128,7 +131,7 @@ class Chart {
     public destroy(): void {
         this.chartElem?.destroy();
         this.chartElem = undefined;
-        document.removeEventListener("user: themeChanged", (e) => {
+        document.removeEventListener("themeChanged", (e) => {
             this.setTheme = (e as CustomEvent).detail;
             this.render();
         });

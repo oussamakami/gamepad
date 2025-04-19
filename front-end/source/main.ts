@@ -3,6 +3,7 @@ import FormHandler from "./formsModule";
 import DashboardLoader from "./dashboardModule";
 import ProfileLoader from "./profileModule";
 import NavigationHandler, {httpPromise} from "./browserModule";
+import NavBarHandler from "./navBarModule";
 
 function expiredNotice(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
@@ -30,6 +31,7 @@ const USER       = new UserData(API_BASE);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
+const NAVBAR     = new NavBarHandler(NAVIGATION);
 
 const FORMS = {
     LOGIN  : new FormHandler("login-form",    `${API_BASE}/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
