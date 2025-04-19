@@ -72,19 +72,23 @@ class ThemeManager {
 }
 
 class NavBarHandler {
+    private logoutAPI    : string;
     private navigation   : NavigationHandler;
+
     private sideNavElem  : HTMLElement | null;    
     private sideNavButton: HTMLElement | null;
     private screenButton : HTMLElement | null;
-    // private logoutButton: HTMLElement;
+    private logoutButton : HTMLElement | null;
 
-    constructor(navigationModule: NavigationHandler) {
+    constructor(baseAPI: string, navigationModule: NavigationHandler) {
         new ThemeManager();
+        this.logoutAPI = `${baseAPI}/logout`;
         this.navigation = navigationModule;
 
         this.sideNavElem = document.getElementById("side-nav");
         this.sideNavButton = document.getElementById("toggle-side-nav");
         this.screenButton = document.getElementById("toggle-fullscreen");
+        this.logoutButton = document.getElementById("logout");
 
         this.initialize();
     }
@@ -96,21 +100,12 @@ class NavBarHandler {
         if (this.screenButton)
             this.screenButton.onclick = () => this.toggleFullScreen();
 
+        if (this.logoutButton)
+            this.logoutButton.onclick = () => this.logoutSession();
+
         document.addEventListener('fullscreenchange', () => this.updateScreenButton());
         document.addEventListener('webkitfullscreenchange', () => this.updateScreenButton());
         document.addEventListener('msfullscreenchange', () => this.updateScreenButton());
-    }
-
-    public toggleSideNav() {
-        if (!this.sideNavElem) return;
-
-        if (this.sideNavElem.style.width === "0px") {
-            this.sideNavElem.classList.remove("hidden");
-            setTimeout(() => {this.sideNavElem!.style.width = "var(--side-nav-width)"}, 10);
-        } else {
-            this.sideNavElem.style.width = "0px";
-            setTimeout(() => {this.sideNavElem!.classList.add("hidden")}, 500);
-        }
     }
 
     private updateScreenButton() {
@@ -135,6 +130,23 @@ class NavBarHandler {
         catch (error) {
             console.error("FullScreen Failed: ", error);
         }
+    }
+
+    public toggleSideNav() {
+        if (!this.sideNavElem) return;
+
+        if (this.sideNavElem.style.width === "0px") {
+            this.sideNavElem.classList.remove("hidden");
+            setTimeout(() => {this.sideNavElem!.style.width = "var(--side-nav-width)"}, 10);
+        } else {
+            this.sideNavElem.style.width = "0px";
+            setTimeout(() => {this.sideNavElem!.classList.add("hidden")}, 500);
+        }
+    }
+
+    public async logoutSession() {
+        await fetch(this.logoutAPI, { method: "GET", credentials: "include" });
+        this.navigation.navigateTo("/login");
     }
 }
 

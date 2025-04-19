@@ -31,7 +31,7 @@ const USER       = new UserData(API_BASE);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
-const NAVBAR     = new NavBarHandler(NAVIGATION);
+const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 
 const FORMS = {
     LOGIN  : new FormHandler("login-form",    `${API_BASE}/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
