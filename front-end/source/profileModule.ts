@@ -1,33 +1,43 @@
 import Chart from "./chartModule";
-import UserData from "./userModule";
 import {httpPromise} from "./browserModule";
 import NavigationHandler from "./browserModule";
+import ActionsHandler from "./actionsModule";
 
 class ProfileLoader {
-    private statsAPI: string;
-    private pictureAPI: string;
-    private projection: Chart;
-    private profile: HTMLElement;
-    private currentUser: UserData;
-    private navigation: NavigationHandler;
+    //APIS
+    private readonly statsAPI      : string;
+    private readonly pictureAPI    : string;
+
+    //DOM ELEMENTS
+    private readonly profile       : HTMLElement;
+    private readonly projection    : Chart;
+
+    //MODULES
+    private readonly navModule     : NavigationHandler;
+    private readonly btnGenerator  : ActionsHandler;
+
+
     private profileData: Record<string, any> | undefined;
-    private profileUserId: number;
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
-        if (baseAPI.endsWith("/"))
-            baseAPI = baseAPI.slice(0, -1);
-
         const elem = document.getElementById("profile");
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+
+        this.statsAPI = baseAPI + "/users";
+        this.pictureAPI = baseAPI + "/picture";
+
         if (!elem)
             throw new Error("Profile element not found");
 
         this.profile = elem;
         this.projection = new Chart("user-projection-chart");
-        this.statsAPI = baseAPI + "/users/";
-        this.pictureAPI = baseAPI + "/picture/";
-        this.navigation = navigationModule;
-        this.currentUser = navigationModule.userData;
-        this.profileUserId = -1;
+
+        this.navModule = navigationModule;
+        this.btnGenerator = new ActionsHandler(baseAPI, navigationModule);
+    }
+
+    public get sessionUserId(): number {
+        return (this.navModule.userData.userId);
     }
 
     public get chartTextColor(): string {
@@ -56,54 +66,58 @@ class ProfileLoader {
 
     private async fetchStats(): httpPromise {
         const url = new URLSearchParams(location.search);
-        if (url.get("id"))
-            this.profileUserId = +(url.get("id"))!;
-        else
-            this.profileUserId = this.currentUser.userId;
+        const targetid = url.get("id") || this.sessionUserId;
+        const endpoint = `${this.statsAPI}/${targetid}`;
 
-        const response = await fetch(this.statsAPI + this.profileUserId, {
-            method: "GET",
-            credentials: "include"
-        }).catch(error => {throw new Error("Unknown error occurred")});
+        try{
+            const response = await fetch(endpoint, {
+                method: "GET",
+                credentials: "include"  
+            });
 
-        if (!response.ok) {
-            this.profileData = undefined;
-            return Promise.reject({httpCode: response.status, httpName: response.statusText})
+            if (!response.ok)
+                throw response;
+
+            this.profileData = (await response.json());
+            return {httpCode: response.status, httpName: response.statusText};
         }
-
-        this.profileData = (await response.json());
-        return Promise.resolve({httpCode: response.status, httpName: response.statusText});
+        catch (error) {
+            throw {httpCode: error.status, httpName: error.statusText};
+        }
     }
 
     private updateProfileInfo(): void {
+        if (!this.profileData) return;
+
         const picture = this.profile.querySelector("[data-user-img]") as HTMLImageElement;
-        const name = this.profile.querySelector("[data-user-name]");
-        const id = this.profile.querySelector("[data-user-id]");
-        const email = this.profile.querySelector("[data-user-email]");
-
-        this.profile.querySelector(".btn-container")?.remove();
-
-        if (picture)
-            picture.src = this.pictureAPI + this.profileUserId
-        if (name)
-            name.textContent = this.profileData?.username;
-        if (id)
-            id.textContent = this.profileData?.id;
-        if (email)
-            email.textContent = this.profileData?.email
+        const data    = this.profile.querySelector("figcaption");
+        const id      = data?.querySelector("[data-user-id]");
+        const name    = data?.querySelector("[data-user-name]");
+        const email   = data?.querySelector("[data-user-email]");
+        
+        data?.querySelector(".btn-container")?.remove();
+        
+        id      && (id   .textContent = this.profileData.id);
+        name    && (name .textContent = this.profileData.username);
+        email   && (email.textContent = this.profileData.email);
+        picture && (picture.src       = `${this.pictureAPI}/${this.profileData.id}`);
+        
+        if (this.profileData.id != this.sessionUserId) {
+            const buttons = this.btnGenerator.generateBtnContainer(this.profileData.id, this.profileData.friendship);
+            data?.appendChild(buttons);
+        }
     }
 
     private updateStats(): void {
-        const TotalPlayed = this.profile.querySelector("[data-user-games-count]");
+        if (!this.profileData) return;
+
         const TotalWon = this.profile.querySelector("[data-user-won-count]");
         const TotalLost = this.profile.querySelector("[data-user-lost-count]");
+        const TotalPlayed = this.profile.querySelector("[data-user-games-count]");
 
-        if (TotalPlayed)
-            TotalPlayed.textContent = this.profileData?.total.total;
-        if (TotalWon)
-            TotalWon.textContent = this.profileData?.wins.total;
-        if (TotalLost)
-            TotalLost.textContent = this.profileData?.loses.total;
+        TotalWon    && (TotalWon   .textContent = this.profileData.wins.total);
+        TotalLost   && (TotalLost  .textContent = this.profileData.loses.total);
+        TotalPlayed && (TotalPlayed.textContent = this.profileData.total.total);
     }
 
     private updateProjection(): void {
@@ -111,13 +125,13 @@ class ProfileLoader {
         const WinsPerGame = {name: "games won", data: [0, 0, 0]};
 
         if (this.profileData) {
-            TotalPerGame.data[0] = (this.profileData.total["ping-pong"] ?? 0)
+            TotalPerGame.data[0] = (this.profileData.total["ping-pong"]   ?? 0)
             TotalPerGame.data[1] = (this.profileData.total["tic-tac-toe"] ?? 0)
-            TotalPerGame.data[2] = (this.profileData.total["rock-paper"] ?? 0)
+            TotalPerGame.data[2] = (this.profileData.total["rock-paper"]  ?? 0)
 
-            WinsPerGame.data[0] = (this.profileData.wins["ping-pong"] ?? 0)
+            WinsPerGame.data[0] = (this.profileData.wins["ping-pong"]   ?? 0)
             WinsPerGame.data[1] = (this.profileData.wins["tic-tac-toe"] ?? 0)
-            WinsPerGame.data[2] = (this.profileData.wins["rock-paper"] ?? 0)
+            WinsPerGame.data[2] = (this.profileData.wins["rock-paper"]  ?? 0)
         }
         
         this.projection.setCategories = ["ping-pong", "tic-tac-toe", "rock-paper-scissors"];
@@ -125,25 +139,22 @@ class ProfileLoader {
         this.projection.render();
     }
 
-
     private updateActivities(): void {
         const winningText = "emerged victorious over";
         const losingText = "suffered defeat at the hands of";
         const activities = this.profile.querySelector('#user-games-history .activity-list');
 
-        if (!activities)
-            return;
+        if (!activities || !this.profileData) return;
 
-        if (!this.profileData?.history.length)
-            activities.innerHTML = `<p style="width: 100%; text-align: center;">Looks like there's no recent history yet!</p>`;
-        else
-            activities.innerHTML = "";
+        activities.innerHTML = (!this.profileData.history.length)
+        ? `<p style="width: 100%; text-align: center;">Looks like there's no recent history yet!</p>`
+        : "";
 
-        this.profileData?.history.forEach(record => {
-            const listElem = document.createElement("li");
+        this.profileData.history.forEach(record => {
             const icon = document.createElement("i");
             const text = document.createElement("span");
             const time = document.createElement("span");
+            const listElem = document.createElement("li");
 
             icon.className = "bx card-icon";
             time.className = "activity-time";
@@ -162,28 +173,33 @@ class ProfileLoader {
                     icon.classList.add("bx-question-mark");
             }
 
-            if (!record.isWinner)
-                icon.classList.add("failure-icon");
-
-            text.innerHTML = `<strong>${record.user_username} (${record.user_nickname})</strong> ${record.isWinner ? winningText : losingText} <strong>${record.enemy_username} (${record.enemy_nickname})</strong>.`;
+            record.isWinner || icon.classList.add("failure-icon");
+            text.innerHTML = 
+            `<strong>${record.user_username} (${record.user_nickname})</strong>
+            ${record.isWinner ? winningText : losingText}
+            <strong>${record.enemy_username} (${record.enemy_nickname})</strong>.
+            `
             time.textContent = record.date;
-
             listElem.appendChild(icon);
             listElem.appendChild(text);
             listElem.appendChild(time);
-
             activities.appendChild(listElem);
         });
     }
 
     public async load(): httpPromise {
-        return this.fetchStats().then(result => {
+        return this.fetchStats()
+        .then(result => {
             this.updateProfileInfo();
             this.updateStats();
             this.updateActivities();
             this.updateProjection();
+
             return (result);
-        }).catch(error => {throw error});
+        })
+        .catch(error => {
+            throw (error)
+        });
     }
 }
 
