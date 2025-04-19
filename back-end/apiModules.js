@@ -81,7 +81,7 @@ function verifyRequestToken(request, reply, next) {
     if (!verification.success)
         return reply.status(401).send({error: "Unauthorized Access"});
 
-    request.user = verification.data.user_id;
+    request.user_id = verification.data.user_id;
     request.token_id = verification.data.token_id;
 
     next();
@@ -134,11 +134,65 @@ function handleLogIn(request, reply) {
     return reply.status(500).send({error: "Internal Server Error"});
 }
 
+function handleUsersRelations(request, reply) {
+    const sender = request.user_id;
+    const {action, target} = request.body;
+    
+    if (!action || !target)
+        return reply.status(400).send({error: "Invalid Request"});
+
+    const senderData = database.fetchUser(sender);
+    const targetData = database.fetchUser(target);
+
+    if (!senderData.success || !targetData.success)
+        return reply.status(404).send({error: senderData.success ? targetData.error.message : senderData.error.message});
+
+    const relations = database.fetchFriendshipData(sender, target);
+
+    if (relations?.stats === "blocked")
+        return reply.status(404).send({error: "User does not exist"});
+
+    let queryResponse;
+
+    switch(action) {
+        case "add":
+            queryResponse = database.sendFriendRequest(sender, target);
+            break;
+        case "cancel":
+            queryResponse = database.rejectFriendRequest(sender, target);
+            break;
+        case "accept":
+            queryResponse = database.acceptFriendRequest(sender, target);
+            break;
+        case "decline":
+            queryResponse = database.rejectFriendRequest(target, sender);
+            break;
+        case "unfriend":
+            queryResponse = database.unfriendUser(sender, target);
+            break;
+        case "block":
+            queryResponse = database.blockUser(sender, target);
+            break;
+        case "unblock":
+            queryResponse = database.unblockUser(sender, target);
+    }
+
+    if (!queryResponse)
+        return reply.status(400).send({error: "Invalid Request"});
+
+    if (!queryResponse.success) {
+        if (!queryResponse.error.code)
+            return reply.status(403).send({error: queryResponse.error.message});
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+    reply.status(201).send({message: "Action successful", ...queryResponse.data});
+}
+
 function fetchSessionData(request, reply) {
-    const queryResponse = database.fetchUser(request.user);
+    const queryResponse = database.fetchUser(request.user_id);
 
     if (!queryResponse.success)
-        return reply.status(401).send({error: "Unauthorized Access"});
+        return reply.status(404).send({error: queryResponse.error.message});
 
     return reply.status(200).send({id: queryResponse.data.id,
         username: queryResponse.data.username, email: queryResponse.data.email});
@@ -169,7 +223,7 @@ async function fetchProfilePicture(request, reply) {
 }
 
 function fetchUserData(request, reply) {
-    const currentUser = request.user;
+    const currentUser = request.user_id;
     let targetUser = database.fetchUser(request.params.userId);
 
     if (!targetUser.success)
@@ -213,6 +267,7 @@ function apiRoutes(fastify, options, done)
     fastify.addHook("preHandler", verifyRequestToken);
     fastify.post("/signup", handleSignUp);
     fastify.post("/login", handleLogIn);
+    fastify.post("/relations", handleUsersRelations);
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
     fastify.get("/stats", fetchDashBoardStats);

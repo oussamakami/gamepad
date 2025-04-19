@@ -30,7 +30,7 @@ class ActionsHandler {
     };
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
-        this.targetAPI = `${baseAPI}/`;
+        this.targetAPI = `${baseAPI}/relations`;
         this.navigation = navigationModule;
     }
 
@@ -45,10 +45,16 @@ class ActionsHandler {
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({action: action, target: targetID})
             });
-            
+
             if (!response.ok)
                 throw new Error();
-            
+
+            if (action === "block") {
+                button.textContent = "unblock";
+                button.dataset.action = "unblock";
+                return ;
+            }
+
             this.navigation.reloadPage();
         }
         catch {
