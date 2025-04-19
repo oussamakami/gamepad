@@ -19,6 +19,72 @@ This is a full-stack web development project focused on building a single-page a
 * **SQLite3**
 * **Docker**
 
+## Installation
+
+Follow the steps below to set up the project:
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/oussamakami/gamepad.git
+   cd gamepad
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Create a `.env` file:**
+
+   ```bash
+   touch .env
+   ```
+
+4. **Configure environment variables:**
+
+   The `.env` file should contain the following:
+
+   ```
+   PORT=<server_port>
+   
+   JWT_SECRET=<64_character_long_secure_string>
+   
+   PICTURES_PATH=<absolute_path_to_profile_pictures_directory>
+   ```
+
+   To generate a secure `JWT_SECRET`, you can use this command:
+
+   ```bash
+   head /dev/urandom | base64 | head -c 64
+   ```
+
+   #### Example `.env` file:
+
+   ```
+   PORT=3000
+
+   JWT_SECRET=uxgK8HyrB6sE/0eLkQsgGQxZwOz1Qrdt7giegJRm31aoP4PVPzFNYXMVszsoYbQG
+
+   PICTURES_PATH=/home/linux/gamepad/back-end/figures
+   ```
+
+5. **Available NPM Scripts:**
+
+   - `npm run build`  
+     Compiles the TypeScript code into JavaScript.
+
+   - `npm run clean`  
+     Removes the compiled JavaScript code.
+
+   - `npm run api`  
+     Starts the backend server only.
+
+   - `npm start`  
+     Builds and runs both frontend and backend. The website will be available at `http://localhost:5500`.
+
+
 # Modules
 ## Design
 - [X] **Navigation**
@@ -186,61 +252,206 @@ This is a full-stack web development project focused on building a single-page a
 - [X] **User Data Module Implementation**
     - [X] **Core User Handling**
         - [X] Process the API response object to manage user data.
+        - [X] Handle session management with backend API
     - [X] **Module Methods**
-        - [X] Retrieve the user ID.
-        - [X] Retrieve the user name.
-        - [X] Retrieve the user theme preference.
-        - [X] Retrieve the user email.
-        - [X] Update the user theme (store in localStorage).
-        - [X] Determine if the user is logged in to show appropriate sections
-        - [X] Fetch userData using the session Token
+        - [X] **Data Retrieval**
+            - [X] Retrieve the user ID (`userId`)
+            - [X] Retrieve the user name (`userName`)
+            - [X] Retrieve the user email (`userEmail`)
+        - [X] **Session Management**
+            - [X] Fetch user data using session token (`fetchSessionData`)
+            - [X] Check authentication status (`isAuthenticated`)
+            - [X] Clear user data (`clear`)
+        - [X] **UI Integration**
+            - [X] Automatically update navigation bar user image
+            - [X] Automatically update navigation bar user name
 - [X] **SPA Navigation Module Implementation**
     - [X] **Core User Handling**
         - [X] Reference to the `userdata` object
+        - [X] Configure navigation elements (mainNav, sideNav, errorPage)
     - [X] **Module Methods**
-        - [X] **Section & Path Mapping**
-            - [X] Map URL paths to website **auth sections**
-            - [X] Map URL paths to website **dashboard sections**
-            - [X] Enable support for custom on-load functions in mapped sections
-            - [X] Set the **error page section ID**
-            - [X] Set the **primary navigation bar ID**
-            - [X] Set the **secondary navigation bar ID**
-        - [X] **Section Visibility & Error Handling**
-            - [X] Show a **section** based on the URL path
-                - [X] Execute the custom on-load function (if specified) before displaying the section
-                - [X] Display the error page if the on-load function fails
-                - [X] Clear loginStatus and redirect to / if the on-load function returns a 401 error response
-            - [X] Hide **all sections** (both auth and dashboard sections)
-            - [X] Show the **error page section** dynamically with an error code and message
-            - [X] Hide the **error page section**
-            - [X] Show the **navigation bar**
-            - [X] Hide the **navigation bar**
+            - [X] **Section Registration**
+                - [X] Add authenticated sections (`addDashSection`)
+                - [X] Add unauthenticated sections (`addAuthSection`)
+                - [X] Support optional FormHandler integration
+                - [X] Support custom on-load functions with HTTP promise
+                - [X] Handle URL path standardization (trailing slashes, query params)
+            - [X] **Section Visibility**
+                - [X] Show/hide all sections (`hideAllSections`)
+                - [X] Dynamic section display based on auth state
+                - [X] Active nav section highlighting
+            - [X] **Error Handling**
+                - [X] Custom error page display (`showError`)
         - [X] **Browser History & Redirection**
             - [X] Add a **URL path** to the browser history (`pushToHistory`)
             - [X] Redirect the user to another **URL path** (`navigateTp`)
+            - [X] Page reload functionality (`reloadPage`)
         - [X] **Event Handling for SPA Navigation**
             - [X] Handle events for **anchor (`<a>`) links**
             - [X] Initialize event listening on all **anchor links** for smooth SPA navigation
+            - [X] Popstate event handling for back/forward
+            - [X] DOMContentLoaded initialization
+        - [X] **UI Integration**
+            - [X] Automatic user image/name updates
+            - [X] Form state reset on navigation
 - [X] **Charts Module Implementation**
-    - [X] **Core User Handling**
+    - [X] **Core Initialization**
         - [X] Specify the `elementId` of the DOM element that will contain the chart
+        - [X] Auto-detect system theme from localStorage
+        - [X] Throw error for invalid element IDs
     - [X] **Module Methods**
         - [X] **Chart Configuration – Getters**
-            - [X] Get the chart `theme`
-            - [X] Get the chart `text color`
-            - [X] Get the chart `bars color`
-            - [X] Get the chart `categories`
-            - [X] Get the chart `dataset`
+            - [X] `theme`: Get current chart theme ("light"|"dark")
+            - [X] `textColor`: Get current text color
+            - [X] `barColors`: Get array of bar colors
+            - [X] `categories`: Get x-axis categories
+            - [X] `dataSet`: Get chart data series
         - [X] **Chart Configuration – Setters**
-            - [X] Set the chart `theme`
-            - [X] Set the chart `text color`
-            - [X] Set the chart `bars color`
-            - [X] Set the chart `categories`
-            - [X] Set the chart `dataset`
+            - [X] `setTheme`: Update chart theme
+            - [X] `setTextColor`: Update text color
+            - [X] `setBarColors`: Update bar colors array
+            - [X] `setCategories`: Update x-axis categories
+            - [X] `setDataSet`: Update chart data series
         - [X] **Chart Rendering & Lifecycle**
-            - [X] Render or update the chart in the DOM
-            - [X] Destroy the chart instance
-        - [X] Support CSS variables as valid color inputs
+            - [X] `render()`: Create or update chart visualization
+                - [X] Auto-handles initial render and updates
+                - [X] Listens for `themeChanged` custom events
+            - [X] `destroy()`: Clean up chart instance
+                - [X] Removes event listeners
+                - [X] Destroys ApexCharts instance
+        - [X] **Rendering & Lifecycle**
+            - [X] CSS variable support for colors
+                - [X] Automatic conversion of CSS variables to computed values
+                - [X] Fallback to #000000 for invalid variables
+            - [X] Theme synchronization
+                - [X] Reactive to system theme changes
+                - [X] Dynamic re-rendering on theme updates
+- [X] **Dashboard Module Implementation**
+    - [X] **Core Initialization**
+        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Throws error if dashboard element not found
+    - [X] **Chart Configuration Proxy**
+        - [X] **Getters**
+            - [X] `chartTextColor`: Get current chart text color
+            - [X] `chartBarColors`: Get array of chart bar colors
+            - [X] `chartTheme`: Get current chart theme ("light"|"dark")
+        - [X] **Setters**
+            - [X] `setChartTextColor`: Update chart text color
+            - [X] `setChartBarColors`: Update chart bar colors
+            - [X] `setChartTheme`: Update chart theme
+    - [X] **Data Management**
+        - [X] `fetchStats()`: Retrieves stats from backend API
+            - [X] Handles network errors
+            - [X] Manages credentials
+        - [X] `load()`: Main loading method
+            - [X] Fetch website stats and update the DOM
+            - [X] Returns HTTP promise
+    - [X] **UI Updaters**
+        - [X] `updateStatsCards()`: Updates all statistic cards
+        - [X] `updateProjection()`: Configures and renders chart
+        - [X] `updateLeaderBoard()`: Dynamically builds leaderboard
+            - [X] Creates ranked player list
+            - [X] Generates profile links
+            - [X] Loads player images
+        - [X] `updateActivities()`: Renders game history
+            - [X] Adds game-specific icons
+            - [X] Formats match results
+            - [X] Displays timestamps
+    - [X] **Event Handling**
+        - [X] Automatic refresh button binding
+        - [X] Chart cleanup on refresh
+- [X] **Profile Loader Implementation**
+    - [X] **Core Initialization**
+        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Throws error if profile element not found
+    - [X] **Chart Configuration Proxy**
+        - [X] **Getters**
+            - [X] `chartTextColor`: Get current chart text color
+            - [X] `chartBarColors`: Get array of chart bar colors
+            - [X] `chartTheme`: Get current chart theme ("light"|"dark")
+        - [X] **Setters**
+            - [X] `setChartTextColor`: Update chart text color
+            - [X] `setChartBarColors`: Update chart bar colors
+            - [X] `setChartTheme`: Update chart theme
+    - [X] **Data Management**
+        - [X] `fetchStats()`: Retrieves stats from backend API
+            - [X] Handles both current user and specified user profiles
+            - [X] Manages URL parameter parsing (?id=)
+            - [X] Handles network errors
+            - [X] Manages credentials
+        - [X] `load()`: Main loading method
+            - [X] Fetch profile stats and update the DOM
+            - [X] Returns HTTP promise
+    - [X] **UI Updaters**
+        - [X] `updateProfileInfo()`: Updates user information
+            - [X] Handles profile picture
+            - [X] Updates name, ID, and email
+            - [ ] Handle action buttons (block, unblock, accept...)
+        - [X] `updateStats()`: Updates game statistics
+            - [X] Total games played
+            - [X] Total games won
+            - [X] Total games lost
+        - [X] `updateProjection()`: Configures and renders chart
+            - [X] Shows games played per type
+            - [X] Shows wins per game type
+            - [X] Handles null data safely
+        - [X] `updateActivities()`: Renders game history
+            - [X] Creates victory/defeat entries
+            - [X] Adds game-specific icons
+            - [X] Formats match results
+            - [X] Displays timestamps
+            - [X] Shows empty state when no history
+- [X] **Theme Manager Implementation**
+    - [X] **Core Initialization**
+        - [X] Optional theme button ID parameter (default: "mode-toggle")
+        - [X] Automatic theme detection on instantiation
+        - [X] Auto-binds click handler when button exists
+    - [X] **Theme Management**
+        - [X] **State Getters**
+            - [X] `currentTheme`: Get active theme ("light"|"dark")
+            - [X] `getSystemTheme`: Detect OS-level preference
+            - [X] `getCachedTheme`: Retrieve stored preference
+        - [X] **State Setters**
+            - [X] `setTheme`: Programmatically set new theme
+                - [X] Persists to localStorage
+                - [X] Triggers UI updates
+                - [X] Broadcasts change event
+        - [X] `toggleTheme()`: Switch between light/dark modes
+    - [X] **UI Synchronization**
+        - [X] `updateThemeButton()`: Dynamically updates toggle icon
+            - [X] Show sun icon for dark mode
+            - [X] Show moon icon for light mode
+        - [X] `updateWebSite()`: Applies theme globally
+            - [X] Sets `data-theme` attribute
+            - [X] Updates button state
+            - [X] Broadcasts "themeChanged" event
+    - [X] **Persistence**
+        - [X] Automatic localStorage management
+        - [X] Falls back to system preference
+        - [X] Validates stored values
+- [X] **NavBar Handler Implementation**
+    - [X] **Core Initialization**
+        - [X] Requires base API endpoint and NavigationHandler instance
+    - [X] **Element References**
+        - [X] Side navigation container
+        - [X] Side nav toggle button
+        - [X] Fullscreen toggle button
+        - [ ] Search Box
+        - [X] Logout button
+    - [X] **Feature Implementation**
+        - [X] **Side Navigation**
+            - [X] Toggle visibility with animation (`toggleSideNav`)
+            - [X] Handles width transition smoothly
+            - [X] Manages hidden state
+        - [X] **Fullscreen Management**
+            - [X] Toggle fullscreen mode (`toggleFullScreen`)
+            - [X] Cross-browser event support
+            - [X] Dynamic button icon updates (`updateScreenButton`)
+        - [X] **Session Management**
+            - [X] Logout functionality (`logoutSession`)
+            - [X] Automatic redirect to login page
+        - [ ] **Search Functionality**
+            - [ ] redirect to search page on submit
 - [ ] **Buttons Action Module Implementation** (@oussamakami)
     - [ ] *To be added soon*
 
