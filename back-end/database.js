@@ -6,6 +6,7 @@ import { clearInterval } from 'timers';
 import Dotenv from 'dotenv';
 import { error } from 'console';
 import PasswordHasher from './passwordHasher.js';
+import twoFA from './twofa.js';
 
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -47,13 +48,13 @@ class userData {
         this.db.exec(`
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY,
+                gid INTEGER UNIQUE DEFAULT NULL,
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT,
-                _2fa BOOLEAN DEFAULT false CHECK ( _2fa IN ( true, false ) ),
-                _2fa_method TEXT NOT NULL DEFAULT 'email' CHECK ( _2fa_method IN ( 'email', 'app' ) ),
-                profile_priv TEXT NOT NULL DEFAULT 'public' CHECK ( profile_priv IN ( 'public', 'friends', 'private' ) ),
-                history_priv TEXT NOT NULL DEFAULT 'public' CHECK ( history_priv IN ( 'public', 'friends', 'private' ) ),
+                twofa_enabled BOOLEAN DEFAULT 0,
+                twofa_method TEXT NOT NULL DEFAULT 'email' CHECK ( twofa_method IN ( 'email', 'app' ) ),
+                twofa_secret TEXT NOT NULL,
                 picture TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS sessions (
@@ -132,11 +133,11 @@ class userData {
         {
             try {
                 const stmt = this.db.prepare(`
-                    INSERT INTO users (id, username, email, password, picture)
-                    VALUES ( ?, ?, ?, ?, ? ) RETURNING *
+                    INSERT INTO users (id, username, email, password, picture, twofa_secret)
+                    VALUES ( ?, ?, ?, ?, ?, ? ) RETURNING *
                 `);
                 const userId = this.generateUserId();
-                result.data = stmt.get(userId, username, email, this.hasher.smartHash(password, userId), picture);
+                result.data = stmt.get(userId, username, email, this.hasher.smartHash(password, userId), picture, twoFA.getSecret());
                 break;
             }
             catch (error) {
