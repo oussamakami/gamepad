@@ -256,6 +256,7 @@ function handleLogout(request, reply) {
         return reply.status(401).send({error: "Unauthorized Access"});
 
     const { success } = database.deleteSession(request.token_id);
+    reply.clearCookie('authToken');
 
     if (!success)
         return reply.status(500).send({error: "Internal Server Error"});
