@@ -31,6 +31,7 @@ Follow the steps below to set up the project:
    ```
 
 2. **Install dependencies:**
+    - requires node verion 18+
 
    ```bash
    npm install
@@ -47,11 +48,19 @@ Follow the steps below to set up the project:
    The `.env` file should contain the following:
 
    ```
-   PORT=<server_port>
+   PORT = <server_port>
    
-   JWT_SECRET=<64_character_long_secure_string>
+   JWT_SECRET = <64_character_long_secure_string>
    
-   PICTURES_PATH=<absolute_path_to_profile_pictures_directory>
+   PICTURES_PATH = <absolute_path_to_profile_pictures_directory>
+   
+   SMTP = <SMTP server url>
+
+   SMTP_PORT = <SMTP server port>
+   
+   SMTP_USER = <SMTP server user/email>
+   
+   SMTP_PASS = <SMTP password/app_password>
    ```
 
    To generate a secure `JWT_SECRET`, you can use this command:
@@ -63,11 +72,19 @@ Follow the steps below to set up the project:
    #### Example `.env` file:
 
    ```
-   PORT=3000
+   PORT = 3000
 
-   JWT_SECRET=uxgK8HyrB6sE/0eLkQsgGQxZwOz1Qrdt7giegJRm31aoP4PVPzFNYXMVszsoYbQG
+   JWT_SECRET = uxgK8HyrB6sE/0eLkQsgGQxZwOz1Qrdt7giegJRm31aoP4PVPzFNYXMVszsoYbQG
 
-   PICTURES_PATH=/home/linux/gamepad/back-end/figures
+   PICTURES_PATH = /home/linux/gamepad/back-end/figures
+
+   SMTP = smtp.gmail.com
+
+   SMTP_PORT = 465
+   
+   SMTP_USER = user@gmail.com
+   
+   SMTP_PASS = abcd efgh ijkl mnop
    ```
 
 5. **Available NPM Scripts:**

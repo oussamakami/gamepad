@@ -1,4 +1,6 @@
 import inputValidator from './inputValidator.js';
+import Mailer from './mailer.js';
+import twoFA from './twofa.js';
 import userData from './database.js'
 import { readFile } from 'fs/promises'
 import { join } from 'path';
@@ -72,8 +74,7 @@ function getSessionInfo(requestPacket) {
 }
 
 function verifyRequestToken(request, reply, next) {
-    if (request.url.endsWith("/login") || request.url.endsWith("/signup"))
-        return (next());
+    if (request.url.includes("/auth/")) return next();
 
     const sessionToken = request.cookies.authToken;
     const verification = database.verifySession(sessionToken);
@@ -261,12 +262,77 @@ function handleLogout(request, reply) {
     return reply.status(200).send({message: "Logged out Successfully"});
 }
 
+function sendRecovery(request, reply) {
+    const email = inputValidator.normalizeEmail(request.body.email);
+
+    if (!inputValidator.validateEmail(email))
+        return reply.status(400).send({error: "Invalid Request"});
+
+    const userAcc = database.fetchUser(email);
+
+    if (!userAcc.success)
+        return reply.status(200).send({message: "Check inbox for further instructions!"});
+
+    const serial = twoFA.getSerial(userAcc.data.id, userAcc.data.twofa_secret);
+    const url = `${request.headers.origin}/reset`+
+                `?id=${encodeURIComponent(userAcc.data.id)}` +
+                `&serial=${encodeURIComponent(serial)}`;
+    
+    Mailer.sendRecoveryEmail(email, url);
+    return reply.status(200).send({message: "Check inbox for further instructions!"});
+}
+
+function verifySerial(request, reply) {
+    const userid = request.query.id;
+    const serial = request.query.serial;
+
+    const user = database.fetchUser(userid);
+
+    if (!user.success || !twoFA.verifySerial(userid, user.data.twofa_secret, serial, false))
+        return reply.status(404).send({error: "page not found"});
+    return reply.status(200).send({message: "valid serial"});
+}
+
+function handleAccountReset(request, reply) {
+    const userid = request.body.userid;
+    const password = request.body.password;
+    const passwordConfirmation = request.body.confirmPassword;
+    const serial = request.body.serial;
+    const user = database.fetchUser(userid);
+
+    if (!user.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+
+    if (!twoFA.verifySerial(userid, user.data.twofa_secret, serial))
+        return reply.status(400).send({error: "Invalid Request"});
+    
+    if (password != passwordConfirmation)
+        return reply.status(403).send({error: "password confirmation doesnt match"});
+
+    if (!database.updateUser(userid, { password }).success)
+        return reply.status(500).send({error: "Internal Server Error"});
+
+    
+    const session = database.createSession(userid, false, getSessionInfo(request));
+    reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+
+    const response = {};
+    response.id = userid;
+    response.username = user.data.username;
+    response.email = user.data.email;
+    return reply.status(200).send({message: "Login successful!", ...response});
+}
 
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
-    fastify.post("/signup", handleSignUp);
-    fastify.post("/login", handleLogIn);
+
+    fastify.post("/auth/signup", handleSignUp);
+    fastify.post("/auth/login", handleLogIn);
+    fastify.post("/auth/recovery", sendRecovery);
+    fastify.post("/auth/resetpass", handleAccountReset);
+    fastify.get("/auth/verifyserial", verifySerial);
+
     fastify.post("/relations", handleUsersRelations);
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);

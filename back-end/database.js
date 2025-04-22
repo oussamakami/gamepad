@@ -232,18 +232,18 @@ class userData {
     updateUser(userIdentifier, updateData) {
         const result = {success: true, table: "users", action: "update"};
         const defaultKeys = [
-            "username", "email", "password", "enable2FA",
-            "method2FA", "profilePrivacy", "historyPrivacy", "picture"];
+            "username", "email", "password", "twoFA_enable",
+            "twoFA_method", "twoFA_secret", "goodleId", "picture"];
         updateData = Object.fromEntries(defaultKeys.map(key => [key, updateData[key]]));
         try {
             const stmt = this.db.prepare(`UPDATE users SET 
                 username = COALESCE(@username, username), 
                 email = COALESCE(@email, email), 
                 password = COALESCE(@password, password),
-                _2fa = COALESCE(@enable2FA, _2fa),
-                _2fa_method = COALESCE(@method2FA, _2fa_method),
-                profile_priv = COALESCE(@profilePrivacy, profile_priv),
-                history_priv = COALESCE(@historyPrivacy, history_priv),
+                twofa_enabled = COALESCE(@twoFA_enable, twofa_enabled),
+                twofa_method = COALESCE(@twoFA_method, twofa_method),
+                twofa_secret = COALESCE(@twoFA_secret, twofa_secret),
+                gid = COALESCE(@goodleId, gid),
                 picture = COALESCE(@picture, picture)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
             `);

@@ -22,7 +22,7 @@ class inputValidator {
         return (typeof userPass === "string") ? userPass.length >= 8 : false;
     }
 
-    validateIdentifier(userIdentifier){
+    validateIdentifier(userIdentifier) {
         return (typeof userIdentifier === "string") ? userIdentifier.length >= 3 : false;
     }
 }

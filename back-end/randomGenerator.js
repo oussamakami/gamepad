@@ -15,8 +15,8 @@ class RecordGenerator {
 
     #generateUsers(numberOfUsers) {
         for (let i = 0; i < numberOfUsers; i++) {
-            const username = faker.person.firstName();
-            const email = faker.internet.email();
+            const username = faker.person.firstName().toLowerCase();
+            const email = faker.internet.email().toLowerCase();
             const password = faker.internet.password();
             
             const user = this.#database.createUser(username, email, password);

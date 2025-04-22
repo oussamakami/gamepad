@@ -7,6 +7,8 @@ class twoFA {
     static appStep = 30; //30sec
     static emailStep = 900; //15min
 
+    static usedSerials = new Set();
+
     static getSecret() {
         const issuer = this.issuer;
         const secret = speakeasy.generateSecret({issuer});
@@ -29,7 +31,7 @@ class twoFA {
     }
 
     static getSerial(userid, secret) {
-        const token = speakeasy.totp({secret, step: 900, digits: 8});
+        const token = speakeasy.totp({secret, step: 3600, digits: 8});
         const hashed = new PasswordHasher("", 36).smartHash(token, userid);
 
         return (Buffer.from(hashed).toString("base64"));
@@ -42,10 +44,18 @@ class twoFA {
         return (appCheck || emailCheck);
     }
 
-    static verifySerial(userid, secret, serial) {
-        const validSerial = this.serialize(userid, secret);
+    static verifySerial(userid, secret, serial, disableAfterVerify = true) {
+        const validSerial = this.getSerial(userid, secret);
 
-        return (validSerial === serial);
+        if (validSerial === serial && !this.usedSerials.has(serial)) {
+            if (disableAfterVerify) {
+                this.usedSerials.add(serial);
+                setTimeout(() => this.usedSerials.delete(serial), 3600000);
+            }
+            return (true);
+        }
+
+        return (false);
     }
 
     static async generateQrCode(userid, secret, issuer = this.issuer) {

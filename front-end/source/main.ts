@@ -14,12 +14,17 @@ function expiredNotice(formHander?: FormHandler): httpPromise {
 
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
-function containsSerial(formHander?: FormHandler): httpPromise {
+async function containsSerial(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
-    const serial = url.get("serial");
-    if (!serial)
+    const userid = url.get("id") || "";
+    const serial = url.get("serial") || "";
+
+    const response = await fetch("http://127.0.0.1:3000/api/auth/verifyserial"+location.search);
+
+    if (!response.ok)
         return Promise.reject({httpCode: 404, httpName: "page not found"});
 
+    formHander?.addToPayload("userid", userid);
     formHander?.addToPayload("serial", serial);
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
@@ -34,10 +39,10 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 
 const FORMS = {
-    LOGIN  : new FormHandler("login-form",    `${API_BASE}/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
-    SIGNUP : new FormHandler("signup-form",   `${API_BASE}/signup`),
-    RECOVER: new FormHandler("recovery-form", `${API_BASE}/`),
-    RESET  : new FormHandler("reset-form",    `${API_BASE}/`),
+    LOGIN  : new FormHandler("login-form",    `${API_BASE}/auth/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
+    SIGNUP : new FormHandler("signup-form",   `${API_BASE}/auth/signup`),
+    RECOVER: new FormHandler("recovery-form", `${API_BASE}/auth/recovery`),
+    RESET  : new FormHandler("reset-form",    `${API_BASE}/auth/resetpass`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/`)
 }
 
