@@ -5,6 +5,15 @@ import ProfileLoader from "./profileModule";
 import NavigationHandler, {httpPromise} from "./browserModule";
 import NavBarHandler from "./navBarModule";
 
+function loadUserData(data) {
+    if (data.redirectTo) {
+        NAVIGATION.navigateTo(data.redirectTo);
+        return ;
+    }
+    USER.load(data);
+    NAVIGATION.navigateTo("/dashboard");
+}
+
 function expiredNotice(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
     const expired = url.get("expired");
@@ -18,6 +27,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
     const userid = url.get("id") || "";
     const serial = url.get("serial") || "";
+    const remember = url.get("remember") || 0;
 
     const response = await fetch("http://127.0.0.1:3000/api/auth/verifyserial"+location.search);
 
@@ -26,6 +36,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
 
     formHander?.addToPayload("userid", userid);
     formHander?.addToPayload("serial", serial);
+    formHander?.addToPayload("remember", String(remember));
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
 
@@ -39,11 +50,11 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 
 const FORMS = {
-    LOGIN  : new FormHandler("login-form",    `${API_BASE}/auth/login`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
+    TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),
+    RESET  : new FormHandler("reset-form",    `${API_BASE}/auth/resetpass`, loadUserData),
+    LOGIN  : new FormHandler("login-form",    `${API_BASE}/auth/login`, loadUserData),
     SIGNUP : new FormHandler("signup-form",   `${API_BASE}/auth/signup`),
-    RECOVER: new FormHandler("recovery-form", `${API_BASE}/auth/recovery`),
-    RESET  : new FormHandler("reset-form",    `${API_BASE}/auth/resetpass`, (data) => {USER.load(data);NAVIGATION.navigateTo("/dashboard")}),
-    TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/`)
+    RECOVER: new FormHandler("recovery-form", `${API_BASE}/auth/recovery`)
 }
 
 const AUTHSECTIONS = [

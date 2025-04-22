@@ -153,7 +153,6 @@ class userData {
 
     checkCredentials(userIdentifier, password) {
         const result = this.fetchUser(userIdentifier);
-        const newData = {};
 
         try {
             if (!result.success)
@@ -163,12 +162,6 @@ class userData {
 
             if (passHash != result.data.password)
                 throw new Error("Incorrect username or password");
-
-            newData.id = result.data.id;
-            newData.username = result.data.username;
-            newData.email = result.data.email;
-
-            result.data = newData;
         }
         catch (error) {
             result.success = false;

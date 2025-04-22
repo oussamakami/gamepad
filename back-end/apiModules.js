@@ -79,8 +79,10 @@ function verifyRequestToken(request, reply, next) {
     const sessionToken = request.cookies.authToken;
     const verification = database.verifySession(sessionToken);
 
-    if (!verification.success)
+    if (!verification.success) {
+        reply.clearCookie('authToken');
         return reply.status(401).send({error: "Unauthorized Access"});
+    }
 
     request.user_id = verification.data.user_id;
     request.token_id = verification.data.token_id;
@@ -121,17 +123,24 @@ function handleLogIn(request, reply) {
     !inputValidator.validatePassword(password)) {
         return reply.status(400).send({error: "Invalid Request"});
     }
-
-    const queryResponse = database.checkCredentials(userIdentifier, password);
-
-    if (queryResponse.success) {
-        const session = database.createSession(queryResponse.data.id, rememberSession, getSessionInfo(request));
+    const user = database.checkCredentials(userIdentifier, password);
+    
+    if (user.success) {
+        if (user.data.twofa_enabled) {
+            if (user.data.twofa_method === "email")
+                Mailer.sendTwoFAEmail(user.data.email, twoFA.getEmailToken(user.data.twofa_secret));
+            const serial = twoFA.getSerial(user.data.id);
+            return reply.send({ redirectTo: `/twofa?id=${encodeURIComponent(user.data.id)}&serial=${encodeURIComponent(serial)}&remember=${rememberSession}` });
+        }
+        const session = database.createSession(user.data.id, rememberSession, getSessionInfo(request));
 
         reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
-        return reply.status(200).send({message: "Login successful!", ...queryResponse.data});
+        delete user.data.twofa_secret;
+        delete user.data.password;
+        return reply.status(200).send({message: "Login successful!", ...user.data});
     }
-    if (!queryResponse.error.code)
-        return reply.status(403).send({error: queryResponse.error.message});
+    if (!user.error.code)
+        return reply.status(403).send({error: user.error.message});
     return reply.status(500).send({error: "Internal Server Error"});
 }
 
@@ -311,11 +320,34 @@ function handleAccountReset(request, reply) {
     const session = database.createSession(userid, false, getSessionInfo(request));
     reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
 
-    const response = {};
-    response.id = userid;
-    response.username = user.data.username;
-    response.email = user.data.email;
-    return reply.status(200).send({message: "Login successful!", ...response});
+    delete user.data.password;
+    delete user.data.twofa_secret;
+    return reply.status(200).send({message: "Login successful!", ...user.data});
+}
+
+function handletwoFa(request, reply) {
+    const userid = request.body.userid;
+    const serial = request.body.serial;
+    const token = request.body.token;
+    const remember = request.body.remember;
+    const user = database.fetchUser(userid);
+
+    if (!user.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+
+    if (!twoFA.verifyToken(user.data.twofa_secret, token))
+        return reply.status(403).send({error: "invalid 2fa code"});
+
+    if (!twoFA.verifySerial(userid, serial))
+        return reply.status(400).send({error: "Invalid Request"});
+
+    const session = database.createSession(userid, remember === "true", getSessionInfo(request));
+    reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+
+    delete user.data.password;
+    delete user.data.twofa_secret;
+    return reply.status(200).send({message: "Login successful!", ...user.data});
+
 }
 
 function apiRoutes(fastify, options, done)
@@ -326,6 +358,7 @@ function apiRoutes(fastify, options, done)
     fastify.post("/auth/login", handleLogIn);
     fastify.post("/auth/recovery", sendRecovery);
     fastify.post("/auth/resetpass", handleAccountReset);
+    fastify.post("/auth/twofa", handletwoFa);
     fastify.get("/auth/verifyserial", verifySerial);
 
     fastify.post("/relations", handleUsersRelations);

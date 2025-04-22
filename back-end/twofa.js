@@ -57,7 +57,7 @@ class twoFA {
         userid = String(userid);
         const validSerial = this.validSerials.get(userid);
 
-        if (validSerial === serial) {
+        if (userid && serial && validSerial === serial) {
             if (disableAfterVerify) {
                 this.validSerials.delete(userid);
                 clearTimeout(this.timeOutStorage.get(userid));
