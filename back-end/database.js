@@ -246,7 +246,14 @@ class userData {
                 gid = COALESCE(@goodleId, gid),
                 picture = COALESCE(@picture, picture)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
-            `);
+                `);
+            const user = this.fetchUser(userIdentifier);
+
+            if (!user.success)
+                throw new Error(user.error.message);
+            if (updateData.password)
+                updateData.password = this.hasher.smartHash(updateData.password, user.data.id);
+
             result.data = stmt.get(updateData, ...Array(3).fill(userIdentifier));
 
             if (!result.data) {

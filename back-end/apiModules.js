@@ -273,7 +273,7 @@ function sendRecovery(request, reply) {
     if (!userAcc.success)
         return reply.status(200).send({message: "Check inbox for further instructions!"});
 
-    const serial = twoFA.getSerial(userAcc.data.id, userAcc.data.twofa_secret);
+    const serial = twoFA.getSerial(userAcc.data.id);
     const url = `${request.headers.origin}/reset`+
                 `?id=${encodeURIComponent(userAcc.data.id)}` +
                 `&serial=${encodeURIComponent(serial)}`;
@@ -286,32 +286,26 @@ function verifySerial(request, reply) {
     const userid = request.query.id;
     const serial = request.query.serial;
 
-    const user = database.fetchUser(userid);
-
-    if (!user.success || !twoFA.verifySerial(userid, user.data.twofa_secret, serial, false))
+    if (!twoFA.verifySerial(userid, serial, false))
         return reply.status(404).send({error: "page not found"});
     return reply.status(200).send({message: "valid serial"});
 }
 
 function handleAccountReset(request, reply) {
     const userid = request.body.userid;
+    const serial = request.body.serial;
     const password = request.body.password;
     const passwordConfirmation = request.body.confirmPassword;
-    const serial = request.body.serial;
-    const user = database.fetchUser(userid);
 
-    if (!user.success)
-        return reply.status(500).send({error: "Internal Server Error"});
-
-    if (!twoFA.verifySerial(userid, user.data.twofa_secret, serial))
-        return reply.status(400).send({error: "Invalid Request"});
-    
     if (password != passwordConfirmation)
         return reply.status(403).send({error: "password confirmation doesnt match"});
 
-    if (!database.updateUser(userid, { password }).success)
-        return reply.status(500).send({error: "Internal Server Error"});
+    if (!twoFA.verifySerial(userid, serial))
+        return reply.status(400).send({error: "Invalid Request"});
 
+    const user = database.updateUser(userid, { password });
+    if (!user.success)
+        return reply.status(500).send({error: "Internal Server Error"});
     
     const session = database.createSession(userid, false, getSessionInfo(request));
     reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
