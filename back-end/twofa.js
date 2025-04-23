@@ -26,7 +26,7 @@ class twoFA {
 
     static  getAppToken(secret) {
         const step = this.appStep;
-        const token = speakeasy.totp({secret, step});
+        const token = speakeasy.totp({secret, step, encoding: 'base32'});
 
         return (token);
     }
@@ -47,7 +47,8 @@ class twoFA {
     }
 
     static  verifyToken(secret, token) {
-        const appCheck = speakeasy.totp.verify({secret, token, step: this.appStep});
+        token = Number(token);
+        const appCheck = speakeasy.totp.verify({secret, token, step: this.appStep, encoding: 'base32'});
         const emailCheck = speakeasy.totp.verify({secret, token, step: this.emailStep});
 
         return (appCheck || emailCheck);
