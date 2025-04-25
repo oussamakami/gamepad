@@ -262,9 +262,9 @@ Follow the steps below to set up the project:
     - [ ] **Forms to handle**
         - [X] **Login Form**
         - [X] **Signup Form**
-        - [ ] **Account Recovery Form**
-        - [ ] **Password Reset Form**
-        - [ ] **Two-Factor Authentication (2FA) Form**
+        - [X] **Account Recovery Form**
+        - [X] **Password Reset Form**
+        - [X] **Two-Factor Authentication (2FA) Form**
         - [ ] **User Settings Form**
 - [X] **User Data Module Implementation**
     - [X] **Core User Handling**
@@ -453,7 +453,7 @@ Follow the steps below to set up the project:
         - [X] Side navigation container
         - [X] Side nav toggle button
         - [X] Fullscreen toggle button
-        - [ ] Search Box
+        - [X] Search Box
         - [X] Logout button
     - [X] **Feature Implementation**
         - [X] **Side Navigation**
@@ -467,11 +467,59 @@ Follow the steps below to set up the project:
         - [X] **Session Management**
             - [X] Logout functionality (`logoutSession`)
             - [X] Automatic redirect to login page
-        - [ ] **Search Functionality**
-            - [ ] redirect to search page on submit
-- [ ] **Buttons Action Module Implementation** (@oussamakami)
-    - [ ] *To be added soon*
-
+        - [X] **Search Functionality**
+            - [X] redirect to search page on submit
+- [ ] **Friends Loader Implementation**
+    - [ ] **Core Initialization**
+        - [ ] Requires base API endpoint and NavigationHandler instance
+        - [ ] Throws error if friends element not found
+        - [ ] Sets up next/previous page button handlers
+    - [ ] **Data Management**
+        - [ ] `fetchStats()`: Retrieves friends results from backend API
+            - [ ] Handles network errors
+            - [ ] Manages credentials
+            - [ ] Stores results and resets pagination
+        - [ ] `load()`: Main loading method
+            - [ ] Fetches friends results and updates the DOM
+            - [ ] Returns HTTP promise
+    - [ ] **UI Components**
+        - [ ] `createItem()`: Generates user card element
+            - [ ] Includes profile picture
+            - [ ] Shows username and online status
+            - [ ] Adds "Profile" link button
+            - [ ] Adds "Block" action button
+        - [ ] `updatePageBody()`: Updates results display
+            - [ ] Handles pagination calculations
+            - [ ] Creates user cards for current page
+            - [ ] Manages next/previous page boundaries
+- [X] **Search Loader Implementation**
+    - [X] **Core Initialization**
+        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Throws error if search elements not found
+        - [X] Sets up next/previous page button handlers
+    - [X] **Data Management**
+        - [X] `fetchStats()`: Retrieves search results from backend API
+            - [X] Parses URL query parameter ("query")
+            - [X] Handles network errors
+            - [X] Manages credentials
+            - [X] Stores results and resets pagination
+        - [X] `load()`: Main loading method
+            - [X] Fetches search results and updates the DOM
+            - [X] Returns HTTP promise
+    - [X] **UI Components**
+        - [X] `generateCountInfo()`: Displays total results count
+            - [X] Creates "X results found" message
+            - [X] Clears previous results
+        - [X] `createItem()`: Generates user card element
+            - [X] Includes profile picture
+            - [X] Shows username and online status
+            - [X] Adds "Profile" link button
+            - [X] Adds "Block" action button
+        - [X] `updatePageBody()`: Updates results display
+            - [X] Handles pagination calculations
+            - [X] Generates results count info
+            - [X] Creates user cards for current page
+            - [X] Manages next/previous page boundaries
 ### Games
 *To be added soon*
 
@@ -568,25 +616,60 @@ Follow the steps below to set up the project:
         - [X] Fetch messages for a chat (`chat_id`, `page_number`) – (20 messages per page)
 
 ### API URLS
-- [X] signup **POST**
+- [X] /auth/signup **POST**
     - [X] Takes user data (`username`, `email`, `password`)
     - [X] Validates all fields are present
     - [X] Checks if username/email already exists
     - [X] Creates new user if validation passes
     - [X] Returns appropriate success/error response
-- [ ] login **POST**
+- [X] /auth/login **POST**
     - [X] Takes user credentials (`username`/`email` and `password`)
     - [X] Verifies credentials match existing user
-    - [ ] Sets up HTTP-only session cookie if valid
+    - [X] Creates new session on success
+    - [X] Sets authToken cookie on success
     - [X] Returns appropriate success/error response
+- [X] /auth/recovery **POST**
+    - [X] Takes user email as input
+    - [X] Validates email format
+    - [X] Checks if email exists in database
+    - [X] Generates secure recovery serial
+    - [X] Constructs recovery URL with (`user id` and `serial`)
+    - [X] Sends recovery email containing the recovery URL
+    - [X] Returns appropriate success/error response
+    - [X] Returns success message even if email doesn't exist (security measure)
+- [X] /auth/resetpass **POST**
+    - [X] Takes (`userid`, `serial`, `password`, and `confirmPassword`)
+    - [X] Validates password confirmation matches
+    - [X] Verifies serial is valid for recovery action
+    - [X] Updates user password in database
+    - [X] Creates new session on success
+    - [X] Sets authToken cookie on success
+    - [X] Returns appropriate success/error response
+- [X] /auth/twofa **POST**
+    - [X] Takes (`userid`, `serial`, `token`, and `remember`)
+    - [X] Verifies user exists
+    - [X] Validates 2FA token
+    - [X] Verifies serial is valid
+    - [X] Creates new session on success
+    - [X] Sets authToken cookie on success
+    - [X] Returns appropriate success/error response
+- [X] /auth/verifyserial **GET**
+    - [X] Takes (`id`: User ID) and (`serial`)
+    - [X] Verifies serial is valid for user
+    - [X] Returns appropriate success/error response
+- [X] /auth/logout **GET**
+    - [X] Checks for valid session cookie
+    - [X] Deletes server-side session
+    - [X] Clears the session cookie
+    - [X] Returns appropriate success/error response
+
 - [X] sessionData **GET**
     - [X] Checks for valid session cookie
     - [X] Returns current user's basic info if valid
     - [X] Returns error if session invalid/expired
-- [ ] picture/`:userId` **GET**
+- [X] picture/`:userId` **GET**
     - [X] Takes target user ID in URL
     - [X] Verifies requesting user has valid session
-    - [ ] Checks if requesting user is blocked by target
     - [X] Returns profile picture if authorized
     - [X] Returns appropriate error if not found/blocked
 - [X] stats **GET**
@@ -603,6 +686,26 @@ Follow the steps below to set up the project:
     - [X] Shows win/loss records per game type
     - [X] Includes recent match history with opponents
     - [X] Returns appropriate error if not found/blocked
+- [X] /search/`:query` **GET**
+    - [X] Takes search query in URL
+    - [X] Returns users that match the search query
+    - [X] Excludes blocked users
+    - [X] Excludes users who blocked requester
+    - [X] Returns appropriate success/error response
+- [ ] /friends **GET**
+    - [ ] Returns user friends data
+    - [ ] Returns appropriate success/error response
+- [X] /relations **POST**
+    - [X] Takes (`target`: Target user ID) and (`action`)
+    - [X] Supported actions:
+        - [X] `add`: Send friend request
+        - [X] `cancel`: Cancel sent request
+        - [X] `accept`: Accept friend request
+        - [X] `decline`: Decline friend request
+        - [X] `unfriend`: Remove friend
+        - [X] `block`: Block user
+        - [X] `unblock`: Unblock user
+    - [X] Returns appropriate success/error response
 
 ### Security
 - [ ] Pretect against **Cross-Site Scripting (XSS)**
