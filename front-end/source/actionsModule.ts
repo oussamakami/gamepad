@@ -20,8 +20,8 @@ class ActionsHandler {
     private readonly targetAPI: string;
     private readonly navigation: NavigationHandler;
     private readonly buttonConfigs: Record<RelationActions, ButtonConfig> = {
-        add:      { text: "Add Friend",     isDanger: false},
-        cancel:   { text: "Cancel Request", isDanger: false},
+        add:      { text: "Add",            isDanger: false},
+        cancel:   { text: "Cancel",         isDanger: false},
         accept:   { text: "Accept",         isDanger: false},
         decline:  { text: "Decline",        isDanger: false},
         unfriend: { text: "Unfriend",       isDanger: false},
@@ -84,7 +84,7 @@ class ActionsHandler {
         return (button);
     }
 
-    public generateBtnContainer(targetID: number, friendshipData?: RelationData | undefined) {
+    public generateBtnContainer(targetID: number, friendshipData?: RelationData | undefined, addProfileAnchor: boolean = false) {
         const container = document.createElement("div");
 
         container.className = "btn-container";
@@ -97,6 +97,8 @@ class ActionsHandler {
             if (friendshipData.sender_id === targetID) {
                 container.appendChild(this.generateActionButton("accept", targetID));
                 container.appendChild(this.generateActionButton("decline", targetID));
+                if (addProfileAnchor)
+                    container.appendChild(this.generateAnchorButton(`/profile?id=${targetID}`, "Profile"));
                 container.appendChild(this.generateActionButton("block", targetID));
                 return (container);
             }
@@ -104,7 +106,11 @@ class ActionsHandler {
                 container.appendChild(this.generateActionButton("cancel", targetID));
         }
 
-        container.appendChild(this.generateAnchorButton(`/chat?user_id=${targetID}`, "Message"));
+        if (addProfileAnchor)
+            container.appendChild(this.generateAnchorButton(`/profile?id=${targetID}`, "Profile"));
+        else
+            container.appendChild(this.generateAnchorButton(`/chat?user_id=${targetID}`, "Message"));
+
         container.appendChild(this.generateActionButton("block", targetID));
 
         return (container);

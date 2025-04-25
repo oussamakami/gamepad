@@ -1357,14 +1357,19 @@ class userData {
         return (result);
     }
 
-    fetchUserFriends(userIdentifier, pageNumber = 1) {
-        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+    fetchUserFriends(userIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "fetch"};
         const user = this.fetchUser(userIdentifier);
-        const valuePerPage = 8;
 
         try {
             const stmt = this.db.prepare(`
-                SELECT u.id, u.username, u.email, fr.status
+                SELECT
+                    u.id, u.username, u.email,
+                    json_object(
+                        'sender_id', fr.sender_id,
+                        'target_id', fr.target_id,
+                        'status', fr.status
+                    ) AS friendship
                 FROM friends_requests fr
                 JOIN users u ON (
                     ( fr.sender_id = ? AND fr.target_id = u.id )
@@ -1373,17 +1378,13 @@ class userData {
                 )
                 WHERE fr.status = 'accepted' OR fr.status = 'pending'
                 ORDER BY ( fr.status = 'accepted' ) ASC, u.username ASC
-                LIMIT ? OFFSET ?
             `);
-            
-            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
-            result.data = stmt.all(...Array(2).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
-            result.done = result.data.length < valuePerPage;
+            result.data = stmt.all(...Array(2).fill(user.data.id));
+            result.data.forEach(row => row.friendship &&= JSON.parse(row.friendship));
         }
         catch (error) {
             result.success = false;
@@ -1393,10 +1394,9 @@ class userData {
         return (result);
     }
 
-    fetchAcceptedFriends(userIdentifier, pageNumber = 1) {
-        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+    fetchAcceptedFriends(userIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "fetch"};
         const user = this.fetchUser(userIdentifier);
-        const valuePerPage = 8;
 
         try {
             const stmt = this.db.prepare(`
@@ -1409,17 +1409,12 @@ class userData {
                 )
                 WHERE fr.status = 'accepted'
                 ORDER BY u.username ASC
-                LIMIT ? OFFSET ?
             `);
-            
-            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
-            result.data = stmt.all(...Array(2).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
-            result.done = result.data.length < valuePerPage;
+            result.data = stmt.all(...Array(2).fill(user.data.id));
         }
         catch (error) {
             result.success = false;
@@ -1429,29 +1424,27 @@ class userData {
         return (result);
     }
 
-    fetchPendingFriend(userIdentifier, pageNumber = 1) {
-        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+    fetchPendingFriend(userIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "fetch"};
         const user = this.fetchUser(userIdentifier);
-        const valuePerPage = 8;
 
         try {
             const stmt = this.db.prepare(`
                 SELECT u.id, u.username, u.email
                 FROM friends_requests fr
-                JOIN users u ON fr.sender_id = u.id
-                WHERE fr.target_id = ? AND fr.status = 'pending'
+                JOIN users u ON (
+                    ( fr.sender_id = ? AND fr.target_id = u.id )
+                    OR
+                    ( fr.target_id = ? AND fr.sender_id = u.id )
+                )
+                WHERE fr.status = 'pending'
                 ORDER BY u.username ASC
-                LIMIT ? OFFSET ?
             `);
-
-            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
-            result.data = stmt.all(user.data.id, valuePerPage, ((pageNumber - 1) * valuePerPage));
-            result.done = result.data.length < valuePerPage;
+            result.data = stmt.all(...Array(2).fill(user.data.id));
         }
         catch (error) {
             result.success = false;
@@ -1469,8 +1462,15 @@ class userData {
         try {
             const stmt = this.db.prepare(`
                 SELECT
-                    u.id, u.username, u.email, 
-                    u.picture, fr.status AS relation
+                    u.id, u.username, u.email,
+                    (CASE
+                        WHEN fr.status IS NULL THEN NULL
+                        ELSE json_object(
+                                'sender_id', fr.sender_id,
+                                'target_id', fr.target_id,
+                                'status', fr.status
+                            )
+                    END) AS friendship
                 FROM users u
                 LEFT JOIN friends_requests fr ON 
                     (fr.sender_id = ? AND fr.target_id = u.id)
@@ -1478,13 +1478,14 @@ class userData {
                     (fr.sender_id = u.id AND fr.target_id = ?)
                 WHERE u.id != ? AND u.username LIKE ?
                 AND (fr.status IS NULL OR fr.status != 'blocked')
-                ORDER BY u.username
+                ORDER BY u.username ASC
             `);
 
             if (!user.success)
                 throw new Error(user.error.message);
 
             result.data = stmt.all(...Array(3).fill(user.data.id), searchQuery);
+            result.data.forEach(row => row.friendship &&= JSON.parse(row.friendship));
         }
         catch (error) {
             result.success = false;

@@ -653,12 +653,12 @@ section {
     grid-template-rows: var(--section-title-height);
 }
 
-#search #results-count {
+#results-count {
     font-size: 1.3rem;
     grid-column: 1 / -1;
 }
 
-#search #results-count > span {
+#results-count > span {
     font-size: 1.6rem;
     color: var(--primary-brand-color);
 }

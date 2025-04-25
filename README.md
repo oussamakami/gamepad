@@ -403,7 +403,7 @@ Follow the steps below to set up the project:
         - [X] `updateProfileInfo()`: Updates user information
             - [X] Handles profile picture
             - [X] Updates name, ID, and email
-            - [ ] Handle action buttons (block, unblock, accept...)
+            - [X] Handle action buttons (block, unblock, accept...)
         - [X] `updateStats()`: Updates game statistics
             - [X] Total games played
             - [X] Total games won
@@ -469,29 +469,28 @@ Follow the steps below to set up the project:
             - [X] Automatic redirect to login page
         - [X] **Search Functionality**
             - [X] redirect to search page on submit
-- [ ] **Friends Loader Implementation**
-    - [ ] **Core Initialization**
-        - [ ] Requires base API endpoint and NavigationHandler instance
-        - [ ] Throws error if friends element not found
-        - [ ] Sets up next/previous page button handlers
-    - [ ] **Data Management**
-        - [ ] `fetchStats()`: Retrieves friends results from backend API
-            - [ ] Handles network errors
-            - [ ] Manages credentials
-            - [ ] Stores results and resets pagination
-        - [ ] `load()`: Main loading method
-            - [ ] Fetches friends results and updates the DOM
-            - [ ] Returns HTTP promise
-    - [ ] **UI Components**
-        - [ ] `createItem()`: Generates user card element
-            - [ ] Includes profile picture
-            - [ ] Shows username and online status
-            - [ ] Adds "Profile" link button
-            - [ ] Adds "Block" action button
-        - [ ] `updatePageBody()`: Updates results display
-            - [ ] Handles pagination calculations
-            - [ ] Creates user cards for current page
-            - [ ] Manages next/previous page boundaries
+- [X] **Friends Loader Implementation**
+    - [X] **Core Initialization**
+        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Throws error if friends element not found
+        - [X] Sets up next/previous page button handlers
+    - [X] **Data Management**
+        - [X] `fetchStats()`: Retrieves friends results from backend API
+            - [X] Handles network errors
+            - [X] Manages credentials
+            - [X] Stores results and resets pagination
+        - [X] `load()`: Main loading method
+            - [X] Fetches friends results and updates the DOM
+            - [X] Returns HTTP promise
+    - [X] **UI Components**
+        - [X] `createItem()`: Generates user card element
+            - [X] Includes profile picture
+            - [X] Shows username and online status
+            - [X] Adds action buttons (block, unblock, accept...)
+        - [X] `updatePageBody()`: Updates results display
+            - [X] Handles pagination calculations
+            - [X] Creates user cards for current page
+            - [X] Manages next/previous page boundaries
 - [X] **Search Loader Implementation**
     - [X] **Core Initialization**
         - [X] Requires base API endpoint and NavigationHandler instance
@@ -513,8 +512,7 @@ Follow the steps below to set up the project:
         - [X] `createItem()`: Generates user card element
             - [X] Includes profile picture
             - [X] Shows username and online status
-            - [X] Adds "Profile" link button
-            - [X] Adds "Block" action button
+            - [X] Adds action buttons (block, unblock, accept...)
         - [X] `updatePageBody()`: Updates results display
             - [X] Handles pagination calculations
             - [X] Generates results count info

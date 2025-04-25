@@ -352,7 +352,6 @@ function handletwoFa(request, reply) {
 function handleSearch(request, reply) {
     const currentUser = request.user_id;
     const search = request.params.query;
-
     const queryResponse = database.searchForUsers(currentUser, search);
 
     if (!queryResponse.success) {
@@ -364,7 +363,15 @@ function handleSearch(request, reply) {
 }
 
 function fetchUserFriends(request, reply) {
-    return reply.status(501);
+    const currentUser = request.user_id;
+    const queryResponse = database.fetchUserFriends(currentUser);
+
+    if (!queryResponse.success) {
+        if (!queryResponse.error.code)
+            return reply.status(403).send({error: queryResponse.error.message});
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+    return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
 }
 
 function apiRoutes(fastify, options, done)

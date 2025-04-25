@@ -2,42 +2,42 @@ import {httpPromise} from "./browserModule";
 import NavigationHandler from "./browserModule";
 import ActionsHandler from "./actionsModule";
 
-class SearchLoader {
+class FriendsLoader {
     private pageNumber: number;
     private readonly elemPerPage = 12;
 
     //APIS
-    private readonly searchAPI     : string;
-    private readonly pictureAPI    : string;
+    private readonly friendsAPI     : string;
+    private readonly pictureAPI     : string;
 
     //DOM ELEMENTS
-    private readonly searchPage    : HTMLElement;
-    private readonly searchPageBody: HTMLElement;
-    private readonly nextPageButton: HTMLElement | null;
-    private readonly PrevPageButton: HTMLElement | null;
+    private readonly friendsPage    : HTMLElement;
+    private readonly friendsPageBody: HTMLElement;
+    private readonly nextPageButton : HTMLElement | null;
+    private readonly PrevPageButton : HTMLElement | null;
 
     //MODULES
     private readonly navModule     : NavigationHandler;
     private readonly btnGenerator  : ActionsHandler;
 
-    private searchData: Record<string, any> | undefined;
+    private friendsData: Record<string, any> | undefined;
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
-        const elem = document.getElementById("search");
+        const elem = document.getElementById("friends");
         const searchBodyelem = elem?.querySelector("ul");
 
         baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
 
-        this.searchAPI = baseAPI + "/search";
+        this.friendsAPI = baseAPI + "/friends";
         this.pictureAPI = baseAPI + "/picture";
 
         if (!elem || !searchBodyelem)
             throw new Error("Search Section not found");
 
-        this.searchPage = elem;
-        this.searchPageBody = searchBodyelem;
-        this.nextPageButton = this.searchPage.querySelector("#search-next");
-        this.PrevPageButton = this.searchPage.querySelector("#search-prev");
+        this.friendsPage = elem;
+        this.friendsPageBody = searchBodyelem;
+        this.nextPageButton = this.friendsPage.querySelector("#friends-next");
+        this.PrevPageButton = this.friendsPage.querySelector("#friends-prev");
 
         this.navModule = navigationModule;
         this.btnGenerator = new ActionsHandler(baseAPI, navigationModule);
@@ -52,7 +52,7 @@ class SearchLoader {
         this.nextPageButton && (this.nextPageButton.onclick = () => {
             let start = ((this.pageNumber) * this.elemPerPage);
 
-            if (start > (this.searchData?.length || 0))
+            if (start > (this.friendsData?.length || 0))
                 return ;
 
             this.pageNumber++;
@@ -61,21 +61,19 @@ class SearchLoader {
     }
 
     private async fetchStats(): httpPromise {
-        const url = new URLSearchParams(location.search);
-        const search = url.get("query");
-        const endpoint = `${this.searchAPI}/${search}`;
+        const endpoint = this.friendsAPI;
 
         try{
             const response = await fetch(endpoint, {
                 method: "GET",
-                credentials: "include"  
+                credentials: "include"
             });
-            
+
             if (!response.ok)
                 throw response;
             
             this.pageNumber = 1;
-            this.searchData = (await response.json());
+            this.friendsData = (await response.json());
 
             return {httpCode: response.status, httpName: response.statusText};
         }
@@ -85,14 +83,14 @@ class SearchLoader {
     }
 
     private generateCountInfo(): void {
-        if (!this.searchData) return;
+        if (!this.friendsData) return;
 
         const countElem = document.createElement("h5");
 
         countElem.id = "results-count";
-        countElem.innerHTML = `found <span>${this.searchData.length}</span> results`;
-        this.searchPageBody.innerHTML = "";
-        this.searchPageBody.appendChild(countElem);
+        countElem.innerHTML = `found <span>${this.friendsData.length}</span> results`;
+        this.friendsPageBody.innerHTML = "";
+        this.friendsPageBody.appendChild(countElem);
     }
 
     private createItem(userid, username, friendship, onlineStatus = false): HTMLElement {
@@ -112,24 +110,24 @@ class SearchLoader {
     }
 
     private updatePageBody(): void {
-        if (!this.searchData) return;
+        if (!this.friendsData) return;
 
         let start = (this.pageNumber - 1) * this.elemPerPage;
-        let end   = Math.min(this.searchData.length, start + this.elemPerPage);
+        let end   = Math.min(this.friendsData.length, start + this.elemPerPage);
         const fragment = document.createDocumentFragment();
 
         this.generateCountInfo();
 
         while (start < end) {
-            let userid = this.searchData.data[start].id;
-            let username = this.searchData.data[start].username;
-            let friendship = this.searchData.data[start].friendship;
+            let userid = this.friendsData.data[start].id;
+            let username = this.friendsData.data[start].username;
+            let friendship = this.friendsData.data[start].friendship;
 
             fragment.appendChild(this.createItem(userid, username, friendship));
             start++;
         }
 
-        this.searchPageBody.appendChild(fragment);
+        this.friendsPageBody.appendChild(fragment);
     }
 
     public async load(): httpPromise {
@@ -145,4 +143,4 @@ class SearchLoader {
     }
 }
 
-export default SearchLoader;
+export default FriendsLoader;

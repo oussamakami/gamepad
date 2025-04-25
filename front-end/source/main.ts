@@ -5,6 +5,7 @@ import ProfileLoader from "./profileModule";
 import NavigationHandler, {httpPromise} from "./browserModule";
 import NavBarHandler from "./navBarModule";
 import SearchLoader from "./searchModule";
+import FriendsLoader from "./friendsModule";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -49,6 +50,7 @@ const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE, NAVIGATION);
+const FRIENDS    = new FriendsLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 
 const FORMS = {
@@ -72,7 +74,7 @@ const DASHSECTIONS = [
     {path: "/dashboard", view: "dashboard", options: {onload: () => DASHBOARD.load()}},
     {path: "/profile",   view: "profile",   options: {onload: () => PROFILE.load()}},
     {path: "/search",    view: "search",    options: {onload: () => SEARCH.load()}},
-    {path: "/friends",   view: "friends",   options: {}},
+    {path: "/friends",   view: "friends",   options: {onload: () => FRIENDS.load()}},
     {path: "/chat",      view: "chat",      options: {}},
     {path: "/settings",  view: "settings",  options: {}},
     {path: "/pong",      view: "pong",      options: {}},
