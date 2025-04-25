@@ -74,12 +74,12 @@ class ActionsHandler {
         return (button);
     }
 
-    public generateChatButton(targetID: number) {
+    public generateAnchorButton(href: string, name:string) {
         const button = document.createElement("a");
 
-        button.innerText = "Message";
+        button.href = href;
+        button.innerText = name;
         button.className = "btn";
-        button.href = `/chat?user_id=${targetID}`;
 
         return (button);
     }
@@ -104,7 +104,7 @@ class ActionsHandler {
                 container.appendChild(this.generateActionButton("cancel", targetID));
         }
 
-        container.appendChild(this.generateChatButton(targetID));
+        container.appendChild(this.generateAnchorButton(`/chat?user_id=${targetID}`, "Message"));
         container.appendChild(this.generateActionButton("block", targetID));
 
         return (container);

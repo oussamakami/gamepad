@@ -454,7 +454,7 @@ section {
     grid-column: 1 / -1;
 }
 
-.section-title > button {
+.section-title button {
     font-size: 1.3rem;
     padding: 0.3rem .5rem;
 }
@@ -606,7 +606,6 @@ section {
 .user-card {
     align-items: center;
     justify-content: center;
-    padding: 4rem 2rem;
     gap: 1rem;
 }
 
@@ -650,6 +649,7 @@ section {
 }
 
 #search .users-list {
+    margin-top: 1rem;
     grid-template-rows: var(--section-title-height);
 }
 
