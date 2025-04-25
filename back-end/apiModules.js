@@ -157,11 +157,6 @@ function handleUsersRelations(request, reply) {
     if (!senderData.success || !targetData.success)
         return reply.status(404).send({error: senderData.success ? targetData.error.message : senderData.error.message});
 
-    const relations = database.fetchFriendshipData(sender, target);
-
-    if (relations?.stats === "blocked")
-        return reply.status(404).send({error: "User does not exist"});
-
     let queryResponse;
 
     switch(action) {
@@ -195,7 +190,10 @@ function handleUsersRelations(request, reply) {
             return reply.status(403).send({error: queryResponse.error.message});
         return reply.status(500).send({error: "Internal Server Error"});
     }
-    reply.status(201).send({message: "Action successful", ...queryResponse.data});
+
+    const relations = database.fetchFriendshipData(sender, target);
+
+    reply.status(201).send(relations);
 }
 
 function fetchSessionData(request, reply) {

@@ -17,12 +17,11 @@ class SearchLoader {
     private readonly PrevPageButton: HTMLElement | null;
 
     //MODULES
-    private readonly navModule     : NavigationHandler;
     private readonly btnGenerator  : ActionsHandler;
 
     private searchData: Record<string, any> | undefined;
 
-    constructor(baseAPI: string, navigationModule: NavigationHandler) {
+    constructor(baseAPI: string) {
         const elem = document.getElementById("search");
         const searchBodyelem = elem?.querySelector("ul");
 
@@ -39,8 +38,7 @@ class SearchLoader {
         this.nextPageButton = this.searchPage.querySelector("#search-next");
         this.PrevPageButton = this.searchPage.querySelector("#search-prev");
 
-        this.navModule = navigationModule;
-        this.btnGenerator = new ActionsHandler(baseAPI, navigationModule);
+        this.btnGenerator = new ActionsHandler(baseAPI);
 
         this.PrevPageButton && (this.PrevPageButton.onclick = () => {
             if (this.pageNumber === 1)

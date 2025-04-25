@@ -33,7 +33,7 @@ class ProfileLoader {
         this.projection = new Chart("user-projection-chart");
 
         this.navModule = navigationModule;
-        this.btnGenerator = new ActionsHandler(baseAPI, navigationModule);
+        this.btnGenerator = new ActionsHandler(baseAPI);
     }
 
     public get sessionUserId(): number {

@@ -17,12 +17,11 @@ class FriendsLoader {
     private readonly PrevPageButton : HTMLElement | null;
 
     //MODULES
-    private readonly navModule     : NavigationHandler;
     private readonly btnGenerator  : ActionsHandler;
 
     private friendsData: Record<string, any> | undefined;
 
-    constructor(baseAPI: string, navigationModule: NavigationHandler) {
+    constructor(baseAPI: string) {
         const elem = document.getElementById("friends");
         const searchBodyelem = elem?.querySelector("ul");
 
@@ -39,8 +38,7 @@ class FriendsLoader {
         this.nextPageButton = this.friendsPage.querySelector("#friends-next");
         this.PrevPageButton = this.friendsPage.querySelector("#friends-prev");
 
-        this.navModule = navigationModule;
-        this.btnGenerator = new ActionsHandler(baseAPI, navigationModule);
+        this.btnGenerator = new ActionsHandler(baseAPI);
 
         this.PrevPageButton && (this.PrevPageButton.onclick = () => {
             if (this.pageNumber === 1)

@@ -18,25 +18,25 @@ interface ButtonConfig {
 
 class ActionsHandler {
     private readonly targetAPI: string;
-    private readonly navigation: NavigationHandler;
     private readonly buttonConfigs: Record<RelationActions, ButtonConfig> = {
-        add:      { text: "Add",            isDanger: false},
-        cancel:   { text: "Cancel",         isDanger: false},
-        accept:   { text: "Accept",         isDanger: false},
-        decline:  { text: "Decline",        isDanger: false},
-        unfriend: { text: "Unfriend",       isDanger: false},
-        block:    { text: "Block",          isDanger: true },
-        unblock:  { text: "Unblock",        isDanger: true }
+        add:      { text: "Add",      isDanger: false },
+        cancel:   { text: "Cancel",   isDanger: false },
+        accept:   { text: "Accept",   isDanger: false },
+        decline:  { text: "Decline",  isDanger: false },
+        unfriend: { text: "Unfriend", isDanger: false },
+        block:    { text: "Block",    isDanger: true  },
+        unblock:  { text: "Unblock",  isDanger: true  }
     };
 
-    constructor(baseAPI: string, navigationModule: NavigationHandler) {
+    constructor(baseAPI: string) {
         this.targetAPI = `${baseAPI}/relations`;
-        this.navigation = navigationModule;
     }
 
     private async handleButtonClick(event: Event, targetID: number) {
         const button = event.currentTarget as HTMLButtonElement;
         const action = button.dataset.action as RelationActions;
+        const container = button.parentElement!;
+        const isForList = container.dataset.for === "list";
 
         try {
             const response = await fetch(this.targetAPI, {
@@ -49,13 +49,9 @@ class ActionsHandler {
             if (!response.ok)
                 throw new Error();
 
-            if (action === "block") {
-                button.textContent = "unblock";
-                button.dataset.action = "unblock";
-                return ;
-            }
-
-            this.navigation.reloadPage();
+            const text = await response.text();
+            const friendship = text ? JSON.parse(text) : null;
+            this.generateBtnContainer(targetID, friendship, isForList, container);
         }
         catch {
             console.error(`Failed to ${action} for user ${targetID}`);
@@ -84,34 +80,51 @@ class ActionsHandler {
         return (button);
     }
 
-    public generateBtnContainer(targetID: number, friendshipData?: RelationData | undefined, addProfileAnchor: boolean = false) {
-        const container = document.createElement("div");
-
+    public generateBtnContainer(target_id: number, friendsData?: RelationData, listContainer?: boolean, container?: HTMLElement) {
+        container = container || document.createElement("div");
         container.className = "btn-container";
+        container.innerHTML = "";
+        container.dataset.for = listContainer ? "list" : "profile";
 
-        if (!friendshipData)
-            container.appendChild(this.generateActionButton("add", targetID));
-        else if (friendshipData.status === "accepted")
-            container.appendChild(this.generateActionButton("unfriend", targetID));
-        else if (friendshipData.status === "pending") {
-            if (friendshipData.sender_id === targetID) {
-                container.appendChild(this.generateActionButton("accept", targetID));
-                container.appendChild(this.generateActionButton("decline", targetID));
-                if (addProfileAnchor)
-                    container.appendChild(this.generateAnchorButton(`/profile?id=${targetID}`, "Profile"));
-                container.appendChild(this.generateActionButton("block", targetID));
-                return (container);
-            }
-            else
-                container.appendChild(this.generateActionButton("cancel", targetID));
+        const profileBtn = () => this.generateAnchorButton(`/profile?id=${target_id}`, "Profile");
+        const messageBtn = () => this.generateAnchorButton(`/chat?user_id=${target_id}`, "Message");
+
+        if (!friendsData) {
+            container.append(
+                this.generateActionButton("add", target_id),
+                listContainer ? profileBtn() : messageBtn(),
+                this.generateActionButton("block", target_id)
+            );
         }
-
-        if (addProfileAnchor)
-            container.appendChild(this.generateAnchorButton(`/profile?id=${targetID}`, "Profile"));
-        else
-            container.appendChild(this.generateAnchorButton(`/chat?user_id=${targetID}`, "Message"));
-
-        container.appendChild(this.generateActionButton("block", targetID));
+        else {
+            switch (friendsData.status) {
+                case "accepted":
+                    container.append(
+                        this.generateActionButton("unfriend", target_id),
+                        listContainer ? profileBtn() : messageBtn(),
+                        this.generateActionButton("block", target_id)
+                    );
+                    break;
+                case "blocked":
+                    container.append(this.generateActionButton("unblock", target_id));
+                    break;
+                case "pending":
+                    if (friendsData.sender_id !== target_id) {
+                        container.append(
+                            this.generateActionButton("cancel", target_id),
+                            listContainer ? profileBtn() : messageBtn(),
+                            this.generateActionButton("block", target_id)
+                        );
+                    } else {
+                        container.append(
+                            this.generateActionButton("accept", target_id),
+                            this.generateActionButton("decline", target_id),
+                            ...(listContainer ? [profileBtn()] : []),
+                            this.generateActionButton("block", target_id)
+                        );
+                    }
+            }
+        }
 
         return (container);
     }
