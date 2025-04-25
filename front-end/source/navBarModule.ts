@@ -79,6 +79,7 @@ class NavBarHandler {
     private sideNavButton: HTMLElement | null;
     private screenButton : HTMLElement | null;
     private logoutButton : HTMLElement | null;
+    private searchForm   : HTMLFormElement | null
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
         new ThemeManager();
@@ -89,6 +90,7 @@ class NavBarHandler {
         this.sideNavButton = document.getElementById("toggle-side-nav");
         this.screenButton = document.getElementById("toggle-fullscreen");
         this.logoutButton = document.getElementById("logout");
+        this.searchForm = document.getElementById("search-box") as HTMLFormElement;
 
         this.initialize();
     }
@@ -103,9 +105,20 @@ class NavBarHandler {
         if (this.logoutButton)
             this.logoutButton.onclick = () => this.logoutSession();
 
+        if (this.searchForm)
+            this.searchForm.onsubmit = (e) => this.handleSearch(e);
+
         document.addEventListener('fullscreenchange', () => this.updateScreenButton());
         document.addEventListener('webkitfullscreenchange', () => this.updateScreenButton());
         document.addEventListener('msfullscreenchange', () => this.updateScreenButton());
+    }
+
+    private handleSearch(event: SubmitEvent) {
+        event.preventDefault();
+    
+        const query = this.searchForm!.querySelector("input")?.value.trim() || "";
+
+        this.navigation.navigateTo(`/search?query=${encodeURIComponent(query)}`);
     }
 
     private updateScreenButton() {
