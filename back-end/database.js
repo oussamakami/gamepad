@@ -1461,45 +1461,30 @@ class userData {
         return (result);
     }
 
-    searchForUsers(searchingUserIdentifier, searchQuery, pageNumber = 1) {
-        const result = {success: true, table: "friends_requests", action: "fetch", done: false};
+    searchForUsers(searchingUserIdentifier, searchQuery) {
+        const result = {success: true, table: "friends_requests", action: "fetch"};
         const user = this.fetchUser(searchingUserIdentifier);
-        const valuePerPage = 8;
-        const temp = {limit: valuePerPage, offset: ((pageNumber - 1) * valuePerPage), search: searchQuery};
+        searchQuery = `%${searchQuery}%`;
 
         try {
             const stmt = this.db.prepare(`
-                SELECT u.id, u.username, u.email, u.picture,
-                COALESCE (
-                    ( SELECT status FROM friends_requests WHERE (
-                        ( sender_id = @userid AND target_id = u.id )
-                        OR ( sender_id = u.id AND target_id = @userid )
-                )), 'unknown' ) AS relation
-                FROM users u WHERE u.id != @userid
-                AND (
-                    u.id = @search
-                    OR u.username LIKE '%' || @search || '%'
-                    OR u.email LIKE '%' || @search || '%'
-                ) AND NOT EXISTS (
-                    SELECT 1 FROM friends_requests
-                    WHERE status = 'blocked' AND
-                    (
-                        ( sender_id = @userid AND target_id = u.id )
-                        OR ( sender_id = u.id AND target_id = @userid )
-                    )
-                )
-                ORDER BY u.username LIMIT @limit OFFSET @offset
+                SELECT
+                    u.id, u.username, u.email, 
+                    u.picture, fr.status AS relation
+                FROM users u
+                LEFT JOIN friends_requests fr ON 
+                    (fr.sender_id = ? AND fr.target_id = u.id)
+                    OR
+                    (fr.sender_id = u.id AND fr.target_id = ?)
+                WHERE u.id != ? AND u.username LIKE ?
+                AND (fr.status IS NULL OR fr.status != 'blocked')
+                ORDER BY u.username
             `);
-
-            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
-            temp.userid = user.data.id;
-            result.data = stmt.all(temp);
-            result.done = result.data.length < valuePerPage;
+            result.data = stmt.all(...Array(3).fill(user.data.id), searchQuery);
         }
         catch (error) {
             result.success = false;
