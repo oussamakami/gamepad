@@ -471,7 +471,7 @@ Follow the steps below to set up the project:
             - [X] redirect to search page on submit
 - [X] **Friends Loader Implementation**
     - [X] **Core Initialization**
-        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Requires base API endpoint
         - [X] Throws error if friends element not found
         - [X] Sets up next/previous page button handlers
     - [X] **Data Management**
@@ -493,7 +493,7 @@ Follow the steps below to set up the project:
             - [X] Manages next/previous page boundaries
 - [X] **Search Loader Implementation**
     - [X] **Core Initialization**
-        - [X] Requires base API endpoint and NavigationHandler instance
+        - [X] Requires base API endpoint
         - [X] Throws error if search elements not found
         - [X] Sets up next/previous page button handlers
     - [X] **Data Management**
@@ -690,9 +690,9 @@ Follow the steps below to set up the project:
     - [X] Excludes blocked users
     - [X] Excludes users who blocked requester
     - [X] Returns appropriate success/error response
-- [ ] /friends **GET**
-    - [ ] Returns user friends data
-    - [ ] Returns appropriate success/error response
+- [X] /friends **GET**
+    - [X] Returns user friends data
+    - [X] Returns appropriate success/error response
 - [X] /relations **POST**
     - [X] Takes (`target`: Target user ID) and (`action`)
     - [X] Supported actions:
