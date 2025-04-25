@@ -15,7 +15,7 @@ const database = new userData("", false);
 
 import RecordGenerator from './randomGenerator.js';
 
-const numberOfUsersToGenerate = 39;
+const numberOfUsersToGenerate = 149;
 const numberOfRecordsToGenerate = 9869;
 const generator = new RecordGenerator(database);
 
@@ -347,7 +347,24 @@ function handletwoFa(request, reply) {
     delete user.data.password;
     delete user.data.twofa_secret;
     return reply.status(200).send({message: "Login successful!", ...user.data});
+}
 
+function handleSearch(request, reply) {
+    const currentUser = request.user_id;
+    const search = request.params.query;
+
+    const queryResponse = database.searchForUsers(currentUser, search);
+
+    if (!queryResponse.success) {
+        if (!queryResponse.error.code)
+            return reply.status(403).send({error: queryResponse.error.message});
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+    return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
+}
+
+function fetchUserFriends(request, reply) {
+    return reply.status(501);
 }
 
 function apiRoutes(fastify, options, done)
@@ -360,13 +377,15 @@ function apiRoutes(fastify, options, done)
     fastify.post("/auth/resetpass", handleAccountReset);
     fastify.post("/auth/twofa", handletwoFa);
     fastify.get("/auth/verifyserial", verifySerial);
+    fastify.get("/auth/logout", handleLogout);
 
-    fastify.post("/relations", handleUsersRelations);
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
     fastify.get("/stats", fetchDashBoardStats);
     fastify.get("/users/:userId", fetchUserData);
-    fastify.get("/logout", handleLogout);
+    fastify.get("/search/:query", handleSearch);
+    fastify.get("/friends", fetchUserFriends);
+    fastify.post("/relations", handleUsersRelations);
 
     done();
 }
