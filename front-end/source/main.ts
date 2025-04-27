@@ -8,12 +8,16 @@ import SearchLoader from "./searchModule";
 import FriendsLoader from "./friendsModule";
 import ChatLoader from "./chatModule";
 
+let SOCKET = new WebSocket('ws://127.0.0.1:3000/api/websocket');
+
 function loadUserData(data) {
     if (data.redirectTo) {
         NAVIGATION.navigateTo(data.redirectTo);
         return ;
     }
     USER.load(data);
+    if (SOCKET.readyState === 3)
+        SOCKET = new WebSocket('ws://127.0.0.1:3000/api/websocket');
     NAVIGATION.navigateTo("/dashboard");
 }
 

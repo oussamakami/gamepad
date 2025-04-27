@@ -183,53 +183,7 @@ class ChatLoader {
     //     const data = 
 
     // }
-    // private generateCountInfo(): void {
-    //     if (!this.friendsData) return;
 
-    //     const countElem = document.createElement("h5");
-
-    //     countElem.id = "results-count";
-    //     countElem.innerHTML = `found <span>${this.friendsData.length}</span> results`;
-    //     this.friendsPageBody.innerHTML = "";
-    //     this.friendsPageBody.appendChild(countElem);
-    // }
-
-    // private createItem(userid, username, friendship, onlineStatus = false): HTMLElement {
-    //     const item = document.createElement('li');
-    //     const statusIcon = onlineStatus ? '<i class="user-online"></i>' : '<i class="user-offline"></i>';
-        
-    //     item.className = "user-card";
-    //     item.innerHTML = `
-    //         <div class="card-title">
-    //             <img alt="profile picture" src="${this.pictureAPI}/${userid}">
-    //             <h4><p class="user-status">${statusIcon}</p><strong>${username}</strong></h4>
-    //         </div>
-    //     `;
-
-    //     item.appendChild(this.btnGenerator.generateBtnContainer(userid, friendship, true));
-    //     return (item);
-    // }
-
-    // private updatePageBody(): void {
-    //     if (!this.friendsData) return;
-
-    //     let start = (this.pageNumber - 1) * this.elemPerPage;
-    //     let end   = Math.min(this.friendsData.length, start + this.elemPerPage);
-    //     const fragment = document.createDocumentFragment();
-
-    //     this.generateCountInfo();
-
-    //     while (start < end) {
-    //         let userid = this.friendsData.data[start].id;
-    //         let username = this.friendsData.data[start].username;
-    //         let friendship = this.friendsData.data[start].friendship;
-
-    //         fragment.appendChild(this.createItem(userid, username, friendship));
-    //         start++;
-    //     }
-
-    //     this.friendsPageBody.appendChild(fragment);
-    // }
 
     public async load(): httpPromise {
         return this.fetchStats()

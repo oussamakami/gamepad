@@ -2,6 +2,7 @@ import inputValidator from './inputValidator.js';
 import Mailer from './mailer.js';
 import twoFA from './twofa.js';
 import userData from './database.js'
+import SocketManager from './socketManager.js';
 import { readFile } from 'fs/promises'
 import { join } from 'path';
 import Dotenv from 'dotenv';
@@ -10,6 +11,7 @@ Dotenv.config();
 const VALIDEXT = ["png", "jpg", "jpeg", "webp"];
 const PICTURES_PATH = process.env.PICTURES_PATH;
 const database = new userData("", false);
+const CONNECTIONS = new SocketManager(database);
 
 //generate random data for testing
 
@@ -401,6 +403,16 @@ function fetchUserChats(request, reply) {
     return reply.status(200).send({data: chats.data});
 }
 
+function handleSocket(socket, request) {
+    const userid = request.user_id
+
+    if (!CONNECTIONS.addUser(socket, userid))
+        return ;
+
+    console.log("ya hala ya welcome md id: ", userid);
+}
+
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -421,6 +433,8 @@ function apiRoutes(fastify, options, done)
     fastify.get("/friends", fetchUserFriends);
     fastify.post("/relations", handleUsersRelations);
     fastify.get("/chats", fetchUserChats);
+
+    fastify.get("/websocket", { websocket: true }, handleSocket);
 
     done();
 }

@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
+import fastifyWebsocket from '@fastify/websocket';
 import apiRoutes from './apiModules.js'
 import Dotenv from 'dotenv';
 
@@ -9,6 +10,7 @@ const PORT = process.env.PORT;
 const fastify = Fastify();
 
 fastify.register(fastifyCookie);
+fastify.register(fastifyWebsocket);
 fastify.register(fastifyCors, {origin: "http://127.0.0.1:5500", credentials: true});
 fastify.register(apiRoutes, { prefix: "/api"});
 
