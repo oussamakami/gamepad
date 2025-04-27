@@ -124,7 +124,7 @@ function handleLogIn(request, reply) {
         return reply.status(400).send({error: "Invalid Request"});
     }
     const user = database.checkCredentials(userIdentifier, password);
-    
+
     if (user.success) {
         if (user.data.twofa_enabled) {
             if (user.data.twofa_method === "email")
@@ -372,6 +372,35 @@ function fetchUserFriends(request, reply) {
     return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
 }
 
+function fetchUserChats(request, reply) {
+    const currentUser = request.user_id;
+    const chatToCreate = request.query.create;
+
+    if (chatToCreate)
+        database.createNewChat(currentUser, chatToCreate);
+
+    const chats = database.fetchUserChats(currentUser);
+
+    if (!chats.success)
+        return reply.status(400).send({error: "Invalid Request"});
+
+    chats.data.forEach(row => {
+        const wins = database.fetchUserWinCounts(row.id);
+        const loses = database.fetchUserLoseCounts(row.id);
+        const messages = database.fetchChatMessages(row.chat_id);
+        const friendship = database.fetchFriendshipData(currentUser, row.id);
+
+        row.wins = wins.data?.total;
+        row.loses = loses.data?.total;
+        row.friendship = friendship;
+        row.messages = messages.data;
+        row.unread = false;
+        if (messages.data?.length)
+            row.unread = messages.data.at(-1)?.sender_id !== currentUser;
+    });
+    return reply.status(200).send({data: chats.data});
+}
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -391,6 +420,7 @@ function apiRoutes(fastify, options, done)
     fastify.get("/search/:query", handleSearch);
     fastify.get("/friends", fetchUserFriends);
     fastify.post("/relations", handleUsersRelations);
+    fastify.get("/chats", fetchUserChats);
 
     done();
 }

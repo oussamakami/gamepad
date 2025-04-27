@@ -136,7 +136,7 @@ class userData {
                     INSERT INTO users (id, username, email, password, picture, twofa_secret)
                     VALUES ( ?, ?, ?, ?, ?, ? ) RETURNING *
                 `);
-                const userId = this.generateUserId();
+                const userId = Number(this.generateUserId());
                 result.data = stmt.get(userId, username, email, this.hasher.smartHash(password, userId), picture, twoFA.getSecret());
                 break;
             }
@@ -616,6 +616,9 @@ class userData {
             `);
     
             result.data = stmt.get();
+            result.data["ping-pong"] = result.data["ping-pong"] ?? 0;
+            result.data["tic-tac-toe"] = result.data["tic-tac-toe"] ?? 0;
+            result.data["rock-paper"] = result.data["rock-paper"] ?? 0;
         }
         catch (error) {
             result.success = false;
@@ -645,6 +648,9 @@ class userData {
                 throw new Error(queryResponse.error.message);
     
             result.data = stmt.get(queryResponse.data.id);
+            result.data["ping-pong"] = result.data["ping-pong"] ?? 0;
+            result.data["tic-tac-toe"] = result.data["tic-tac-toe"] ?? 0;
+            result.data["rock-paper"] = result.data["rock-paper"] ?? 0;
         }
         catch (error) {
             result.success = false;
@@ -673,6 +679,9 @@ class userData {
                 throw new Error(queryResponse.error.message);
     
             result.data = stmt.get(queryResponse.data.id);
+            result.data["ping-pong"] = result.data["ping-pong"] ?? 0;
+            result.data["tic-tac-toe"] = result.data["tic-tac-toe"] ?? 0;
+            result.data["rock-paper"] = result.data["rock-paper"] ?? 0;
         }
         catch (error) {
             result.success = false;
@@ -698,6 +707,9 @@ class userData {
             `);
     
             result.data = stmt.get(Math.floor(date.getTime() / 1000));
+            result.data["ping-pong"] = result.data["ping-pong"] ?? 0;
+            result.data["tic-tac-toe"] = result.data["tic-tac-toe"] ?? 0;
+            result.data["rock-paper"] = result.data["rock-paper"] ?? 0;
         }
         catch (error) {
             result.success = false;
@@ -832,6 +844,7 @@ class userData {
         const result = {success: true, table: "chats", action: "create"};
         let user1 = this.fetchUser(userIdentifier1);
         let user2 = this.fetchUser(userIdentifier2);
+        const relation = this.fetchFriendshipData(user1.data.id, user2.data.id);
 
         try {
             const stmt = this.db.prepare(`
@@ -842,11 +855,13 @@ class userData {
             if (!user1.success || !user2.success)
                 throw new Error(!user1.success ? user1.error.message : user2.error.message);
 
+            if (relation && relation.data.status === "blocked")
+                throw new Error("user does not exist!");
             if (user1.data.id > user2.data.id)
                 [user1, user2] = [user2, user1];
 
             if (user1.data.id === user2.data.id)
-                throw new Error("Users cannot create a chat with themselves")
+                throw new Error("Users cannot create a chat with themselves");
 
             result.data = stmt.get(user1.data.id, user2.data.id);
         }
@@ -858,20 +873,14 @@ class userData {
         return (result);
     }
 
-    fetchUserChats(userIdentifier, pageNumber = 1) {
-        const result = {success: true, table: "chats", action: "fetch", done: false};
+    fetchUserChats(userIdentifier) {
+        const result = {success: true, table: "chats", action: "fetch"};
         const user = this.fetchUser(userIdentifier);
-        const valuePerPage = 20;
 
         try {
             const stmt = this.db.prepare(`
-                SELECT c.id AS chat_id, u.username AS recipient_name,
-                (CASE
-                    WHEN c.user1_id = ? THEN c.user2_id
-                    ELSE c.user1_id
-                END) AS recipient_id
+                SELECT c.id AS chat_id, u.id, u.username, u.email
                 FROM chats c
-
                 JOIN users u ON
                 u.id = (CASE
                             WHEN c.user1_id = ? THEN c.user2_id
@@ -879,17 +888,12 @@ class userData {
                         END)
                 WHERE c.user1_id = ? OR c.user2_id = ?
                 ORDER BY chat_id ASC
-                LIMIT ? OFFSET ?
             `);
-
-            if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
-                throw new Error("Invalid page number value");
 
             if (!user.success)
                 throw new Error(user.error.message);
 
-            result.data = stmt.all(...Array(4).fill(user.data.id), valuePerPage, ((pageNumber - 1) * valuePerPage));
-            result.done = result.data.length < valuePerPage;
+            result.data = stmt.all(...Array(3).fill(user.data.id));
         }
         catch (error) {
             result.success = false;
@@ -1064,12 +1068,12 @@ class userData {
     #fetchCompressedChatMessages(chat_id, pageNumber = 1) {
         const result = {success: true, table: "messages", action: "fetch", done: false};
         const chat = this.fetchChat(chat_id);
-        const valuePerPage = 20;
+        const valuePerPage = 80;
 
         try {
             const stmt = this.db.prepare(`
                 SELECT * FROM messages WHERE chat_id = ?
-                ORDER BY date ASC LIMIT ? OFFSET ?
+                ORDER BY id DESC LIMIT ? OFFSET ?
             `);
 
             if (typeof pageNumber !== "number" || isNaN(pageNumber) || pageNumber < 1)
@@ -1317,6 +1321,9 @@ class userData {
             }
 
             result.data = stmt.get(sender.data.id, target.data.id);
+            const chatid = this.fetchChatByParticipants(targetIdentifier, senderIdentifier);
+            if (chatid.success)
+                this.deleteChat(chatid.data.id);
         }
         catch (error) {
             result.success = false;

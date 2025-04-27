@@ -6,6 +6,7 @@ import NavigationHandler, {httpPromise} from "./browserModule";
 import NavBarHandler from "./navBarModule";
 import SearchLoader from "./searchModule";
 import FriendsLoader from "./friendsModule";
+import ChatLoader from "./chatModule";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -52,6 +53,7 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
+const CHAT       = new ChatLoader(API_BASE);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),
@@ -75,7 +77,7 @@ const DASHSECTIONS = [
     {path: "/profile",   view: "profile",   options: {onload: () => PROFILE.load()}},
     {path: "/search",    view: "search",    options: {onload: () => SEARCH.load()}},
     {path: "/friends",   view: "friends",   options: {onload: () => FRIENDS.load()}},
-    {path: "/chat",      view: "chat",      options: {}},
+    {path: "/chat",      view: "chat",      options: {onload: () => CHAT.load()}},
     {path: "/settings",  view: "settings",  options: {}},
     {path: "/pong",      view: "pong",      options: {}},
     {path: "/tictac",    view: "tic-tac",   options: {}},
