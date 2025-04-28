@@ -178,9 +178,6 @@ Follow the steps below to set up the project:
         - [ ] Display session name
         - [ ] Sign out button for each session
         - [ ] Sign out from all sessions button
-    - [ ] **Privacy Settings**
-        - [ ] Choose who can view your profile
-        - [ ] Choose who can see your game history
     - [ ] **Two-Factor Authentication (2FA)**
         - [ ] Enable or disable 2FA
         - [ ] Receive 2FA codes via email
@@ -706,10 +703,10 @@ Follow the steps below to set up the project:
     - [X] Returns appropriate success/error response
 
 ### Security
-- [ ] Pretect against **Cross-Site Scripting (XSS)**
+- [ ] Pretect against **Cross-Site Scripting (XSS)** (implement after docker compose)
 - [X] Pretect against **SQL Injection**
 - [X] Implement a custom hashing algorithm
-- [ ] Implement/Enforce **HTTPS** communication
+- [ ] Implement/Enforce **HTTPS** communication (implement after docker compose)
 
 # Authors
 
