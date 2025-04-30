@@ -1,82 +1,76 @@
 import {httpPromise} from "./browserModule";
 import ActionsHandler from "./actionsModule";
+import SocketHandler from "./SocketModule";
 
 class ChatLoader {
     //APIS
-    private readonly chatAPI    : string;
-    private readonly pictureAPI : string;
+    private readonly pictureAPI   : string;
 
     //DOM ELEMENTS
-    private readonly chatPage   : HTMLElement;
-    private readonly chatList   : HTMLElement;
-    private readonly chatBox    : HTMLElement;
-    private readonly chatInfo   : HTMLElement;
+    private readonly chatPage     : HTMLElement;
+    private readonly chatList     : HTMLElement;
+    private readonly chatBox      : HTMLElement;
+    private readonly chatInfo     : HTMLElement;
 
     //MODULES
-    private readonly btnGenerator  : ActionsHandler;
+    private readonly socket       : SocketHandler;
+    private readonly btnGenerator : ActionsHandler;
 
     private ChatData: Record<string, any> | undefined;
     private activeChat: Record<string, any> | undefined;
 
-    constructor(baseAPI: string) {
+    constructor(baseAPI: string, socketHandler: SocketHandler) {
         const elem = document.getElementById("chat");
         const chatList = elem?.querySelector("#chat-list")?.querySelector("ul");
         const chatBox = elem?.querySelector("#chat-box");
         const chatInfo = elem?.querySelector("#chat-info");
+        const chatinput = chatBox?.querySelector("form") as HTMLFormElement;
+        const deletebtn = chatBox?.querySelector("#delete-chat") as HTMLButtonElement;
 
         baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
-
-        this.chatAPI = baseAPI + "/chats";
         this.pictureAPI = baseAPI + "/picture";
 
-        if (!elem || !chatList || !chatBox || !chatInfo)
+        if (!elem || !chatList || !chatBox ||
+            !chatInfo || !chatinput || !deletebtn)
             throw new Error("Chat Section not found");
 
         this.chatPage = elem;
         this.chatList = chatList as HTMLElement;
         this.chatBox = chatBox as HTMLElement;
         this.chatInfo = chatInfo as HTMLElement;
+        chatinput.onsubmit = (e) => this.sendMessage(e);
+        deletebtn.onclick = (e) => this.deleteCurrentChat();
 
         this.btnGenerator = new ActionsHandler(baseAPI);
+        this.socket = socketHandler;
     }
 
-    private async fetchStats(): httpPromise {
-        const url = new URLSearchParams(location.search);
-        const target = Number(url.get("user_id"));
-
-        const endpoint = target ? `${this.chatAPI}?create=${target}` : this.chatAPI;
-        this.activeChat = undefined;
-
-        try{
-            const response = await fetch(endpoint, {
-                method: "GET",
-                credentials: "include"
-            });
-
-            if (!response.ok)
-                throw response;
-
-            this.ChatData = (await response.json());
-
-            return {httpCode: response.status, httpName: response.statusText};
-        }
-        catch (error) {
-            throw {httpCode: error.status, httpName: error.statusText};
-        }
+    public updateChatData(data: Record<string, any>) {
+        this.ChatData = data.data;
+        this.load();
     }
 
-    private createChatItem(chatid: number, userid: number, username: string, lastMessage?: string, unread?: boolean) {
+    private createChatItem(chatid: number, userid: number, username: string, messages?: Record<string, any>[]) {
+        let lastMessage = undefined;
+        let unread = false;
         const item = document.createElement("li");
 
         item.className = "chat-item";
-        item.dataset.chatid = String(chatid);
+
+        if (this.activeChat && this.activeChat.user_id == userid)
+            item.classList.add("active");
+
+        if (messages && messages.length) {
+            lastMessage = messages[0].message;
+            unread = messages[0].sender_id === userid;
+        }
 
         const data = `
             <a href="/chat?user_id=${userid}">
                 <img src="${this.pictureAPI}/${userid}" alt="profile picture">
                 <div class="info">
-                    <h5>${username}<span class="notification ${!unread ? "hidden" : ""}"></span></h5>
-                    <p>${lastMessage ? lastMessage : ""}</p>
+                    <h5>${username}<span class="notification ${unread ? "" : "hidden"}"></span></h5>
+                    <p>${lastMessage || ""}</p>
                 </div>
             </a>
         `;
@@ -100,49 +94,59 @@ class ChatLoader {
         return (item);
     }
 
+    private createNewChat(targetUser_id: number) {
+        this.socket.send({type: "chat", action: "create", target_id: targetUser_id});
+    }
+
+    private deleteCurrentChat() {
+        if (!this.activeChat) return;
+        this.socket.send({type: "chat", action: "delete", chat_id: this.activeChat.chat_id});
+        window.history.replaceState(null, "", location.pathname);
+    } 
+
     private updateChatList(): void {
         if (!this.ChatData) return;
+
         const url = new URLSearchParams(location.search);
         const target = Number(url.get("user_id"));
+        const keys = Object.keys(this.ChatData);
 
-        this.chatList.innerHTML = "";
-    
-        this.ChatData.data.forEach(row => {
-            let chatid = row.chat_id;
-            let userid = row.id;
-            let username = row.username;
-            let lastMessage = row.messages?.at(-1)?.message;
-            let unread = row.unread;
+        if (!keys.length && !target)
+            this.chatList.innerHTML = `<p style="padding:1rem 3rem;text-align:center;">You don’t have any active chats right now.</p>`;
+        else
+            this.chatList.innerHTML = "";
 
-            if (target && userid === target)
-                this.activeChat = row;
+        this.activeChat = this.ChatData[keys[0]];
+        if (target) {
+            if (this.ChatData[target])
+                this.activeChat = this.ChatData[target];
+            else
+                this.createNewChat(target);
+        }
 
-            this.chatList.appendChild(this.createChatItem(chatid, userid, username, lastMessage, unread));
+        keys.forEach(user_id => {
+            let chat = this.ChatData![user_id];
+            this.chatList.appendChild(this.createChatItem(chat.chat_id, chat.user_id, chat.username, chat.messages));
         });
-
-        if (!this.activeChat)
-            this.activeChat = this.ChatData.data[0];
-
-        this.chatList.querySelector(`[data-chatid="${this.activeChat?.chat_id}"]`)?.classList.add("active");
     }
 
     private updateChatBox() {
         if (!this.activeChat) return;
 
-        console.log(this.activeChat);
-
         const chatUserImg = this.chatBox.querySelector("[data-chat-partner-image]") as HTMLImageElement;
         const chatUserName = this.chatBox.querySelector("[data-chat-partner-name]") as HTMLElement;
+        const onlineStatus = this.chatBox.querySelector("[data-chat-partner-status]") as HTMLElement;
         const messagesBox = this.chatBox.querySelector("ul") as HTMLElement;
         
-        if (!chatUserImg || !chatUserName || !messagesBox) return;
+        if (!chatUserImg || !chatUserName || !messagesBox || !onlineStatus) return;
 
-        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.id}`;
+        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.user_id}`;
         chatUserName.textContent = this.activeChat.username;
+        onlineStatus.className = this.activeChat.isOnline ? "user-online" : "user-offline";
         messagesBox.innerHTML = "";
 
         this.activeChat.messages.forEach(message => {
-            messagesBox.appendChild(this.createMessageItem(message.message, message.date, message.sender_id === this.activeChat?.id));
+            messagesBox.appendChild(this.createMessageItem(message.message, message.date, message.sender_id === this.activeChat!.user_id));
         })
         
         this.chatBox.classList.remove("hidden");
@@ -154,6 +158,7 @@ class ChatLoader {
         const ChatUserInfo = this.chatInfo.querySelector(".partner-info") as HTMLElement;
         const chatUserImg = ChatUserInfo.querySelector("[data-chat-partner-image]") as HTMLImageElement;
         const chatUserName = ChatUserInfo.querySelector("[data-chat-partner-name]") as HTMLElement;
+        const onlineStatus = ChatUserInfo.querySelector("[data-chat-partner-status]") as HTMLElement;
         const chatUserId = ChatUserInfo.querySelector("[data-chat-partner-id]") as HTMLElement;
         const chatUserEmail = ChatUserInfo.querySelector("[data-chat-partner-email]") as HTMLElement;
         const chatUserWins = ChatUserInfo.querySelector("[data-chat-partner-wins]") as HTMLElement;
@@ -164,39 +169,49 @@ class ChatLoader {
             !chatUserLoses)
             return;
 
-        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.id}`;
+        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.user_id}`;
         chatUserName.textContent = this.activeChat.username;
-        chatUserId.textContent = this.activeChat.id;
+        onlineStatus.className = this.activeChat.isOnline ? "user-online" : "user-offline";
+        chatUserId.textContent = this.activeChat.user_id;
         chatUserEmail.textContent = this.activeChat.email;
         chatUserWins.textContent = this.activeChat.wins;
         chatUserLoses.textContent = this.activeChat.loses;
 
         ChatUserInfo.querySelector(".btn-container")?.remove();
-        ChatUserInfo.appendChild(this.btnGenerator.generateBtnContainer(this.activeChat.id, this.activeChat.friendship, true));
+        ChatUserInfo.appendChild(this.btnGenerator.generateBtnContainer(this.activeChat.user_id, this.activeChat.friendship, true));
 
         this.chatInfo.classList.remove("hidden");
     }
 
-    // private sendMessage(message: string) {
-    //     if (!this.activeChat) return;
+    private sendMessage(event: SubmitEvent) {
+        event.preventDefault();
+        if (!this.activeChat) return;
 
-    //     const data = 
+        const form = event.target as HTMLFormElement;
+        const input =form.querySelector("#message-input") as HTMLInputElement;
+        const message = input.value.trim() || "";
+        form.reset();
 
-    // }
+        if (!message.length) return;
+
+        this.socket.send({
+            type: "chat",
+            action: "send",
+            chat_id: this.activeChat.chat_id,
+            target_id: this.activeChat.user_id,
+            message: message
+        });
+    }
 
 
     public async load(): httpPromise {
-        return this.fetchStats()
-        .then(result => {
-            this.updateChatList();
-            this.updateChatBox();
-            this.updateChatInfo();
+        this.chatBox.classList.add("hidden");
+        this.chatInfo.classList.add("hidden");
+        this.updateChatList();
+        this.updateChatBox();
+        this.updateChatInfo();
 
-            return (result);
-        })
-        .catch(error => {
-            throw (error)
-        });
+        return {httpCode: 200, httpName: "ok"};
     }
 }
 

@@ -193,9 +193,22 @@ function handleUsersRelations(request, reply) {
         return reply.status(500).send({error: "Internal Server Error"});
     }
 
-    const relations = database.fetchFriendshipData(sender, target);
+    if (["add", "accept", "decline"].includes(action)) {
+        const notifcation = {type: "notification", action: "friendship"};
+        switch(action) {
+            case "add":
+                notifcation.message = `<strong>${senderData.data.username}</strong> sent you a friend request`;
+                break;
+            case "accept":
+                notifcation.message = `<strong>${senderData.data.username}</strong> Accepted your friend request`;
+                break;
+            case "decline":
+                notifcation.message = `<strong>${senderData.data.username}</strong> Declined your friend request`;
+        }
+        CONNECTIONS.send(target, notifcation);
+    }
 
-    reply.status(201).send(relations);
+    reply.status(201).send(database.fetchFriendshipData(sender, target));
 }
 
 function fetchSessionData(request, reply) {
@@ -389,24 +402,59 @@ function getUserChats(user_id) {
 
         response.data[row.id] = {
             chat_id: row.chat_id,
+            user_id: row.id,
+            username: row.username,
+            email: row.email,
+            friendship: friendship,
+            messages: messages.data,
             wins: wins.data?.total,
             loses: loses.data?.total,
-            friendship: friendship,
-            messages: messages.data
+            isOnline: CONNECTIONS.isUserOnline(row.id)
         }
     });
 
     return (response);
 }
 
+function handleSocketChat(user_id, message) {
+    if (message.type !== "chat") return;
+    
+    const notifcation = {type: "notification", action: "message"};
+    const senderdata = database.fetchUser(user_id);
+
+    if (!senderdata.success) return;
+    switch(message.action) {
+        case "create":
+            database.createNewChat(user_id, message.target_id);
+            break;
+        case "delete":
+            database.deleteChat(message.chat_id);
+            break;
+        case "send":
+            database.sendMessage(message.chat_id, user_id, message.message);
+            CONNECTIONS.send(message.target_id, getUserChats(message.target_id));
+            
+            notifcation.message = `<strong>${senderdata.data.username}</strong> sent you a new message`;
+            CONNECTIONS.send(message.target_id, notifcation);
+    }
+    CONNECTIONS.send(user_id, getUserChats(user_id));
+}
+
 function handleSocket(socket, request) {
     const userid = request.user_id
     const sessionToken = request.cookies.authToken;
-
-    if (!CONNECTIONS.addUser(socket, userid, sessionToken))
-        return ;
+    
+    if (!CONNECTIONS.addUser(socket, userid, sessionToken)) return ;
 
     socket.send(JSON.stringify(getUserChats(userid)));
+    const intervalId = setInterval(() => {
+        try { socket.send(JSON.stringify(getUserChats(userid))) }
+        catch (error) { clearInterval(intervalId) }
+    }, 60000);
+
+    socket.on("message", (msg) => handleSocketChat(userid, JSON.parse(msg)));
+    socket.on("close", () => clearInterval(intervalId));
+    socket.on("error", () => clearInterval(intervalId));
 }
 
 

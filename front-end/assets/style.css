@@ -812,7 +812,8 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 1rem;
+    width: .8rem;
+    height: .8rem;
     font-size: .7rem;
     background-color: var(--secondary-brand-color);
     border-radius: 50%;

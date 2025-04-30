@@ -454,8 +454,6 @@ class userData {
         const WEEK = 604800;
         const MONTH = 2592000;
 
-        if (diff < MINUTE)
-            return (`${diff} second${diff === 1 ? '' : 's'}`);
         if (diff < HOUR)
             return (`${Math.floor(diff / MINUTE)} minute${Math.floor(diff / MINUTE) === 1 ? '' : 's'}`);
         if (diff < DAY)
@@ -844,7 +842,7 @@ class userData {
         const result = {success: true, table: "chats", action: "create"};
         let user1 = this.fetchUser(userIdentifier1);
         let user2 = this.fetchUser(userIdentifier2);
-        const relation = this.fetchFriendshipData(user1.data.id, user2.data.id);
+        const relation = this.fetchFriendshipData(user1.data?.id, user2.data?.id);
 
         try {
             const stmt = this.db.prepare(`
@@ -854,7 +852,6 @@ class userData {
 
             if (!user1.success || !user2.success)
                 throw new Error(!user1.success ? user1.error.message : user2.error.message);
-
             if (relation && relation.data.status === "blocked")
                 throw new Error("user does not exist!");
             if (user1.data.id > user2.data.id)

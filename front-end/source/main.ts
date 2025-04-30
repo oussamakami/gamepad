@@ -56,7 +56,7 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
-const CHAT       = new ChatLoader(API_BASE);
+const CHAT       = new ChatLoader(API_BASE, SOCKET);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),
@@ -95,6 +95,8 @@ PROFILE.setChartBarColors = ["--primary-brand-color", "#4f55a6"];
 AUTHSECTIONS.forEach(section => NAVIGATION.addAuthSection(section.path, section.view, section.options));
 DASHSECTIONS.forEach(section => NAVIGATION.addDashSection(section.path, section.view, section.options));
 
+SOCKET.addMessageHandler("chat", (data) => {CHAT.updateChatData(data)});
 SOCKET.connect();
+
 NAVIGATION.configure("top-nav", "side-nav", "error");
 NAVIGATION.initialize();

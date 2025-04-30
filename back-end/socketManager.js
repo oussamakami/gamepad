@@ -36,6 +36,21 @@ class SocketManager {
         return (this.userToSocket.get(user_id) || []);
     }
 
+    isUserOnline(user_id) {
+        return (this.userToSocket.has(user_id));
+    }
+
+    send(user_id, message) {
+        if (!message) return;
+        message = JSON.stringify(message);
+        const userSockets = this.userToSocket.get(user_id) || [];
+
+        userSockets.forEach(socket => {
+            if (socket.readyState === WebSocket.OPEN)
+                socket.send(message);
+        });
+    }
+
     startSocketmonitor(socket, sessionToken) {
         if (this.socketTimers.has(socket))
             return ;
