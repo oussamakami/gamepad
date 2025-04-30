@@ -7,8 +7,7 @@ import NavBarHandler from "./navBarModule";
 import SearchLoader from "./searchModule";
 import FriendsLoader from "./friendsModule";
 import ChatLoader from "./chatModule";
-
-let SOCKET = new WebSocket('ws://127.0.0.1:3000/api/websocket');
+import SocketHandler from "./SocketModule";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -16,8 +15,7 @@ function loadUserData(data) {
         return ;
     }
     USER.load(data);
-    if (SOCKET.readyState === 3)
-        SOCKET = new WebSocket('ws://127.0.0.1:3000/api/websocket');
+    SOCKET.connect();
     NAVIGATION.navigateTo("/dashboard");
 }
 
@@ -51,6 +49,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
 const API_BASE   = "http://127.0.0.1:3000/api";
 
 const USER       = new UserData(API_BASE);
+const SOCKET     = new SocketHandler("ws://127.0.0.1:3000/api/websocket", USER);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
@@ -96,5 +95,6 @@ PROFILE.setChartBarColors = ["--primary-brand-color", "#4f55a6"];
 AUTHSECTIONS.forEach(section => NAVIGATION.addAuthSection(section.path, section.view, section.options));
 DASHSECTIONS.forEach(section => NAVIGATION.addDashSection(section.path, section.view, section.options));
 
+SOCKET.connect();
 NAVIGATION.configure("top-nav", "side-nav", "error");
 NAVIGATION.initialize();

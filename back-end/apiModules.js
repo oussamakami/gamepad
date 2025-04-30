@@ -374,42 +374,39 @@ function fetchUserFriends(request, reply) {
     return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
 }
 
-function fetchUserChats(request, reply) {
-    const currentUser = request.user_id;
-    const chatToCreate = request.query.create;
-
-    if (chatToCreate)
-        database.createNewChat(currentUser, chatToCreate);
-
-    const chats = database.fetchUserChats(currentUser);
+function getUserChats(user_id) {
+    const response = {type: "chat", data: {}};
+    const chats = database.fetchUserChats(user_id);
 
     if (!chats.success)
-        return reply.status(400).send({error: "Invalid Request"});
+        return response;
 
     chats.data.forEach(row => {
         const wins = database.fetchUserWinCounts(row.id);
         const loses = database.fetchUserLoseCounts(row.id);
         const messages = database.fetchChatMessages(row.chat_id);
-        const friendship = database.fetchFriendshipData(currentUser, row.id);
+        const friendship = database.fetchFriendshipData(user_id, row.id);
 
-        row.wins = wins.data?.total;
-        row.loses = loses.data?.total;
-        row.friendship = friendship;
-        row.messages = messages.data;
-        row.unread = false;
-        if (messages.data?.length)
-            row.unread = messages.data.at(-1)?.sender_id !== currentUser;
+        response.data[row.id] = {
+            chat_id: row.chat_id,
+            wins: wins.data?.total,
+            loses: loses.data?.total,
+            friendship: friendship,
+            messages: messages.data
+        }
     });
-    return reply.status(200).send({data: chats.data});
+
+    return (response);
 }
 
 function handleSocket(socket, request) {
     const userid = request.user_id
+    const sessionToken = request.cookies.authToken;
 
-    if (!CONNECTIONS.addUser(socket, userid))
+    if (!CONNECTIONS.addUser(socket, userid, sessionToken))
         return ;
 
-    console.log("ya hala ya welcome md id: ", userid);
+    socket.send(JSON.stringify(getUserChats(userid)));
 }
 
 
@@ -423,7 +420,7 @@ function apiRoutes(fastify, options, done)
     fastify.post("/auth/resetpass", handleAccountReset);
     fastify.post("/auth/twofa", handletwoFa);
     fastify.get("/auth/verifyserial", verifySerial);
-    fastify.get("/auth/logout", handleLogout);
+    fastify.get("/logout", handleLogout);
 
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
@@ -432,7 +429,6 @@ function apiRoutes(fastify, options, done)
     fastify.get("/search/:query", handleSearch);
     fastify.get("/friends", fetchUserFriends);
     fastify.post("/relations", handleUsersRelations);
-    fastify.get("/chats", fetchUserChats);
 
     fastify.get("/websocket", { websocket: true }, handleSocket);
 

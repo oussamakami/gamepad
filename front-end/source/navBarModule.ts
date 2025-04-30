@@ -83,7 +83,7 @@ class NavBarHandler {
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
         new ThemeManager();
-        this.logoutAPI = `${baseAPI}/auth/logout`;
+        this.logoutAPI = `${baseAPI}/logout`;
         this.navigation = navigationModule;
 
         this.sideNavElem = document.getElementById("side-nav");
@@ -159,7 +159,6 @@ class NavBarHandler {
 
     public async logoutSession() {
         await fetch(this.logoutAPI, { method: "GET", credentials: "include" });
-        this.navigation.navigateTo("/login");
     }
 }
 
