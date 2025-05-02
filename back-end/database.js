@@ -852,7 +852,7 @@ class userData {
 
             if (!user1.success || !user2.success)
                 throw new Error(!user1.success ? user1.error.message : user2.error.message);
-            if (relation && relation.data.status === "blocked")
+            if (relation?.status === "blocked")
                 throw new Error("user does not exist!");
             if (user1.data.id > user2.data.id)
                 [user1, user2] = [user2, user1];
