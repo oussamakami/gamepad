@@ -986,7 +986,6 @@ section {
     top: calc(var(--top-nav-height) / 2);
     right: 0;
     width: 22rem;
-    max-height: 30rem;
     border-radius: .25rem;
     box-shadow: var(--box-shadow);
     background-color: var(--card-bg);
@@ -1009,8 +1008,8 @@ section {
 }
 
 .notification-list {
-    flex-direction: column;
-    max-height: 400px;
+    flex-direction: column-reverse;
+    max-height: 26rem;
     overflow-y: auto;
 }
 

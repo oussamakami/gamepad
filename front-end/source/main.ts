@@ -8,6 +8,7 @@ import SearchLoader from "./searchModule";
 import FriendsLoader from "./friendsModule";
 import ChatLoader from "./chatModule";
 import SocketHandler from "./SocketModule";
+import NOTIFICATIONS from "./notificationsModule";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -96,6 +97,7 @@ AUTHSECTIONS.forEach(section => NAVIGATION.addAuthSection(section.path, section.
 DASHSECTIONS.forEach(section => NAVIGATION.addDashSection(section.path, section.view, section.options));
 
 SOCKET.addMessageHandler("chat", (data) => {CHAT.updateChatData(data)});
+SOCKET.addMessageHandler("notification", (data) => NOTIFICATIONS.addNotification(data))
 SOCKET.connect();
 
 NAVIGATION.configure("top-nav", "side-nav", "error");
