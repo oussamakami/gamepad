@@ -1,5 +1,4 @@
 import {httpPromise} from "./browserModule";
-import NavigationHandler from "./browserModule";
 import ActionsHandler from "./actionsModule";
 
 class SearchLoader {
@@ -122,8 +121,9 @@ class SearchLoader {
             let userid = this.searchData.data[start].id;
             let username = this.searchData.data[start].username;
             let friendship = this.searchData.data[start].friendship;
+            let isOnline = this.searchData.data[start].isOnline;
 
-            fragment.appendChild(this.createItem(userid, username, friendship));
+            fragment.appendChild(this.createItem(userid, username, friendship, isOnline));
             start++;
         }
 

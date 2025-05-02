@@ -262,6 +262,7 @@ function fetchUserData(request, reply) {
         return reply.status(500).send({error: "Internal Server Error"});
 
     if (relation) stats.data.friendship = relation;
+    stats.data.isOnline = CONNECTIONS.isUserOnline(targetUser);
     return reply.status(200).send(stats.data);
 }
 
@@ -372,6 +373,8 @@ function handleSearch(request, reply) {
             return reply.status(403).send({error: queryResponse.error.message});
         return reply.status(500).send({error: "Internal Server Error"});
     }
+
+    queryResponse.data.forEach(row => row.isOnline = CONNECTIONS.isUserOnline(row.id));
     return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
 }
 
@@ -384,6 +387,7 @@ function fetchUserFriends(request, reply) {
             return reply.status(403).send({error: queryResponse.error.message});
         return reply.status(500).send({error: "Internal Server Error"});
     }
+    queryResponse.data.forEach(row => row.isOnline = CONNECTIONS.isUserOnline(row.id));
     return reply.status(200).send({data: queryResponse.data, length: queryResponse.data.length});
 }
 

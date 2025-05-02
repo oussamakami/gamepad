@@ -89,18 +89,20 @@ class ProfileLoader {
     private updateProfileInfo(): void {
         if (!this.profileData) return;
 
-        const picture = this.profile.querySelector("[data-user-img]") as HTMLImageElement;
-        const data    = this.profile.querySelector("figcaption");
-        const id      = data?.querySelector("[data-user-id]");
-        const name    = data?.querySelector("[data-user-name]");
-        const email   = data?.querySelector("[data-user-email]");
+        const picture  = this.profile.querySelector("[data-user-img]") as HTMLImageElement;
+        const data     = this.profile.querySelector("figcaption");
+        const id       = data?.querySelector("[data-user-id]");
+        const name     = data?.querySelector("[data-user-name]");
+        const email    = data?.querySelector("[data-user-email]");
+        const isonline = data?.querySelector("[data-user-status]")?.querySelector("i");
         
         data?.querySelector(".btn-container")?.remove();
         
-        id      && (id   .textContent = this.profileData.id);
-        name    && (name .textContent = this.profileData.username);
-        email   && (email.textContent = this.profileData.email);
-        picture && (picture.src       = `${this.pictureAPI}/${this.profileData.id}`);
+        id       && (id   .textContent  = this.profileData.id);
+        name     && (name .textContent  = this.profileData.username);
+        email    && (email.textContent  = this.profileData.email);
+        picture  && (picture.src        = `${this.pictureAPI}/${this.profileData.id}`);
+        isonline && (isonline.className = this.profileData.isOnline ? "user-online" : "user-offline");
         
         if (this.profileData.id != this.sessionUserId) {
             const buttons = this.btnGenerator.generateBtnContainer(this.profileData.id, this.profileData.friendship);

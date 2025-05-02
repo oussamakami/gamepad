@@ -1,5 +1,4 @@
 import {httpPromise} from "./browserModule";
-import NavigationHandler from "./browserModule";
 import ActionsHandler from "./actionsModule";
 
 class FriendsLoader {
@@ -120,8 +119,9 @@ class FriendsLoader {
             let userid = this.friendsData.data[start].id;
             let username = this.friendsData.data[start].username;
             let friendship = this.friendsData.data[start].friendship;
+            let isOnline = this.friendsData.data[start].isOnline;
 
-            fragment.appendChild(this.createItem(userid, username, friendship));
+            fragment.appendChild(this.createItem(userid, username, friendship, isOnline));
             start++;
         }
 
