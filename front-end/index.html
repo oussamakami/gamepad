@@ -62,7 +62,7 @@
                 <li class="top-nav-icon-btn" id="notification-btn">
                     <i class='bx bx-bell'></i>
                     <span class="notification-badge"></span>
-                    <div class="notification-dropdown active">
+                    <div class="notification-dropdown">
                         <h4>Notifications</h4>
                         <ul class="notification-list"></ul>
                     </div>
@@ -483,6 +483,161 @@
                                 <li>games won: <span data-chat-partner-wins>0</span></li>
                                 <li>games lost: <span data-chat-partner-loses>0</span></li>
                             </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settings" class="dash-section hidden">
+                <div class="section-title">
+                    <h4>settings</h4>
+                </div>
+                <div class="cards-container" id="profile-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>profile settings</h4>
+                            <i class='bx bx-user card-icon'></i>
+                        </div>
+                        <form id="profile-settings-form" class="container-form">
+                            <p class="form-status"></p>
+                            <div id="picture-prev">
+                                <img data-user-img alt="profile picture">
+                                <div>
+                                    <label for="profileNewPic" class="btn">change photo</label>
+                                    <input type="file" id="profileNewPic" accept="image/*" class="hidden" name="figure">
+                                    <button class="danger-btn">delete</button>
+                                </div>
+                            </div>
+                            <label for="settings-profile-name">Username</label>
+                            <input type="text" id="settings-profile-name" name="username" minlength="3" required>
+
+                            <label for="settings-profile-email">Email</label>
+                            <input type="email" id="settings-profile-email" name="email" required>
+
+                            <input type="submit" class="btn" value="save changes">
+                        </form>
+                    </div>
+                </div>
+                <div class="cards-container" id="security-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>security settings</h4>
+                            <i class='bx bx-lock card-icon'></i>
+                        </div>
+                        <form id="security-settings-form" class="container-form">
+                            <p class="form-status"></p>
+                            <label for="settings-security-password">current password</label>
+                            <input type="password" id="settings-security-password" name="password" placeholder="Enter your password" minlength="8" required>
+                            
+                            <label for="settings-security-new">new password</label>
+                            <input type="password" id="settings-security-new" name="newPassword" placeholder="Enter your new password" minlength="8" required>
+
+                            <label for="settings-security-confirm">confirm new password</label>
+                            <input type="password" id="settings-security-confirm" name="confirmPassword" placeholder="confirm your new password" minlength="8" required>
+
+                            <input type="submit" class="btn" value="update password">
+                            <p class="divider">integrated</p>
+                            <button class="btn google-btn">
+                                <img src="./assets/images/google_icon.png" alt="google logo">
+                                Link with Google
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="cards-container" id="sessions-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>active sessions settings</h4>
+                            <i class='bx bx-desktop card-icon'></i>
+                        </div>
+                        <ul id="sessions-list">
+                            <li class="sessions-item">
+                                <strong>127.0.0.1 on Firefox (Linux)</strong>
+                                <label>current</label>
+                                <button class="btn">logout</button>
+                            </li>
+                            <li class="sessions-item">
+                                <strong>127.0.0.1 on Firefox (Linux)</strong>
+                                <button class="btn">logout</button>
+                            </li>
+                        </ul>
+                        <button class="btn">logout from all devices</button>
+                    </div>
+                </div>
+                <div class="cards-container" id="blocked-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>blocked users</h4>
+                            <i class='bx bx-block card-icon'></i>
+                        </div>
+                        <ul id="blocked-list">
+                            <li class="blocked-item">
+                                <img src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="profile picture">
+                                <strong>eddie</strong>
+                                <div class="btn-container">
+                                    <button data-action="add" class="danger-btn">unblock</button>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="cards-container" id="twofa-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>two-factor authentication</h4>
+                            <i class='bx bx-shield card-icon'></i>
+                        </div>
+                        <form id="twofa-settings-form" class="container-form">
+                            <label class="twofa-status">Status: <i class="disabled"></i></label>
+
+                            <div id="twofa-enable-section" class="hidden">
+                                <h4>Choose 2FA Method:</h4>
+                                <div class="settings-methods">
+                                    <label>
+                                        <input class="hidden" type="radio" name="twofa-method" value="email" checked>
+                                        <div class="method-card">
+                                            <i class='bx bx-envelope card-icon'></i>
+                                            <span>Email</span>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <input class="hidden" type="radio" name="twofa-method" value="authenticator">
+                                        <div class="method-card">
+                                            <i class='bx bx-mobile-alt card-icon'></i>
+                                            <span>Authenticator App</span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div id="twofa-qrcode-section" class="hidden">
+                                    <img id="twofa-qrcode" src="" alt="QR-Code"></img>
+                                    <div>
+                                        <p>Or enter this code manually:</p>
+                                        <p class="twofa-secret-code">JBSWY3DPEHPK3PXP</p>
+                                        <label for="twofa-verify-code">Verification Code</label>
+                                        <input type="number" id="twofa-verify-code" placeholder="Enter 6-digit code">
+                                    </div>
+                                </div>
+                                <div class="btn-container">
+                                    <input type="submit" value="verify" class="btn">
+                                    <button class="danger-btn">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                        <button class="btn">Enable 2FA</button>
+                    </div>
+                </div>
+                <div class="cards-container" id="privacy-settings">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>account settings</h4>
+                            <i class='bx bx-cog card-icon'></i>
+                        </div>
+                        <div class="card-value">
+                            <button id="delete-history" class="danger-btn">clear all games history</button>
+                            <button id="delete-account" class="danger-btn">delete account permanently</button>
+                            <p>These actions cannot be undone.</p>
                         </div>
                     </div>
                 </div>

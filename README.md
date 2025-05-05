@@ -169,26 +169,27 @@ Follow the steps below to set up the project:
     - [X] Option to send a message
     - [X] Option to block the user
     - [X] Indicate if the user is online
-- [ ] **Settings**
-    - [ ] Update profile picture
-    - [ ] Edit user name
-    - [ ] Change email address
-    - [ ] Reset or change password
-    - [ ] **Logged-in Sessions**
-        - [ ] Display session name
-        - [ ] Sign out button for each session
-        - [ ] Sign out from all sessions button
-    - [ ] **Two-Factor Authentication (2FA)**
-        - [ ] Enable or disable 2FA
-        - [ ] Receive 2FA codes via email
-        - [ ] Use an authentication app for 2FA
-    - [ ] **Blocked Users**
-        - [ ] View blocked users list
-        - [ ] Unblock a user
-    - [ ] **Account & Data Management**
-        - [ ] Clear game history
-        - [ ] Permanently delete account
-- [ ] **Games** (@slazar42)
+- [X] **Settings**
+    - [X] Update profile picture
+    - [X] Edit user name
+    - [X] Change email address
+    - [X] Reset or change password
+    - [X] Link/UnLink google account
+    - [X] **Logged-in Sessions**
+        - [X] Display session name
+        - [X] Sign out button for each session
+        - [X] Sign out from all sessions button
+    - [X] **Two-Factor Authentication (2FA)**
+        - [X] Enable or disable 2FA
+        - [X] Receive 2FA codes via email
+        - [X] Use an authentication app for 2FA
+    - [X] **Blocked Users**
+        - [X] View blocked users list
+        - [X] Unblock a user
+    - [X] **Account & Data Management**
+        - [X] Clear game history
+        - [X] Permanently delete account
+- [ ] **Games**
     - [ ] **Ping Pong**
         - [ ] Set user nickname
         - [ ] Generate a unique game ID
@@ -249,20 +250,20 @@ Follow the steps below to set up the project:
     - [ ] Check cross-browser compatibility for Chrome and Firefox
 
 ## Front-End Code
-- [ ] **Forms Module Implementation**
+- [X] **Forms Module Implementation**
     - [X] **Core Form Handling**
         - [X] Specify `formId` to uniquely identify the form.
         - [X] Define the HTTP request method (`GET`, `POST`, etc.).
         - [X] Set the target API endpoint for data submission.
     - [X] **Optional Callbacks**
         - [X] Execute a function after a successful form submission (`onSuccess`).
-    - [ ] **Forms to handle**
+    - [X] **Forms to handle**
         - [X] **Login Form**
         - [X] **Signup Form**
         - [X] **Account Recovery Form**
         - [X] **Password Reset Form**
         - [X] **Two-Factor Authentication (2FA) Form**
-        - [ ] **User Settings Form**
+        - [X] **User Settings Form**
 - [X] **User Data Module Implementation**
     - [X] **Core User Handling**
         - [X] Process the API response object to manage user data.
@@ -284,18 +285,18 @@ Follow the steps below to set up the project:
         - [X] Reference to the `userdata` object
         - [X] Configure navigation elements (mainNav, sideNav, errorPage)
     - [X] **Module Methods**
-            - [X] **Section Registration**
-                - [X] Add authenticated sections (`addDashSection`)
-                - [X] Add unauthenticated sections (`addAuthSection`)
-                - [X] Support optional FormHandler integration
-                - [X] Support custom on-load functions with HTTP promise
-                - [X] Handle URL path standardization (trailing slashes, query params)
-            - [X] **Section Visibility**
-                - [X] Show/hide all sections (`hideAllSections`)
-                - [X] Dynamic section display based on auth state
-                - [X] Active nav section highlighting
-            - [X] **Error Handling**
-                - [X] Custom error page display (`showError`)
+        - [X] **Section Registration**
+            - [X] Add authenticated sections (`addDashSection`)
+            - [X] Add unauthenticated sections (`addAuthSection`)
+            - [X] Support optional FormHandler integration
+            - [X] Support custom on-load functions with HTTP promise
+            - [X] Handle URL path standardization (trailing slashes, query params)
+        - [X] **Section Visibility**
+            - [X] Show/hide all sections (`hideAllSections`)
+            - [X] Dynamic section display based on auth state
+            - [X] Active nav section highlighting
+        - [X] **Error Handling**
+            - [X] Custom error page display (`showError`)
         - [X] **Browser History & Redirection**
             - [X] Add a **URL path** to the browser history (`pushToHistory`)
             - [X] Redirect the user to another **URL path** (`navigateTp`)
