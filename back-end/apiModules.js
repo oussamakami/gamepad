@@ -275,11 +275,15 @@ function fetchDashBoardStats(request, reply) {
 }
 
 function handleLogout(request, reply) {
-    if (!request.token_id)
+    let token_id = request.params.tokenId || request.token_id;
+
+    if (!token_id)
         return reply.status(401).send({error: "Unauthorized Access"});
 
-    const { success } = database.deleteSession(request.token_id);
-    reply.clearCookie('authToken');
+    const { success } = database.deleteSession(token_id);
+
+    if (token_id === request.token_id)
+        reply.clearCookie('authToken');
 
     if (!success)
         return reply.status(500).send({error: "Internal Server Error"});
@@ -567,6 +571,28 @@ function handleSettingsSecurity(request, reply) {
     return reply.status(201).send({message: "success!"});
 }
 
+function fetchSettingsData(request, reply) {
+    const user_id = request.user_id;
+    const token_id = request.token_id;
+    const userData = database.fetchUser(user_id);
+    const sessions = database.fetchAllUserSessions(user_id, token_id);
+    const blockedUsers = database.fetchBlockedUsers(user_id);
+    const response = {};
+
+    if (!userData.success || !sessions.success || !blockedUsers.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+
+    response.sessions = sessions.data.sort((a, b) => {
+        if (a.current) return -1;
+        if (b.current) return 1;
+        return 0;
+    });
+    response.blocked = blockedUsers.data;
+    response.twofa = userData.data.twofa_enabled;
+
+    return reply.status(200).send(response);
+}
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -577,7 +603,7 @@ function apiRoutes(fastify, options, done)
     fastify.post("/auth/resetpass", handleAccountReset);
     fastify.post("/auth/twofa", handletwoFa);
     fastify.get("/auth/verifyserial", verifySerial);
-    fastify.get("/logout", handleLogout);
+    fastify.get("/logout/:tokenId", handleLogout);
 
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);
@@ -587,6 +613,7 @@ function apiRoutes(fastify, options, done)
     fastify.get("/friends", fetchUserFriends);
     fastify.post("/relations", handleUsersRelations);
 
+    fastify.get("/settings/data", fetchSettingsData);
     fastify.post("/settings/updateProfile", handleSettingsProfile);
     fastify.post("/settings/updatePass", handleSettingsSecurity);
 

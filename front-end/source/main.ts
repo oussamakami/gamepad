@@ -59,7 +59,7 @@ const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
 const CHAT       = new ChatLoader(API_BASE, SOCKET);
-const SETTINGS   = new SettingsLoader(API_BASE, USER);
+const SETTINGS   = new SettingsLoader(API_BASE, NAVIGATION);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),

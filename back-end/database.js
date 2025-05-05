@@ -429,12 +429,16 @@ class userData {
         return (result);
     }
 
-    fetchAllUserSessions(userId) {
+    fetchAllUserSessions(userId, currentSessionId) {
         const result = {success: true, table: "sessions", action: "fetch"};
         
         try {
             const stmt = this.db.prepare(`SELECT * FROM sessions WHERE user_id = ?`);
             result.data = stmt.all(userId);
+            result.data.forEach(row => {
+                row.title = `${row.ip_address} on ${row.browser} (${row.platform})`
+                row.current = row.token_id === currentSessionId;
+            });
         }
         catch (error) {
             result.success = false;
@@ -1449,6 +1453,32 @@ class userData {
                 throw new Error(user.error.message);
 
             result.data = stmt.all(...Array(2).fill(user.data.id));
+        }
+        catch (error) {
+            result.success = false;
+            result.error = error;
+        }
+
+        return (result);
+    }
+
+    fetchBlockedUsers(userIdentifier) {
+        const result = {success: true, table: "friends_requests", action: "fetch"};
+        const user = this.fetchUser(userIdentifier);
+
+        try {
+            const stmt = this.db.prepare(`
+                SELECT u.id, u.username
+                FROM friends_requests fr
+                JOIN users u ON ( fr.sender_id = ? AND fr.target_id = u.id )
+                WHERE fr.status = 'blocked'
+                ORDER BY u.username ASC
+            `);
+
+            if (!user.success)
+                throw new Error(user.error.message);
+
+            result.data = stmt.all(user.data.id);
         }
         catch (error) {
             result.success = false;

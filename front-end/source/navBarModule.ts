@@ -83,7 +83,7 @@ class NavBarHandler {
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
         new ThemeManager();
-        this.logoutAPI = `${baseAPI}/logout`;
+        this.logoutAPI = `${baseAPI}/logout/`;
         this.navigation = navigationModule;
 
         this.sideNavElem = document.getElementById("side-nav");

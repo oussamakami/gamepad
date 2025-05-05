@@ -1129,7 +1129,7 @@ section {
     object-position: center;
 }
 
-.blocked-item div {
+.blocked-item button {
     margin-left: auto;
 }
 

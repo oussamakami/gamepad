@@ -551,18 +551,8 @@
                             <h4>active sessions settings</h4>
                             <i class='bx bx-desktop card-icon'></i>
                         </div>
-                        <ul id="sessions-list">
-                            <li class="sessions-item">
-                                <strong>127.0.0.1 on Firefox (Linux)</strong>
-                                <label>current</label>
-                                <button class="btn">logout</button>
-                            </li>
-                            <li class="sessions-item">
-                                <strong>127.0.0.1 on Firefox (Linux)</strong>
-                                <button class="btn">logout</button>
-                            </li>
-                        </ul>
-                        <button class="btn">logout from all devices</button>
+                        <ul id="sessions-list"></ul>
+                        <button id="closeAllSessions" class="btn">logout from all devices</button>
                     </div>
                 </div>
                 <div class="cards-container" id="blocked-settings">
@@ -571,15 +561,7 @@
                             <h4>blocked users</h4>
                             <i class='bx bx-block card-icon'></i>
                         </div>
-                        <ul id="blocked-list">
-                            <li class="blocked-item">
-                                <img src="https://cdn.pixabay.com/photo/2024/02/28/07/42/european-shorthair-8601492_640.jpg" alt="profile picture">
-                                <strong>eddie</strong>
-                                <div class="btn-container">
-                                    <button data-action="add" class="danger-btn">unblock</button>
-                                </div>
-                            </li>
-                        </ul>
+                        <ul id="blocked-list"></ul>
                     </div>
                 </div>
                 <div class="cards-container" id="twofa-settings">

@@ -35,8 +35,8 @@ class ActionsHandler {
     private async handleButtonClick(event: Event, targetID: number) {
         const button = event.currentTarget as HTMLButtonElement;
         const action = button.dataset.action as RelationActions;
-        const container = button.parentElement!;
-        const isForList = container.dataset.for === "list";
+        const container = button.parentElement;
+        const isForList = container?.dataset.for === "list";
 
         try {
             const response = await fetch(this.targetAPI, {
@@ -51,7 +51,8 @@ class ActionsHandler {
 
             const text = await response.text();
             const friendship = text ? JSON.parse(text) : null;
-            this.generateBtnContainer(targetID, friendship, isForList, container);
+            if (container && container.className === "btn-container")
+                this.generateBtnContainer(targetID, friendship, isForList, container);
         }
         catch {
             console.error(`Failed to ${action} for user ${targetID}`);
@@ -65,7 +66,7 @@ class ActionsHandler {
         button.dataset.action = action;
         button.innerText = text;
         button.className = isDanger ? "danger-btn" : "btn";
-        button.onclick = (event) => this.handleButtonClick(event, targetID);
+        button.addEventListener("click", (event) => this.handleButtonClick(event, targetID));
 
         return (button);
     }
