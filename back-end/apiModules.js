@@ -3,12 +3,12 @@ import Mailer from './mailer.js';
 import twoFA from './twofa.js';
 import userData from './database.js'
 import SocketManager from './socketManager.js';
-import { readFile } from 'fs/promises'
-import { join } from 'path';
+import { unlink, writeFile, readFile } from 'fs/promises'
+import { extname, join } from 'path';
 import Dotenv from 'dotenv';
 
 Dotenv.config();
-const VALIDEXT = ["png", "jpg", "jpeg", "webp"];
+const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
 const PICTURES_PATH = process.env.PICTURES_PATH;
 const database = new userData("", false);
 const CONNECTIONS = new SocketManager(database);
@@ -229,7 +229,7 @@ async function fetchProfilePicture(request, reply) {
 
     const filename = queryResponse.data.picture;
     const path = join(PICTURES_PATH, filename);
-    const extention = filename.split(".").pop();
+    const extention = extname(filename);
 
     if (!VALIDEXT.includes(extention))
         return reply.status(500).send({error: "Internal Server Error"});
@@ -237,7 +237,7 @@ async function fetchProfilePicture(request, reply) {
     try {
         const image = await readFile(path);
 
-        reply.header('Content-Type', `image/${extention}`);
+        reply.header('Content-Type', `image/${extention.slice(1)}`);
         return reply.status(200).send(image);
     }
     catch (error) {
@@ -320,6 +320,9 @@ function handleAccountReset(request, reply) {
     const serial = request.body.serial;
     const password = request.body.password;
     const passwordConfirmation = request.body.confirmPassword;
+
+    if (!inputValidator.validatePassword(password))
+        return reply.status(400).send({error: "Invalid password"});
 
     if (password != passwordConfirmation)
         return reply.status(403).send({error: "password confirmation doesnt match"});
@@ -464,6 +467,105 @@ function handleSocket(socket, request) {
     socket.on("error", () => clearInterval(intervalId));
 }
 
+async function extractMultipartFields(request) {
+    if (!request.isMultipart())
+        return ({});
+
+    const result = {};
+    const parts = request.parts();
+
+    for await (const part of parts) {
+        const field = part.fieldname;
+
+        if (part.type === "field")
+            result[field] = part.value;
+        if (part.type === "file" && part.filename.length) {
+            result[field] = {
+                filename: part.filename,
+                data: await part.toBuffer()
+            }
+        }
+    }
+
+    return (result);
+}
+
+async function saveProfilePicture(user_id, file) {
+    const extension = extname(file.filename) || '.jpg';
+    const filename = `${user_id}${extension}`;
+    const filePath = join(PICTURES_PATH, filename);
+
+    if (!VALIDEXT.includes(extension))
+        return (undefined);
+
+    try { await unlink(filePath) } catch {}
+
+    await writeFile(filePath, file.data);
+    return (filename);
+}
+
+async function handleSettingsProfile(request, reply) {
+    const newData = {};
+    const user_id = request.user_id;
+    const currentUser = database.fetchUser(user_id);
+    const data = (request.isMultipart()) ? await extractMultipartFields(request) : reply.body;
+
+    if (!currentUser.success)
+        return reply.status(400).send({error: "Invalid Request"});
+
+    if (data.figure) {
+        newData.picture = (await saveProfilePicture(user_id, data.figure));
+        if (!newData.picture)
+            return reply.status(403).send({error: "unsupported file extention"});
+    }
+
+    if (data.username) {
+        if (!inputValidator.validateUserName(data.username))
+            return reply.status(400).send({error: "Invalid Request"});
+        if (data.username !== currentUser.data.username)
+            newData.username = data.username;
+    }
+
+    if (data.email) {
+        data.email = inputValidator.normalizeEmail(data.email);
+        if (!inputValidator.validateEmail(data.email))
+            return reply.status(400).send({error: "Invalid Request"});
+        if (data.email !== currentUser.data.email)
+            newData.email = data.email;
+    }
+
+    const queryResponse = database.updateUser(user_id, newData);
+    if (!queryResponse.success) {
+        if (queryResponse.error.code) {
+            if (queryResponse.error.message.includes("UNIQUE"))
+                return reply.status(409).send({error: "Username or Email already taken"});
+            return reply.status(500).send({error: "Internal Server Error"});
+        }
+        return reply.status(403).send({error: queryResponse.error.message});
+    }
+    return reply.status(201).send({message: "success!"});
+}
+
+function handleSettingsSecurity(request, reply) {
+    const user_id = request.user_id;
+    const password = request.body.password;
+    const newPassword = request.body.newPassword;
+    const confirmPassword = request.body.confirmPassword;
+
+    const user = database.checkCredentials(user_id, password);
+
+    if (!user.success)
+        return reply.status(403).send({error: "Incorrect password"});
+    if (!inputValidator.validatePassword(newPassword))
+        return reply.status(400).send({error: "Invalid password"});
+    if (newPassword != confirmPassword)
+        return reply.status(403).send({error: "password confirmation doesnt match"});
+
+    const query = database.updateUser(user_id, { password: newPassword });
+    if (!query.success)
+        return reply.status(500).send({error: "Internal Server Error"});
+    return reply.status(201).send({message: "success!"});
+}
 
 function apiRoutes(fastify, options, done)
 {
@@ -484,6 +586,9 @@ function apiRoutes(fastify, options, done)
     fastify.get("/search/:query", handleSearch);
     fastify.get("/friends", fetchUserFriends);
     fastify.post("/relations", handleUsersRelations);
+
+    fastify.post("/settings/updateProfile", handleSettingsProfile);
+    fastify.post("/settings/updatePass", handleSettingsSecurity);
 
     fastify.get("/websocket", { websocket: true }, handleSocket);
 

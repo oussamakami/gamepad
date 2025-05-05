@@ -23,6 +23,7 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.0.0",
+    "@fastify/multipart": "^9.0.3",
     "@fastify/websocket": "^11.0.2",
     "apexcharts": "^4.5.0",
     "better-sqlite3": "^11.9.0",
