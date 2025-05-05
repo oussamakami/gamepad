@@ -67,7 +67,7 @@ class ChatLoader {
 
         const data = `
             <a href="/chat?user_id=${userid}">
-                <img src="${this.pictureAPI}/${userid}" alt="profile picture">
+                <img src="${this.pictureAPI}/${userid}?v=${Date.now()}" alt="profile picture">
                 <div class="info">
                     <h5>${username}<span class="notification ${unread ? "" : "hidden"}"></span></h5>
                     <p>${lastMessage || ""}</p>
@@ -140,7 +140,7 @@ class ChatLoader {
         
         if (!chatUserImg || !chatUserName || !messagesBox || !onlineStatus) return;
 
-        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.user_id}`;
+        chatUserImg.src = `${this.pictureAPI}/${this.activeChat.user_id}?v=${Date.now()}`;
         chatUserName.textContent = this.activeChat.username;
         onlineStatus.className = this.activeChat.isOnline ? "user-online" : "user-offline";
         messagesBox.innerHTML = "";

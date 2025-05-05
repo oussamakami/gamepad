@@ -99,7 +99,7 @@ class SearchLoader {
         item.className = "user-card";
         item.innerHTML = `
             <div class="card-title">
-                <img alt="profile picture" src="${this.pictureAPI}/${userid}">
+                <img alt="profile picture" src="${this.pictureAPI}/${userid}?v=${Date.now()}">
                 <h4><p class="user-status">${statusIcon}</p><strong>${username}</strong></h4>
             </div>
         `;

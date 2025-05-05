@@ -28,11 +28,15 @@ class FormHandler {
         this.formElement.addEventListener("submit", this.handleSubmit.bind(this));
     }
 
-    private getEntries(): string {
+    private getEntries(): FormData | string {
         const formData = new FormData(this.formElement);
-        const entries = Object.fromEntries(formData.entries());
 
-        return (JSON.stringify(entries));
+        if (!this.formElement.querySelector('input[type="file"]')) {
+            const entries = Object.fromEntries(formData.entries());
+            return JSON.stringify(entries);
+        }
+
+        return (formData);
     }
 
     public addToPayload(key: string, value: string): void {
@@ -51,11 +55,17 @@ class FormHandler {
         passwordInputs.forEach(input => input.value = "");
     }
 
-    private async sendRequest(payload: string): Promise<string> {
+    private async sendRequest(payload: FormData | string): Promise<string> {
+        const headers = new Headers();
+
+        if (!(payload instanceof FormData)) {
+            headers.append("Content-Type", "application/json");
+        }
+
         const response = await fetch(this.targetAPI, {
             method: "POST",
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers,
             body: payload
         })
         .catch(error => {throw new Error("Unknown error occurred")});
@@ -76,6 +86,7 @@ class FormHandler {
         .then(response => {
             const responseObj = response.length ? JSON.parse(response) : {};
 
+            this.resetPasswordFields();
             this.showSuccess(responseObj.message || "Success");
             this.onSuccess(responseObj)
         })

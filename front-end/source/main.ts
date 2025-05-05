@@ -9,6 +9,7 @@ import FriendsLoader from "./friendsModule";
 import ChatLoader from "./chatModule";
 import SocketHandler from "./SocketModule";
 import NOTIFICATIONS from "./notificationsModule";
+import SettingsLoader from "./settingsHandler";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -58,6 +59,7 @@ const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
 const CHAT       = new ChatLoader(API_BASE, SOCKET);
+const SETTINGS   = new SettingsLoader(API_BASE, USER);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),
@@ -82,7 +84,7 @@ const DASHSECTIONS = [
     {path: "/search",    view: "search",    options: {onload: () => SEARCH.load()}},
     {path: "/friends",   view: "friends",   options: {onload: () => FRIENDS.load()}},
     {path: "/chat",      view: "chat",      options: {onload: () => CHAT.load()}},
-    {path: "/settings",  view: "settings",  options: {}},
+    {path: "/settings",  view: "settings",  options: {onload: () => SETTINGS.load()}},
     {path: "/pong",      view: "pong",      options: {}},
     {path: "/tictac",    view: "tic-tac",   options: {}},
     {path: "/rps",       view: "rps",       options: {}},

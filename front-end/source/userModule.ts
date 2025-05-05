@@ -13,7 +13,7 @@ class UserData {
 
         this.clear();
         this.sessionAPI = baseAPI + "/sessionData";
-        this.pictureAPI = baseAPI + "/picture/";
+        this.pictureAPI = baseAPI + "/picture";
         this.isSessionLoaded = false;
     }
 
@@ -30,7 +30,7 @@ class UserData {
         const displayname = document.querySelector("[data-nav-user-name]");
 
         if (picture)
-            picture.src = this.pictureAPI + this.id;
+            picture.src = `${this.pictureAPI}/${this.id}?v=${Date.now()}`;
         if (displayname)
             displayname.textContent = this.name;
     }

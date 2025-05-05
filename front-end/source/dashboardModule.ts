@@ -21,7 +21,7 @@ class DashboardLoader {
         this.dashboard = elem;
         this.projection = new Chart("projection-chart");
         this.statsAPI = baseAPI + "/stats";
-        this.pictureAPI = baseAPI + "/picture/";
+        this.pictureAPI = baseAPI + "/picture";
         this.navigation = navigationModule;
 
         elem.querySelector("#dash-refresh")?.addEventListener("click", (event) => {
@@ -125,7 +125,7 @@ class DashboardLoader {
 
             link.href = `/profile?id=${player.userId}`;
             rank.textContent = `#${index + 1}`;
-            userimg.src = this.pictureAPI + player.userId;
+            userimg.src = `${this.pictureAPI}/${player.userId}?v=${Date.now()}`;
             username.textContent = player.username;
 
             link.appendChild(rank);

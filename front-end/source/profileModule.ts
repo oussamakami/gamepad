@@ -101,7 +101,7 @@ class ProfileLoader {
         id       && (id   .textContent  = this.profileData.id);
         name     && (name .textContent  = this.profileData.username);
         email    && (email.textContent  = this.profileData.email);
-        picture  && (picture.src        = `${this.pictureAPI}/${this.profileData.id}`);
+        picture  && (picture.src        = `${this.pictureAPI}/${this.profileData.id}?v=${Date.now()}`);
         isonline && (isonline.className = this.profileData.isOnline ? "user-online" : "user-offline");
         
         if (this.profileData.id != this.sessionUserId) {
