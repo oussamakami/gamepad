@@ -1,6 +1,7 @@
 import {httpPromise} from "./browserModule";
 import ActionsHandler from "./actionsModule";
 import SocketHandler from "./SocketModule";
+import UserData from "./userModule";
 
 class ChatLoader {
     //APIS
@@ -13,13 +14,14 @@ class ChatLoader {
     private readonly chatInfo     : HTMLElement;
 
     //MODULES
+    private readonly user         : UserData
     private readonly socket       : SocketHandler;
     private readonly btnGenerator : ActionsHandler;
 
     private ChatData: Record<string, any> | undefined;
     private activeChat: Record<string, any> | undefined;
 
-    constructor(baseAPI: string, socketHandler: SocketHandler) {
+    constructor(baseAPI: string, USER: UserData,socketHandler: SocketHandler) {
         const elem = document.getElementById("chat");
         const chatList = elem?.querySelector("#chat-list")?.querySelector("ul");
         const chatBox = elem?.querySelector("#chat-box");
@@ -41,13 +43,14 @@ class ChatLoader {
         chatinput.onsubmit = (e) => this.sendMessage(e);
         deletebtn.onclick = (e) => this.deleteCurrentChat();
 
-        this.btnGenerator = new ActionsHandler(baseAPI);
+        this.user = USER;
         this.socket = socketHandler;
+        this.btnGenerator = new ActionsHandler(baseAPI);
     }
 
     public updateChatData(data: Record<string, any>) {
         this.ChatData = data.data;
-        this.load();
+        this.load(false);
     }
 
     private createChatItem(chatid: number, userid: number, username: string, messages?: Record<string, any>[]) {
@@ -111,7 +114,7 @@ class ChatLoader {
         const target = Number(url.get("user_id"));
         const keys = Object.keys(this.ChatData);
 
-        if (!keys.length && !target)
+        if (!keys.length)
             this.chatList.innerHTML = `<p style="padding:1rem 3rem;text-align:center;">You don’t have any active chats right now.</p>`;
         else
             this.chatList.innerHTML = "";
@@ -204,14 +207,20 @@ class ChatLoader {
     }
 
 
-    public async load(): httpPromise {
+    public async load(checkConnection: boolean = true): httpPromise {
+        if (checkConnection) {
+            await this.user.fetchSessionData();
+            const isLoggedIn = await this.user.isAuthenticated();
+            if (!isLoggedIn)
+                return Promise.reject({httpCode: 401, httpName: "forbiden"});
+        }
         this.chatBox.classList.add("hidden");
         this.chatInfo.classList.add("hidden");
         this.updateChatList();
         this.updateChatBox();
         this.updateChatInfo();
 
-        return {httpCode: 200, httpName: "ok"};
+        return Promise.resolve({httpCode: 200, httpName: "ok"});
     }
 }
 

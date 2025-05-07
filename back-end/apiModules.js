@@ -206,6 +206,8 @@ function handleUsersRelations(request, reply) {
         }
         CONNECTIONS.send(target, notifcation);
     }
+    CONNECTIONS.send(target, getUserChats(target));
+    CONNECTIONS.send(sender, getUserChats(sender));
 
     reply.status(201).send(database.fetchFriendshipData(sender, target));
 }
@@ -600,7 +602,7 @@ async function loginWithGoogle(request, reply) {
     const googleData = await twoFA.exchangeGoogleCode(request.query.code, request.query.state);
 
     if (!googleData)
-        return reply.redirect(`${googleData.originURI}/login?expired=true`);
+        return reply.redirect(`${googleData.originURI}/login?error=${encodeURIComponent("google failed")}`);
 
     let userquery = database.fetchUser(googleData.sub);
 
@@ -611,7 +613,7 @@ async function loginWithGoogle(request, reply) {
             userquery = await database.createUserWithGoogle(googleData);
         
         if (!userquery.success)
-            return reply.redirect(`${googleData.originURI}/login?expired=true`);
+            return reply.redirect(`${googleData.originURI}/login?error=${encodeURIComponent("session expired")}`);
     }
     if (user_id)
         return reply.redirect(`${googleData.originURI}/settings`);

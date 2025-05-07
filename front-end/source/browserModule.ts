@@ -156,7 +156,7 @@ class NavigationHandler {
         .catch(error => {
             if (error.httpCode === 401) {
                 this.user.clear();
-                this.navigateTo("/login?expired=true");
+                this.navigateTo(`/login?error=${encodeURIComponent("session expired")}`);
             } else {
                 this.hideAllSections(isLoggedIn);
                 this.showError(error.httpCode, error.httpName);
@@ -182,12 +182,13 @@ class NavigationHandler {
 
     private handleEvents(event: MouseEvent): void {
         const targetAnchor = (event.target as HTMLElement).closest('a');
+        const targetPath = (targetAnchor as HTMLAnchorElement)?.getAttribute("href");
         if (!targetAnchor) return ;
-
-        const targetPath = (targetAnchor as HTMLAnchorElement).getAttribute("href") || "/";
-
+        
         event.preventDefault();
-        this.navigateTo(targetPath);
+
+        if (targetPath)
+            this.navigateTo(targetPath);
     }
 
     public initialize(): void {

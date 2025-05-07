@@ -21,12 +21,12 @@ function loadUserData(data) {
     NAVIGATION.navigateTo("/dashboard");
 }
 
-function expiredNotice(formHander?: FormHandler): httpPromise {
+function checkError(formHander?: FormHandler): httpPromise {
     const url = new URLSearchParams(location.search);
-    const expired = url.get("expired");
-
-    if (expired)
-        formHander?.showError("session expired");
+    const error = url.get("error");
+    
+    if (error)
+        formHander?.showError(error);
 
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
@@ -61,7 +61,7 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
-const CHAT       = new ChatLoader(API_BASE, SOCKET);
+const CHAT       = new ChatLoader(API_BASE, USER, SOCKET);
 const SETTINGS   = new SettingsLoader(API_BASE, NAVIGATION);
 
 const FORMS = {
@@ -73,8 +73,8 @@ const FORMS = {
 }
 
 const AUTHSECTIONS = [
-    {path: "/",        view: "login",    options: {formHander: FORMS.LOGIN,   onload: expiredNotice}},
-    {path: "/login",   view: "login",    options: {formHander: FORMS.LOGIN,   onload: expiredNotice}},
+    {path: "/",        view: "login",    options: {formHander: FORMS.LOGIN,   onload: checkError}},
+    {path: "/login",   view: "login",    options: {formHander: FORMS.LOGIN,   onload: checkError}},
     {path: "/reset",   view: "reset",    options: {formHander: FORMS.RESET,   onload: containsSerial}},
     {path: "/twofa",   view: "twofa",    options: {formHander: FORMS.TWOFA,   onload: containsSerial}},
     {path: "/signup",  view: "signup",   options: {formHander: FORMS.SIGNUP   }},

@@ -159,6 +159,8 @@ class NavBarHandler {
 
     public async logoutSession() {
         await fetch(this.logoutAPI, { method: "GET", credentials: "include" });
+        this.navigation.userData.clear();
+        this.navigation.navigateTo("/");
     }
 }
 

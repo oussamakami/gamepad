@@ -137,8 +137,10 @@ class SettingsLoader {
                 const response = await fetch(endpoint, {method: "GET", credentials: "include"});
                 if (!response.ok)
                     throw new Error(`Failed to close session`);
-                if (current)
+                if (current) {
+                    this.user.clear();
                     this.navModule.navigateTo("/");
+                }
                 item.remove();
             }
             catch (error) {
@@ -162,7 +164,11 @@ class SettingsLoader {
         item.appendChild(this.btnGenerator.generateActionButton("unblock", userId));
 
         const button = item.querySelector("button")!;
-        button.onclick = () => item.remove();
+        button.onclick = () => {
+            item.remove();
+            if (!this.blockedList.innerHTML.length)
+                this.blockedList.innerHTML = "<p>You haven’t blocked anyone yet.</p>"
+        };
 
         return (item);
     }
@@ -207,6 +213,7 @@ class SettingsLoader {
                 console.error(error.message);
             }
         });
+        this.user.clear();
         this.navModule.navigateTo("/");
     }
 
@@ -262,6 +269,8 @@ class SettingsLoader {
             appOption?.addEventListener("change", () => {
                 if (appOption.checked) qrData?.classList.remove("hidden");
             });
+
+            if (appOption.checked) qrData?.classList.remove("hidden");
         }
 
         if (this.settingsData.twofa_secret) {

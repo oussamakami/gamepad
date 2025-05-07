@@ -71,7 +71,7 @@ class UserData {
     }
 
     public async isAuthenticated(): Promise<boolean> {
-        if ((!this.isLoggedIn && !this.isSessionLoaded) || this.isLoggedIn)
+        if (!this.isSessionLoaded)
             await this.fetchSessionData();
         return (this.isLoggedIn);
     }
