@@ -592,8 +592,21 @@ async function fetchSettingsData(request, reply) {
 }
 
 function redirectToGoogle(request, reply) {
+    const user_id = request.user_id;
+    const unlink = request.query.unlink;
     const referer = request.headers.referer;
     const originURI = referer.endsWith("/") ? referer.slice(0, -1) : referer;
+
+    if (user_id && unlink === "true") {
+        const userquery = database.updateUser(user_id, {goodleId: null});
+
+        if (userquery.success) {
+            if (!userquery.data.password)
+                reply.redirect(`${originURI}/settings?error=${encodeURIComponent("Set password to unlink Google")}`);
+            reply.redirect(`${originURI}/settings`);
+        };
+        reply.redirect(`${originURI}/settings?error=${encodeURIComponent("Failed to unlink Google")}`);
+    }
     reply.redirect(twoFA.generateGoogleConsentURL(originURI));
 }
 
@@ -601,25 +614,49 @@ async function loginWithGoogle(request, reply) {
     const user_id = request.user_id;
     const googleData = await twoFA.exchangeGoogleCode(request.query.code, request.query.state);
 
-    if (!googleData)
-        return reply.redirect(`${googleData.originURI}/login?error=${encodeURIComponent("google failed")}`);
+    if (!googleData.sub)
+        return reply.redirect(`${googleData.originURI}/${user_id ? "settings" : "login"}?error=${encodeURIComponent("Google data retrieval failed")}`);
 
-    let userquery = database.fetchUser(googleData.sub);
+    try {
+        let updateQuery;
+        const userquery = database.fetchUser(googleData.sub);
 
-    if (!userquery.success) {
-        if (user_id)
-            userquery = database.updateUser(user_id, {goodleId: googleData.sub});
+        if (!userquery.success) {
+            if (user_id) {
+                updateQuery = database.updateUser(user_id, {goodleId: googleData.sub});
+                if (!updateQuery.success) throw {action: "link", success: false, error: "Unable to link Google account"};
+                throw {action: "link", success: true, id: updateQuery.data.id};
+            }
+            else {
+                updateQuery = await database.createUserWithGoogle(googleData);
+                if (!updateQuery.success) throw {action: "create", success: false, error: "Email already associated with profile"};
+                throw {action: "create", success: true, id: updateQuery.data.id};
+            }
+        }
+        else if (user_id)
+            throw {action: "link", success: false, error: "Google account linked elsewhere"}
         else
-            userquery = await database.createUserWithGoogle(googleData);
-        
-        if (!userquery.success)
-            return reply.redirect(`${googleData.originURI}/login?error=${encodeURIComponent("session expired")}`);
+            throw {action: "connect", success: true, id: userquery.data.id};
     }
-    if (user_id)
-        return reply.redirect(`${googleData.originURI}/settings`);
+    catch (status) {
+        let target = `${googleData.originURI}/`;
 
-    const session = database.createSession(userquery.data.id, false, getSessionInfo(request));
-    return reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"}).redirect(`${googleData.originURI}`);
+        if (status.action === "link")
+            target += "settings";
+
+        if (!status.success) {
+            if (status.action !== "link")
+                target += "login";
+            target += `?error=${encodeURIComponent(status.error)}`;
+            return reply.redirect(target);
+        }
+        else if (status.success && status.action !== "link") {
+            const session = database.createSession(status.id, true, getSessionInfo(request));
+            return reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"}).redirect(target);
+        }
+        else
+            return reply.redirect(target);
+    }
 }
 
 function handleSettingsTwofa(request, reply) {

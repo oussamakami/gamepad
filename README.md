@@ -49,18 +49,22 @@ Follow the steps below to set up the project:
 
    ```
    PORT = <server_port>
-   
+
    JWT_SECRET = <64_character_long_secure_string>
-   
+
    PICTURES_PATH = <absolute_path_to_profile_pictures_directory>
-   
+
    SMTP = <SMTP server url>
 
    SMTP_PORT = <SMTP server port>
-   
+
    SMTP_USER = <SMTP server user/email>
-   
+
    SMTP_PASS = <SMTP password/app_password>
+
+   CLIENT_ID = <Google OAUTH2 Project Client ID>
+
+   CLIENT_SECRET = <Google OAUTH2 Project Client Secret>
    ```
 
    To generate a secure `JWT_SECRET`, you can use this command:
@@ -81,10 +85,14 @@ Follow the steps below to set up the project:
    SMTP = smtp.gmail.com
 
    SMTP_PORT = 465
-   
+
    SMTP_USER = user@gmail.com
-   
+
    SMTP_PASS = abcd efgh ijkl mnop
+
+   CLIENT_ID = 420389808456-6eyfjlkxbk78xzboqiv8lsnrasid0cmd.apps.googleusercontent.com
+
+   CLIENT_SECRET = QADSNG-OKtDL5KdUI8r9iJSh3JnXeBnbef8
    ```
 
 5. **Available NPM Scripts:**

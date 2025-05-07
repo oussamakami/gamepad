@@ -132,6 +132,13 @@ class userData {
         const result = {success: true, table: "users", action: "create"};
         const picture = DEFAULT_PICTURES[Math.random() * DEFAULT_PICTURES.length | 0]
         let attempts = 0;
+
+        if (!username.length || !email.length) {
+            result.success = false;
+            result.error = "invalid username/email";
+            return (result);
+        }
+
         
         while (++attempts < 5)
         {
@@ -192,9 +199,11 @@ class userData {
     }
 
     async createUserWithGoogle(googleData) {
-            const username = googleData.given_name + this.generateUserId(4);
-            const email = googleData.email;
-            const query = this.createUser(username, email);
+            const username1 = ((googleData.given_name || "") + this.generateUserId(4)).slice(0, 20);
+            const username2 = ((googleData.given_name || "") + this.generateUserId(4)).slice(0, 20);
+            const email = googleData.email || "";
+            let query = this.createUser(username1, email);
+            if (!query.success) query = this.createUser(username2, email);
             if (!query.success) return (query);
             const picture = await this.savePictureFromURL(query.data.id, googleData.picture);
             const updateQuery = this.updateUser(query.data.id, {goodleId: googleData.sub, picture: picture || null});
@@ -286,7 +295,7 @@ class userData {
                 twofa_enabled = COALESCE(@twoFA_enable, twofa_enabled),
                 twofa_method = COALESCE(@twoFA_method, twofa_method),
                 twofa_secret = COALESCE(@twoFA_secret, twofa_secret),
-                gid = COALESCE(@goodleId, gid),
+                gid = @goodleId,
                 picture = COALESCE(@picture, picture)
                 WHERE id = ? OR username = ? OR email = ? RETURNING *
                 `);
@@ -296,6 +305,9 @@ class userData {
                 throw new Error(user.error.message);
             if (updateData.password)
                 updateData.password = this.hasher.smartHash(updateData.password, user.data.id);
+
+            if (updateData.goodleId === undefined || (updateData.goodleId === null && !user.data.password))
+                updateData.goodleId = user.data.gid;
 
             result.data = stmt.get(updateData, ...Array(3).fill(userIdentifier));
 

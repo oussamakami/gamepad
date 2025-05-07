@@ -6,6 +6,7 @@ import NavigationHandler from "./browserModule";
 
 class SettingsLoader {
     //APIS
+    private readonly baseAPI          : string;
     private readonly dataAPI          : string;
     private readonly logoutAPI        : string;
     private readonly pictureAPI       : string;
@@ -41,6 +42,7 @@ class SettingsLoader {
 
         baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
+        this.baseAPI = baseAPI;
         this.dataAPI = baseAPI + "/settings/data";
         this.logoutAPI = baseAPI + "/logout";
         this.pictureAPI = baseAPI + "/picture";
@@ -108,12 +110,27 @@ class SettingsLoader {
             this.securityElem.querySelector("#settings-security-password")?.remove();
         }
 
-        if (googlebtn && this.settingsData.usesGoogle) {
-            googlebtn.innerHTML = `
-                <img src="./assets/images/google_icon.png" alt="google logo">
-                Google account linked
-            `;
-            googlebtn.onclick = (e) => {e.preventDefault()};
+        if (googlebtn) {
+            if (this.settingsData.usesGoogle) {
+                googlebtn.innerHTML = `
+                    <img src="./assets/images/google_icon.png" alt="google logo">
+                    Disconnect Google Account
+                `;
+                googlebtn.onclick = (e) => {
+                    e.preventDefault();
+                    location.href = `${this.baseAPI}/auth/google?unlink=true`;
+                };
+            }
+            else {
+                googlebtn.innerHTML = `
+                    <img src="./assets/images/google_icon.png" alt="google logo">
+                    Connect Google Account
+                `;
+                googlebtn.onclick = (e) => {
+                    e.preventDefault();
+                    location.href = `${this.baseAPI}/auth/google`;
+                };
+            }
         }
     }
 
@@ -288,6 +305,11 @@ class SettingsLoader {
             this.updateSessionsList();
             this.updateBlockedList();
             this.handleTwoFa();
+
+            const url = new URLSearchParams(location.search);
+            const error = url.get("error");
+            if (error)
+                this.securityForm.showError(error);
 
             return (result);
         })
