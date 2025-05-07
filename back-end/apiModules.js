@@ -3,7 +3,7 @@ import Mailer from './mailer.js';
 import twoFA from './twofa.js';
 import userData from './database.js'
 import SocketManager from './socketManager.js';
-import { unlink, writeFile, readFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { extname, join } from 'path';
 import Dotenv from 'dotenv';
 
@@ -76,12 +76,11 @@ function getSessionInfo(requestPacket) {
 }
 
 function verifyRequestToken(request, reply, next) {
-    if (request.url.includes("/auth/")) return next();
-
     const sessionToken = request.cookies.authToken;
     const verification = database.verifySession(sessionToken);
 
     if (!verification.success) {
+        if (request.url.includes("/auth/")) return next();
         reply.clearCookie('authToken');
         return reply.status(401).send({error: "Unauthorized Access"});
     }
@@ -494,20 +493,6 @@ async function extractMultipartFields(request) {
     return (result);
 }
 
-async function saveProfilePicture(user_id, file) {
-    const extension = extname(file.filename) || '.jpg';
-    const filename = `${user_id}${extension}`;
-    const filePath = join(PICTURES_PATH, filename);
-
-    if (!VALIDEXT.includes(extension))
-        return (undefined);
-
-    try { await unlink(filePath) } catch {}
-
-    await writeFile(filePath, file.data);
-    return (filename);
-}
-
 async function handleSettingsProfile(request, reply) {
     const newData = {};
     const user_id = request.user_id;
@@ -518,7 +503,7 @@ async function handleSettingsProfile(request, reply) {
         return reply.status(400).send({error: "Invalid Request"});
 
     if (data.figure) {
-        newData.picture = (await saveProfilePicture(user_id, data.figure));
+        newData.picture = (await database.savePicture(user_id, data.figure));
         if (!newData.picture)
             return reply.status(403).send({error: "unsupported file extention"});
     }
@@ -556,10 +541,15 @@ function handleSettingsSecurity(request, reply) {
     const newPassword = request.body.newPassword;
     const confirmPassword = request.body.confirmPassword;
 
-    const user = database.checkCredentials(user_id, password);
+    let user = database.fetchUser(user_id);
 
-    if (!user.success)
-        return reply.status(403).send({error: "Incorrect password"});
+    if (!user.success) {
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+    else if (user.data.password) {
+        if (!database.checkCredentials(user_id, password).success)
+            return reply.status(403).send({error: "Incorrect password"});
+    }
     if (!inputValidator.validatePassword(newPassword))
         return reply.status(400).send({error: "Invalid password"});
     if (newPassword != confirmPassword)
@@ -589,8 +579,41 @@ function fetchSettingsData(request, reply) {
     });
     response.blocked = blockedUsers.data;
     response.twofa = userData.data.twofa_enabled;
+    response.hasPassword = !!userData.data.password;
+    response.usesGoogle = !!userData.data.gid;
 
     return reply.status(200).send(response);
+}
+
+function redirectToGoogle(request, reply) {
+    const referer = request.headers.referer;
+    const originURI = referer.endsWith("/") ? referer.slice(0, -1) : referer;
+    reply.redirect(twoFA.generateGoogleConsentURL(originURI));
+}
+
+async function loginWithGoogle(request, reply) {
+    const user_id = request.user_id;
+    const googleData = await twoFA.exchangeGoogleCode(request.query.code, request.query.state);
+
+    if (!googleData)
+        return reply.redirect(`${googleData.originURI}/login?expired=true`);
+
+    let userquery = database.fetchUser(googleData.sub);
+
+    if (!userquery.success) {
+        if (user_id)
+            userquery = database.updateUser(user_id, {goodleId: googleData.sub});
+        else
+            userquery = await database.createUserWithGoogle(googleData);
+        
+        if (!userquery.success)
+            return reply.redirect(`${googleData.originURI}/login?expired=true`);
+    }
+    if (user_id)
+        return reply.redirect(`${googleData.originURI}/settings`);
+
+    const session = database.createSession(userquery.data.id, false, getSessionInfo(request));
+    return reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"}).redirect(`${googleData.originURI}`);
 }
 
 function apiRoutes(fastify, options, done)
@@ -604,6 +627,9 @@ function apiRoutes(fastify, options, done)
     fastify.post("/auth/twofa", handletwoFa);
     fastify.get("/auth/verifyserial", verifySerial);
     fastify.get("/logout/:tokenId", handleLogout);
+
+    fastify.get("/auth/google", redirectToGoogle);
+    fastify.get("/auth/google/callback", loginWithGoogle);
 
     fastify.get("/sessionData", fetchSessionData);
     fastify.get("/picture/:userId", fetchProfilePicture);

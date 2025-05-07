@@ -36,7 +36,7 @@ class SettingsLoader {
         const blockedList = elem?.querySelector("#blocked-list");
         const twofa = elem?.querySelector("#blocked-list");
 
-        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
         this.dataAPI = baseAPI + "/settings/data";
         this.logoutAPI = baseAPI + "/logout";
@@ -84,10 +84,29 @@ class SettingsLoader {
         const img = this.profileElem.querySelector("[data-user-img]") as HTMLImageElement;
         const username = this.profileElem.querySelector("#settings-profile-name") as HTMLInputElement;
         const email = this.profileElem.querySelector("#settings-profile-email") as HTMLInputElement;
-
+        
         img && ( img.src = `${this.pictureAPI}/${this.user.userId}?v=${Date.now()}` );
         username && ( username.value = this.user.userName );
         email && ( email.value = this.user.userEmail );
+    }
+
+    private updateSecurityForm() {
+        if (!this.settingsData) return;
+
+        const googlebtn = this.securityElem.querySelector(".google-btn") as HTMLButtonElement;
+
+        if (!this.settingsData.hasPassword) {
+            this.securityElem.querySelector(`label[for="settings-security-password"]`)?.remove();
+            this.securityElem.querySelector("#settings-security-password")?.remove();
+        }
+
+        if (googlebtn && this.settingsData.usesGoogle) {
+            googlebtn.innerHTML = `
+                <img src="./assets/images/google_icon.png" alt="google logo">
+                Google account linked
+            `;
+            googlebtn.onclick = (e) => {e.preventDefault()};
+        }
     }
 
     private createSessionItem(token_id: number, title: string, current: boolean = false) {
@@ -108,7 +127,6 @@ class SettingsLoader {
 
             try{
                 const response = await fetch(endpoint, {method: "GET", credentials: "include"});
-    
                 if (!response.ok)
                     throw new Error(`Failed to close session`);
                 if (current)
@@ -188,6 +206,7 @@ class SettingsLoader {
         return this.fetchData()
         .then(result => {
             this.updateProfileForm();
+            this.updateSecurityForm();
             this.updateSessionsList();
             this.updateBlockedList();
 

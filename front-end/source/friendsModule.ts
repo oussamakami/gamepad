@@ -24,7 +24,7 @@ class FriendsLoader {
         const elem = document.getElementById("friends");
         const searchBodyelem = elem?.querySelector("ul");
 
-        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
         this.friendsAPI = baseAPI + "/friends";
         this.pictureAPI = baseAPI + "/picture";

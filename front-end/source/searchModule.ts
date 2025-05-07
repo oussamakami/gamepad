@@ -24,7 +24,7 @@ class SearchLoader {
         const elem = document.getElementById("search");
         const searchBodyelem = elem?.querySelector("ul");
 
-        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
         this.searchAPI = baseAPI + "/search";
         this.pictureAPI = baseAPI + "/picture";

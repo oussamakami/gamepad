@@ -27,7 +27,7 @@ class ChatLoader {
         const chatinput = chatBox?.querySelector("form") as HTMLFormElement;
         const deletebtn = chatBox?.querySelector("#delete-chat") as HTMLButtonElement;
 
-        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
         this.pictureAPI = baseAPI + "/picture";
 
         if (!elem || !chatList || !chatBox ||

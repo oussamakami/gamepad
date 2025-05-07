@@ -7,9 +7,13 @@ import Dotenv from 'dotenv';
 import { error } from 'console';
 import PasswordHasher from './passwordHasher.js';
 import twoFA from './twofa.js';
+import { unlink, writeFile } from 'fs/promises';
+import { extname, join } from 'path';
 
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
+const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
+const PICTURES_PATH = process.env.PICTURES_PATH;
 const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"]
 const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -124,7 +128,7 @@ class userData {
         `);
     }
 
-    createUser(username, email, password) {
+    createUser(username, email, password = undefined) {
         const result = {success: true, table: "users", action: "create"};
         const picture = DEFAULT_PICTURES[Math.random() * DEFAULT_PICTURES.length | 0]
         let attempts = 0;
@@ -137,7 +141,7 @@ class userData {
                     VALUES ( ?, ?, ?, ?, ?, ? ) RETURNING *
                 `);
                 const userId = Number(this.generateUserId());
-                result.data = stmt.get(userId, username, email, this.hasher.smartHash(password, userId), picture, twoFA.getSecret());
+                result.data = stmt.get(userId, username, email, !password? null: this.hasher.smartHash(password, userId), picture, twoFA.getSecret());
                 break;
             }
             catch (error) {
@@ -149,6 +153,52 @@ class userData {
             }
         }
         return (result);
+    }
+
+    async savePicture(name, pictureData) {
+        try {
+            const extension = extname(pictureData.filename) || '.jpg';
+            const filename = `${name}${extension}`;
+            const filePath = join(PICTURES_PATH, filename);
+    
+            if (!VALIDEXT.includes(extension))
+                throw new Error;
+    
+            try { await unlink(filePath) } catch {}
+    
+            await writeFile(filePath, pictureData.data);
+    
+            return (filename);
+        }
+        catch {
+            return (undefined);
+        }
+    }
+    
+    async savePictureFromURL(name, pictureURL) {
+        try {
+            const pictureData = {};
+            const response = await fetch(pictureURL);
+    
+            if (!response.ok)
+                throw new Error;
+    
+            pictureData.filename = "." + response.headers.get("content-type").split("/").pop();
+            pictureData.data = Buffer.from(await response.arrayBuffer());
+            return (this.savePicture(name, pictureData));
+        } catch (error) {
+            return (undefined);
+        }
+    }
+
+    async createUserWithGoogle(googleData) {
+            const username = googleData.given_name + this.generateUserId(4);
+            const email = googleData.email;
+            const query = this.createUser(username, email);
+            if (!query.success) return (query);
+            const picture = await this.savePictureFromURL(query.data.id, googleData.picture);
+            const updateQuery = this.updateUser(query.data.id, {goodleId: googleData.sub, picture: picture || null});
+            return (updateQuery);
     }
 
     checkCredentials(userIdentifier, password) {
@@ -191,8 +241,8 @@ class userData {
         const result = {success: true, table: "users", action: "fetch"};
 
         try {
-            const stmt = this.db.prepare(`SELECT * FROM users WHERE id = ? OR username = ? OR email = ?`);
-            result.data = stmt.get(...Array(3).fill(userIdentifier));
+            const stmt = this.db.prepare(`SELECT * FROM users WHERE id = ? OR username = ? OR email = ? OR gid = ?`);
+            result.data = stmt.get(...Array(4).fill(userIdentifier));
 
             if (!result.data) {
                 delete result.data;

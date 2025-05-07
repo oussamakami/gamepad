@@ -21,7 +21,7 @@ class ProfileLoader {
 
     constructor(baseAPI: string, navigationModule: NavigationHandler) {
         const elem = document.getElementById("profile");
-        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, 1) : baseAPI;
+        baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
         this.statsAPI = baseAPI + "/users";
         this.pictureAPI = baseAPI + "/picture";

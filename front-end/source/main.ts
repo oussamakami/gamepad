@@ -48,7 +48,10 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
 }
 
 
-const API_BASE   = "http://127.0.0.1:3000/api";
+let API_BASE   = "http://127.0.0.1:3000/api/";
+
+if (API_BASE.endsWith("/"))
+    API_BASE = API_BASE.slice(0, -1);
 
 const USER       = new UserData(API_BASE);
 const SOCKET     = new SocketHandler("ws://127.0.0.1:3000/api/websocket", USER);
@@ -101,6 +104,13 @@ DASHSECTIONS.forEach(section => NAVIGATION.addDashSection(section.path, section.
 SOCKET.addMessageHandler("chat", (data) => {CHAT.updateChatData(data)});
 SOCKET.addMessageHandler("notification", (data) => NOTIFICATIONS.addNotification(data))
 SOCKET.connect();
+
+document.querySelectorAll(".google-btn").forEach(btn => {
+    (btn as HTMLButtonElement).onclick = (e) => {
+        e.preventDefault();
+        location.href = `${API_BASE}/auth/google`;
+    };
+})
 
 NAVIGATION.configure("top-nav", "side-nav", "error");
 NAVIGATION.initialize();
