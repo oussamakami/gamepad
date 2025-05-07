@@ -28,7 +28,7 @@ class FormHandler {
         this.formElement.addEventListener("submit", this.handleSubmit.bind(this));
     }
 
-    private getEntries(): FormData | string {
+    public getEntries(): FormData | string {
         const formData = new FormData(this.formElement);
 
         if (!this.formElement.querySelector('input[type="file"]')) {
@@ -111,7 +111,7 @@ class FormHandler {
     private updateStatus(message: string, type?: "success" | "failure"): void {
         const statusElement = this.formElement.querySelector(".form-status") as HTMLElement;
 
-        if (!this.showStatus || !statusElement) return ;
+        if ((!this.showStatus && type === "success") || !statusElement) return;
         
         statusElement.textContent = message;
         statusElement.className = "form-status";

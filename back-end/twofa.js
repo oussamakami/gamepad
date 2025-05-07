@@ -21,7 +21,7 @@ class twoFA {
         const issuer = this.issuer;
         const secret = speakeasy.generateSecret({issuer});
 
-        return (secret.base32);
+        return (secret.base32.substring(0, 16));
     }
 
     static  getEmailToken(secret) {

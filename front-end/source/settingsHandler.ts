@@ -11,15 +11,18 @@ class SettingsLoader {
     private readonly pictureAPI       : string;
     private readonly updatePassAPI    : string;
     private readonly updateProfileAPI : string;
+    private readonly updateTwoFaAPI   : string;
 
     //DOM ELEMENTS
     private readonly profileElem  : HTMLElement;
     private readonly securityElem : HTMLElement;
     private readonly sessionList  : HTMLElement;
     private readonly blockedList  : HTMLElement;
+    private readonly twoFaElem    : HTMLElement;
 
     private readonly profileForm  : FormHandler;
     private readonly securityForm : FormHandler;
+    private readonly twoFaForm : FormHandler;
 
     //MODULES
     private readonly user         : UserData;
@@ -34,7 +37,7 @@ class SettingsLoader {
         const security = elem?.querySelector("#security-settings-form");
         const sessions = elem?.querySelector("#sessions-list");
         const blockedList = elem?.querySelector("#blocked-list");
-        const twofa = elem?.querySelector("#blocked-list");
+        const twofa = elem?.querySelector("#twofa-settings-form");
 
         baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
 
@@ -43,6 +46,7 @@ class SettingsLoader {
         this.pictureAPI = baseAPI + "/picture";
         this.updateProfileAPI = baseAPI + "/settings/updateProfile";
         this.updatePassAPI = baseAPI + "/settings/updatePass";
+        this.updateTwoFaAPI = baseAPI + "/settings/updateTwoFa";
 
         if (!elem || !profile || !security ||
             !sessions || !blockedList || !twofa)
@@ -52,9 +56,13 @@ class SettingsLoader {
         this.securityElem = security as HTMLElement;
         this.sessionList = sessions as HTMLElement;
         this.blockedList = blockedList as HTMLElement;
+        this.twoFaElem = twofa as HTMLElement;
 
-        this.profileForm = new FormHandler(profile.id, this.updateProfileAPI, async (data) => {navigationModule.reloadPage()});
-        this.profileForm = new FormHandler(security.id, this.updatePassAPI);
+        this.securityForm = new FormHandler(security.id, this.updatePassAPI);
+        this.twoFaForm    = new FormHandler(twofa.id, this.updateTwoFaAPI, async (data) => {navigationModule.reloadPage()});
+        this.profileForm  = new FormHandler(profile.id, this.updateProfileAPI, async (data) => {navigationModule.reloadPage()});
+
+        this.twoFaForm.setStatusVisibility = false;
 
         this.navModule = navigationModule;
         this.user = navigationModule.userData;
@@ -202,6 +210,67 @@ class SettingsLoader {
         this.navModule.navigateTo("/");
     }
 
+    private handleTwoFa(): void {
+        if (!this.settingsData) return;
+
+        const status = this.twoFaElem.querySelector("label i");
+        const options = this.twoFaElem.querySelector("#twofa-enable-section");
+        const qrPicture = options?.querySelector("#twofa-qrcode") as HTMLImageElement;
+        const qrSecret = options?.querySelector(".twofa-secret-code");
+        const qrData = this.twoFaElem.querySelector("#twofa-qrcode-section");
+        const actionBtn = this.twoFaElem.querySelector("#form-settings-action") as HTMLButtonElement;
+        const abortBtn = this.twoFaElem.querySelector("#form-settings-abort") as HTMLButtonElement;
+
+
+
+        if (status)
+            status.className = this.settingsData.twofa ? "enabled" : "disabled";
+
+        if (actionBtn) {
+            actionBtn.classList.remove("hidden");
+            if (this.settingsData.twofa) {
+                actionBtn.innerHTML = "disable 2FA";
+                actionBtn.onclick = () => this.twoFaForm.addToPayload("disable", "true");
+            } else {
+                actionBtn.innerHTML = "enable 2FA";
+                actionBtn.onclick = (e) => {
+                    e.preventDefault();
+                    this.twoFaForm.addToPayload("disable", "false");
+                    options?.classList.remove("hidden");
+                    actionBtn.classList.add("hidden");
+                };
+            }
+        }
+
+        if (abortBtn) {
+            abortBtn.onclick = (e) => {
+                options?.classList.add("hidden");
+                actionBtn?.classList.remove("hidden");
+                this.twoFaForm.resetStatus();
+            };
+        }
+
+        if (options) {
+            options.classList.add("hidden");
+            const emailOption = options.querySelector(`input[value="email"]`) as HTMLInputElement;
+            const appOption = options.querySelector(`input[value="authenticator"]`) as HTMLInputElement;
+
+            emailOption?.addEventListener("change", () => {
+                if (emailOption.checked) qrData?.classList.add("hidden");
+            });
+
+            appOption?.addEventListener("change", () => {
+                if (appOption.checked) qrData?.classList.remove("hidden");
+            });
+        }
+
+        if (this.settingsData.twofa_secret) {
+            if (qrPicture) qrPicture.src = this.settingsData.twofa_qrCode;
+            if (qrSecret) qrSecret.innerHTML = this.settingsData.twofa_secret;
+            this.twoFaForm.addToPayload("secret", this.settingsData.twofa_secret);
+        }
+    }
+
     public async load(): httpPromise {
         return this.fetchData()
         .then(result => {
@@ -209,6 +278,7 @@ class SettingsLoader {
             this.updateSecurityForm();
             this.updateSessionsList();
             this.updateBlockedList();
+            this.handleTwoFa();
 
             return (result);
         })

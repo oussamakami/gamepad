@@ -561,7 +561,7 @@ function handleSettingsSecurity(request, reply) {
     return reply.status(201).send({message: "success!"});
 }
 
-function fetchSettingsData(request, reply) {
+async function fetchSettingsData(request, reply) {
     const user_id = request.user_id;
     const token_id = request.token_id;
     const userData = database.fetchUser(user_id);
@@ -578,9 +578,13 @@ function fetchSettingsData(request, reply) {
         return 0;
     });
     response.blocked = blockedUsers.data;
-    response.twofa = userData.data.twofa_enabled;
     response.hasPassword = !!userData.data.password;
     response.usesGoogle = !!userData.data.gid;
+    response.twofa = userData.data.twofa_enabled;
+    if (!response.twofa) {
+        response.twofa_secret = twoFA.getSecret();
+        response.twofa_qrCode = await twoFA.generateQrCode(user_id, response.twofa_secret);
+    }
 
     return reply.status(200).send(response);
 }
@@ -616,6 +620,40 @@ async function loginWithGoogle(request, reply) {
     return reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"}).redirect(`${googleData.originURI}`);
 }
 
+function handleSettingsTwofa(request, reply) {
+    const user_id = request.user_id;
+    const secret = request.body.secret;
+    const method = request.body.twoFA_Method;
+    const token = request.body.twoFA_Token;
+    const isCancel = request.body.disable;
+
+    let user = database.fetchUser(user_id);
+
+    if (!user.success) {
+        return reply.status(500).send({error: "Internal Server Error"});
+    }
+    
+    if (isCancel && isCancel === "true") {
+        if (!database.updateUser(user_id, {twoFA_enable: 0}).success)
+            return reply.status(500).send({error: "Internal Server Error"});
+    }
+    else if (method === "email") {
+        if (!user.data.email)
+            return reply.status(500).send({error: "There is no email linked to your account"});
+        if (!database.updateUser(user_id, {twoFA_enable: 1, twoFA_method: "email", twoFA_secret: secret}).success)
+            return reply.status(500).send({error: "Internal Server Error"});
+    }
+    else if (method === "authenticator") {
+        if (!token.length || !twoFA.verifyToken(secret, token))
+            return reply.status(403).send({error: "Incorrect Token"});
+        if (!database.updateUser(user_id, {twoFA_enable: 1, twoFA_method: "app", twoFA_secret: secret}).success)
+            return reply.status(500).send({error: "Internal Server Error"});
+    }
+    else
+        return reply.status(500).send({error: "Invalid 2FA method"});
+    return reply.status(201).send({message: "success!"});
+}
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -642,6 +680,7 @@ function apiRoutes(fastify, options, done)
     fastify.get("/settings/data", fetchSettingsData);
     fastify.post("/settings/updateProfile", handleSettingsProfile);
     fastify.post("/settings/updatePass", handleSettingsSecurity);
+    fastify.post("/settings/updateTwoFa", handleSettingsTwofa);
 
     fastify.get("/websocket", { websocket: true }, handleSocket);
 

@@ -107,7 +107,7 @@
                     </div>
                     
                     <form id="login-form" class="container-form">
-                        <button class="btn google-btn">
+                        <button class="btn google-btn" type="button">
                             <img src="./assets/images/google_icon.png" alt="google logo">
                             Log in with Google
                         </button>
@@ -147,7 +147,7 @@
                     </div>
 
                     <form id="signup-form" class="container-form">
-                        <button class="btn google-btn">
+                        <button class="btn google-btn" type="button">
                             <img src="./assets/images/google_icon.png" alt="google logo">
                             sign up with Google
                         </button>
@@ -538,7 +538,7 @@
 
                             <input type="submit" class="btn" value="update password">
                             <p class="divider">integrated</p>
-                            <button class="btn google-btn">
+                            <button class="btn google-btn" type="button">
                                 <img src="./assets/images/google_icon.png" alt="google logo">
                                 Link with Google
                             </button>
@@ -571,20 +571,21 @@
                             <i class='bx bx-shield card-icon'></i>
                         </div>
                         <form id="twofa-settings-form" class="container-form">
+                            <p class="form-status"></p>
                             <label class="twofa-status">Status: <i class="disabled"></i></label>
 
                             <div id="twofa-enable-section" class="hidden">
                                 <h4>Choose 2FA Method:</h4>
                                 <div class="settings-methods">
                                     <label>
-                                        <input class="hidden" type="radio" name="twofa-method" value="email" checked>
+                                        <input class="hidden" type="radio" name="twoFA_Method" value="email" checked>
                                         <div class="method-card">
                                             <i class='bx bx-envelope card-icon'></i>
                                             <span>Email</span>
                                         </div>
                                     </label>
                                     <label>
-                                        <input class="hidden" type="radio" name="twofa-method" value="authenticator">
+                                        <input class="hidden" type="radio" name="twoFA_Method" value="authenticator">
                                         <div class="method-card">
                                             <i class='bx bx-mobile-alt card-icon'></i>
                                             <span>Authenticator App</span>
@@ -596,18 +597,18 @@
                                     <img id="twofa-qrcode" src="" alt="QR-Code"></img>
                                     <div>
                                         <p>Or enter this code manually:</p>
-                                        <p class="twofa-secret-code">JBSWY3DPEHPK3PXP</p>
+                                        <p class="twofa-secret-code"></p>
                                         <label for="twofa-verify-code">Verification Code</label>
-                                        <input type="number" id="twofa-verify-code" placeholder="Enter 6-digit code">
+                                        <input type="number" id="twofa-verify-code" name="twoFA_Token"placeholder="Enter 6-digit code" minlength="6">
                                     </div>
                                 </div>
                                 <div class="btn-container">
                                     <input type="submit" value="verify" class="btn">
-                                    <button class="danger-btn">Cancel</button>
+                                    <button id="form-settings-abort" class="danger-btn" type="button">Cancel</button>
                                 </div>
                             </div>
+                            <button id="form-settings-action" class="btn">Enable 2FA</button>
                         </form>
-                        <button class="btn">Enable 2FA</button>
                     </div>
                 </div>
                 <div class="cards-container" id="privacy-settings">
