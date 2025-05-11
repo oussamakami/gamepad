@@ -24,7 +24,7 @@
 <body>
 
     <!-- Side Navigation -->
-    <nav id="side-nav" class="hidden">
+    <nav id="side-nav" class="">
         <a id="nav-logo" href="/">
             <h1 class="logo">gamepad</h1>
         </a>
@@ -36,9 +36,9 @@
             <li id="profile-nav"><a href="/profile"><i class='bx bx-user-circle'></i> <span>profile</span></a></li>
 
             <label>games</label>
-            <li id="pong-nav"><a href="/pong"><i class='bx bx-meteor'></i> <span>ping pong</span></a></li>
+            <li id="pong-nav"><a href="/ping-pong"><i class='bx bx-meteor'></i> <span>ping pong</span></a></li>
             <li id="tic-tac-nav"><a href="/tic-tac"><i class='bx bx-circle'></i> <span>tic tac toe</span></a></li>
-            <li id="rps-nav"><a href="/rps"><i class='bx bx-cut'></i> <span>rock paper</span></a></li>
+            <li id="rps-nav"><a href="/rock-paper"><i class='bx bx-cut'></i> <span>rock paper</span></a></li>
 
             <label>user</label>
             <li id="settings-nav"><a href="/settings"><i class='bx bx-cog'></i> <span>settings</span></a></li>
@@ -49,7 +49,7 @@
     <div id="app-sections">
 
         <!-- Top Navigation -->
-        <header id="top-nav" class="hidden">
+        <header id="top-nav" class="">
             <button id="toggle-side-nav" class="top-nav-icon-btn">
                 <i class='bx bx-menu'></i>
             </button>
@@ -540,7 +540,7 @@
                             <p class="divider">integrated</p>
                             <button class="btn google-btn" type="button">
                                 <img src="./assets/images/google_icon.png" alt="google logo">
-                                Link with Google
+                                Connect Google Account
                             </button>
                         </form>
                     </div>
@@ -621,6 +621,93 @@
                             <button id="delete-history" class="danger-btn">clear all games history</button>
                             <button id="delete-account" class="danger-btn">delete account permanently</button>
                             <p>These actions cannot be undone.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Games Section -->
+            <section id="match-maker" class="dash-section">
+                <div class="section-title">
+                    <h4>game name</h4>
+                </div>
+                <div id="mode-selection" class="cards-container hidden">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>select game mode</h4>
+                            <i class='bx bx-game card-icon'></i>
+                        </div>
+                        <div class="game-modes">
+                            <button id="single-game-btn" class="btn">Single Game</button>
+                            <button id="tournament-btn" class="btn">Tournament</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="player-setup" class="cards-container hidden">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4>enter players details</h4>
+                            <i class='bx bx-user-plus card-icon'></i>
+                        </div>
+                        <form id="player-setup-form">
+                            <p class="form-status"></p>
+                            <div id="player-inputs" class="card-value"></div>
+                            <input type="submit" class="btn" value="start game">
+                        </form>
+                    </div>
+                </div>
+                <div id="game-arena" class="cards-container hidden">
+                    <div class="card">
+                        <div class="card-title">
+                            <h4 id="game-status">game arena</h4>
+                            <i class='bx bx-trophy card-icon'></i>
+                        </div>
+                        <div id="tournament-bracket" class="hidden">
+                            <div class="bracket-stage">
+                                <div class="bracket-match">
+                                    <div class="player">Player 1</div>
+                                    <div class="vs">vs</div>
+                                    <div class="player">Player 2</div>
+                                </div>
+                                <div class="bracket-match">
+                                    <div class="player" id="player3">Player 3</div>
+                                    <div class="vs">vs</div>
+                                    <div class="player" id="player4">Player 4</div>
+                                </div>
+                            </div>
+                            <div class="bracket-stage">
+                                <div class="bracket-match">
+                                    <div class="player" id="finalist1">Finalist 1</div>
+                                    <div class="vs">vs</div>
+                                    <div class="player" id="finalist2">Finalist 2</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="current-match">
+                            <div id="players-display">
+                                <div class="player-card" id="current-player1">
+                                    <h3>Player 1</h3>
+                                    <div class="score">0</div>
+                                </div>
+                                <div class="vs">vs</div>
+                                <div class="player-card" id="current-player2">
+                                    <h3>Player 2</h3>
+                                    <div class="score">0</div>
+                                </div>
+                            </div>
+
+                            <div id="ping-pong" class="hidden">
+                                <canvas></canvas>
+                            </div>
+                            <div id="rock-paper" class="hidden">
+                            </div>
+                            <div id="tic-tac" class="hidden">
+                            </div>
+
+                        <!-- Game Result -->
+                        <div id="game-result" class="hidden">
+                            <h2>player1</h2>
+                            <button class="btn">Play Again</button>
                         </div>
                     </div>
                 </div>

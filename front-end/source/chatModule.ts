@@ -21,7 +21,7 @@ class ChatLoader {
     private ChatData: Record<string, any> | undefined;
     private activeChat: Record<string, any> | undefined;
 
-    constructor(baseAPI: string, USER: UserData,socketHandler: SocketHandler) {
+    constructor(baseAPI: string, USER: UserData, socketHandler: SocketHandler) {
         const elem = document.getElementById("chat");
         const chatList = elem?.querySelector("#chat-list")?.querySelector("ul");
         const chatBox = elem?.querySelector("#chat-box");

@@ -10,6 +10,7 @@ import ChatLoader from "./chatModule";
 import SocketHandler from "./SocketModule";
 import NOTIFICATIONS from "./notificationsModule";
 import SettingsLoader from "./settingsHandler";
+import GameHandler from "./gameHandler";
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -63,6 +64,7 @@ const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
 const CHAT       = new ChatLoader(API_BASE, USER, SOCKET);
 const SETTINGS   = new SettingsLoader(API_BASE, NAVIGATION);
+const MATCH      = new GameHandler(API_BASE, SOCKET);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),
@@ -81,16 +83,16 @@ const AUTHSECTIONS = [
     {path: "/recover", view: "recovery", options: {formHander: FORMS.RECOVER  }}
 ]
 const DASHSECTIONS = [
-    {path: "/",          view: "dashboard", options: {onload: () => DASHBOARD.load()}},
-    {path: "/dashboard", view: "dashboard", options: {onload: () => DASHBOARD.load()}},
-    {path: "/profile",   view: "profile",   options: {onload: () => PROFILE.load()}},
-    {path: "/search",    view: "search",    options: {onload: () => SEARCH.load()}},
-    {path: "/friends",   view: "friends",   options: {onload: () => FRIENDS.load()}},
-    {path: "/chat",      view: "chat",      options: {onload: () => CHAT.load()}},
-    {path: "/settings",  view: "settings",  options: {onload: () => SETTINGS.load()}},
-    {path: "/pong",      view: "pong",      options: {}},
-    {path: "/tictac",    view: "tic-tac",   options: {}},
-    {path: "/rps",       view: "rps",       options: {}},
+    {path: "/",           view: "dashboard",   options: {onload: () => DASHBOARD.load()}},
+    {path: "/dashboard",  view: "dashboard",   options: {onload: () => DASHBOARD.load()}},
+    {path: "/profile",    view: "profile",     options: {onload: () => PROFILE  .load()}},
+    {path: "/search",     view: "search",      options: {onload: () => SEARCH   .load()}},
+    {path: "/friends",    view: "friends",     options: {onload: () => FRIENDS  .load()}},
+    {path: "/chat",       view: "chat",        options: {onload: () => CHAT     .load()}},
+    {path: "/settings",   view: "settings",    options: {onload: () => SETTINGS .load()}},
+    {path: "/ping-pong",  view: "match-maker", options: {onload: () => MATCH    .load()}},
+    {path: "/tic-tac",    view: "match-maker", options: {onload: () => MATCH    .load()}},
+    {path: "/rock-paper", view: "match-maker", options: {onload: () => MATCH    .load()}}
 ]
 
 DASHBOARD.setChartTextColor = "--primary-text-color";

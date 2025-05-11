@@ -467,7 +467,14 @@ function handleSocket(socket, request) {
         catch (error) { clearInterval(intervalId) }
     }, 60000);
 
-    socket.on("message", (msg) => handleSocketChat(userid, JSON.parse(msg)));
+    socket.on("message", (msg) => {
+        const message = JSON.parse(msg);
+
+        if (message.type === "chat")
+            handleSocketChat(userid, message);
+        else if (message.type === "gameRecord")
+            database.addGameRecord(message);
+    });
     socket.on("close", () => clearInterval(intervalId));
     socket.on("error", () => clearInterval(intervalId));
 }
@@ -693,6 +700,43 @@ function handleSettingsTwofa(request, reply) {
     return reply.status(201).send({message: "success!"});
 }
 
+function verifyUsersExistence(request, reply) {
+    const count = request.body.gameMode === "single" ? 2 : 4;
+    const gameUsers = new Set();
+    const gameNickNames = new Set();
+    const result = [];
+
+    try {
+        for (let i = 1; i <= count; i++) {
+            const username = (request.body[`player${i}`]).trim();
+            const nickname = (request.body[`nickname${i}`]).trim().slice(0, 10) || username;
+
+            if (!username) throw new Error(`missing player${i}`);
+
+            const userData = database.fetchUser(username);
+
+            if (!userData.success || (userData.success && userData.data.username !== username))
+                throw new Error(`user: ${username} does not exist`);
+
+            result.push({user_id: userData.data.id, nickname});
+
+            gameUsers.add(username);
+            gameNickNames.add(nickname);
+        }
+
+        if (gameUsers.size !== count)
+            throw new Error(`Each player must be unique`);
+        if (gameNickNames.size !== count)
+            throw new Error(`Each player must have a unique nickname`);
+        if (result.length !== count)
+            return reply.status(500).send({error: "Internal Server Error"});
+    }
+    catch (error) {
+        return reply.status(409).send({error: error.message});
+    }
+    return reply.status(200).send({message: "success!", data: result});
+}
+
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -720,6 +764,8 @@ function apiRoutes(fastify, options, done)
     fastify.post("/settings/updateProfile", handleSettingsProfile);
     fastify.post("/settings/updatePass", handleSettingsSecurity);
     fastify.post("/settings/updateTwoFa", handleSettingsTwofa);
+
+    fastify.post("/verifyGameUsers", verifyUsersExistence);
 
     fastify.get("/websocket", { websocket: true }, handleSocket);
 

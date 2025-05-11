@@ -71,8 +71,17 @@ class FormHandler {
         .catch(error => {throw new Error("Unknown error occurred")});
 
         const responseData = await response.text();
-        if (!response.ok)
-            throw new Error(responseData.length ? JSON.parse(responseData).error : "Unknown error occurred");
+        if (!response.ok) {
+            if (responseData.length) {
+                const errorMsg = JSON.parse(responseData).error;
+
+                if (errorMsg !== "Not Found")
+                    throw new Error(errorMsg);
+                else
+                    throw new Error("API endpoint not found");
+            }
+            throw new Error("Unknown error occurred");
+        }
 
         return (responseData);
     }
@@ -124,6 +133,10 @@ class FormHandler {
 
     public get statusVisibility(): boolean {
         return (this.showStatus);
+    }
+
+    public get formElem(): HTMLFormElement {
+        return (this.formElement);
     }
 }
 
