@@ -91,7 +91,7 @@ const DASHSECTIONS = [
     {path: "/chat",       view: "chat",        options: {onload: () => CHAT     .load()}},
     {path: "/settings",   view: "settings",    options: {onload: () => SETTINGS .load()}},
     {path: "/ping-pong",  view: "match-maker", options: {onload: () => MATCH    .load()}},
-    {path: "/tic-tac",    view: "match-maker", options: {onload: () => MATCH    .load()}},
+    {path: "/tic-tac",    view: "match-maker", options: {onload: () => Promise.reject({ httpCode: 501, httpName: "Not Implemented"})}},
     {path: "/rock-paper", view: "match-maker", options: {onload: () => MATCH    .load()}}
 ]
 

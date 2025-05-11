@@ -24,7 +24,7 @@
 <body>
 
     <!-- Side Navigation -->
-    <nav id="side-nav" class="">
+    <nav id="side-nav" class="hidden">
         <a id="nav-logo" href="/">
             <h1 class="logo">gamepad</h1>
         </a>
@@ -49,7 +49,7 @@
     <div id="app-sections">
 
         <!-- Top Navigation -->
-        <header id="top-nav" class="">
+        <header id="top-nav" class="hidden">
             <button id="toggle-side-nav" class="top-nav-icon-btn">
                 <i class='bx bx-menu'></i>
             </button>
@@ -611,7 +611,7 @@
                         </form>
                     </div>
                 </div>
-                <div class="cards-container" id="privacy-settings">
+                <div class="cards-container hidden" id="privacy-settings">
                     <div class="card">
                         <div class="card-title">
                             <h4>account settings</h4>
@@ -627,7 +627,7 @@
             </section>
 
             <!-- Games Section -->
-            <section id="match-maker" class="dash-section">
+            <section id="match-maker" class="dash-section hidden">
                 <div class="section-title">
                     <h4>game name</h4>
                 </div>
@@ -699,8 +699,22 @@
                             <div id="ping-pong" class="hidden">
                                 <canvas></canvas>
                             </div>
+
                             <div id="rock-paper" class="hidden">
+                                <div class="rps-game-area">
+                                    <div class="rps-player-area">
+                                        <h2 id="player1-status"></h2>
+                                        <div id="player1-choices"></div>
+                                    </div>
+                                    <div class="rps-vs">VS</div>
+                                    <div class="rps-player-area">
+                                        <h2 id="player2-status"></h2>
+                                        <div id="player2-choices"></div>
+                                    </div>
+                                </div>
+                                <div id="rps-result" class="hidden"></div>
                             </div>
+
                             <div id="tic-tac" class="hidden">
                             </div>
 

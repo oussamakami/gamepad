@@ -2,6 +2,7 @@ import { httpPromise } from "./browserModule";
 import FormHandler from "./formsModule";
 import SocketHandler from "./SocketModule";
 import PongHandler from "./pongHandler";
+import RPSHandler from "./rpsHandler";
 
 
 type GameMode = "single" | "tournament";
@@ -63,6 +64,7 @@ class GameHandler {
 
     //GAMES
     private pong                    : PongHandler;
+    private RPS                     : RPSHandler;
 
     constructor(baseAPI: string, socketHandler: SocketHandler) {
         const elem            = document.getElementById("match-maker");
@@ -93,6 +95,7 @@ class GameHandler {
 
         this.socket = socketHandler;
         this.pong = new PongHandler("ping-pong");
+        this.RPS = new RPSHandler("rock-paper");
     }
 
     private hideAllPages(): void {
@@ -111,6 +114,7 @@ class GameHandler {
         this.matches = [];
 
         this.pong.destroyGame();
+        this.RPS.destroyGame();
     }
 
     private determineGameType(): boolean {
@@ -290,23 +294,24 @@ class GameHandler {
     private async handleArenaPage(data?: any) {
         this.hideAllPages();
         this.setupMatches(data?.data);
-        
+
         this.updateScore();
         this.arenaPage.classList.remove('hidden');
 
         const currentMatch = this.matches[this.matchIndex];
         if (!currentMatch) return;
 
-        if (this.gameType === GameType.Pong) {
-            this.addToScore(await this.pong.startGame(!(currentMatch?.score1 + currentMatch?.score2)))
-        }
+        if (this.gameType === GameType.Pong)
+            this.addToScore(await this.pong.startGame(!(currentMatch?.score1 + currentMatch?.score2)));
+        else if (this.gameType === GameType.RPS)
+            this.addToScore(await this.RPS.startGame(currentMatch?.player1.nickname, currentMatch.player2.nickname));
     }
 
     public load(): httpPromise {
         this.resetPageData();
 
         if (!this.determineGameType())
-            return Promise.reject({ httpCode: 404, httpName: "not found" });
+            return Promise.reject({ httpCode: 404, httpName: "Not Found" });
 
         this.handleGameMode();
         return Promise.resolve({ httpCode: 200, httpName: "ok" });

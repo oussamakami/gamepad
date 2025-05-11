@@ -1374,3 +1374,64 @@ section {
     border-radius: .3rem;
     border: 1px solid var(--border-color);
 }
+
+#rock-paper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+.rps-game-area {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+}
+
+.rps-player-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.rps-player-area h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--secondary-text-color);
+}
+
+.rps-player-area button {
+    font-size: 2rem;
+    padding: 1rem;
+    margin: 0 .5rem;
+    border-radius: .4rem;
+    background-color: var(--input-bg);
+}
+
+#rps-result {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 800px;
+    color: var(--primary-brand-color);
+    background-color: rgba(var(--primary-brand-color-rgb), 0.2);
+    border: 2px solid var(--primary-brand-color);
+}
+
+.rps-vs {
+    display: flex;
+    align-items: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--secondary-text-color);
+    padding: 0 2rem;
+}

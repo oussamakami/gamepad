@@ -40,7 +40,7 @@ class PongHandler {
 
     constructor(sectionID: string, width: number = 800, height: number = 400) {
         const section = document.getElementById(sectionID);
-        const canvas = section?.querySelector("canvas") as HTMLCanvasElement | null;
+        const canvas  = section?.querySelector("canvas") as HTMLCanvasElement | null;
         const context = canvas?.getContext('2d');
 
         if (!section || !canvas || !context)
@@ -49,10 +49,11 @@ class PongHandler {
         canvas.width  = width
         canvas.height = height;
 
-        this.pongPage    = section;
-        this.canvas  = canvas;
-        this.context = context;
+        this.pongPage = section;
+        this.canvas   = canvas;
+        this.context  = context;
 
+        this.pongPage.className = "hidden";
         this.initializeElements();
     }
 
@@ -225,11 +226,19 @@ class PongHandler {
         }
     }
 
+    private moveScrollToBottom() {
+        const parent = document.querySelector("main");
+        if (!parent) return ;
+
+        parent.scrollTop = parent.scrollHeight
+    }
+
     public async startGame(resetWholeGame: boolean = false) {
         return new Promise<number>((resolve) => {
             this.gameWinner = resolve;
             
             this.pongPage.className = "";
+            this.moveScrollToBottom();
 
             document.addEventListener('keydown', this.keyDownHandler);
             document.addEventListener('keyup', this.keyUpHandler);
