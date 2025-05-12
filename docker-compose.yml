@@ -1,0 +1,49 @@
+name: gamepad
+
+services:
+    server:
+        container_name: server
+        build: ./back-end
+        ports:
+            - 3000:3000/tcp
+        volumes:
+            - ssl:/www/ssl:rw
+        networks:
+            gamepad_network:
+                aliases:
+                    - backend
+        secrets:
+            - credentials
+        healthcheck:
+            test: ["CMD", "curl", "-kf", "https://server:3000/api/health"]
+            interval: 5m
+            timeout: 5s
+            retries: 3
+            start_period: 20s
+            start_interval: 5s
+        restart: always
+    nginx:
+        container_name: website
+        build: ./front-end
+        ports:
+            - 443:443/tcp
+        volumes:
+            - ssl:/etc/nginx/ssl:rw
+        networks:
+            gamepad_network:
+                aliases:
+                    - nginx
+        depends_on:
+            server:
+                condition: service_healthy
+        restart: always
+
+volumes:
+    ssl:
+
+networks:
+    gamepad_network:
+
+secrets:
+    credentials:
+        file: .env

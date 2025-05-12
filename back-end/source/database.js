@@ -13,7 +13,7 @@ import { extname, join } from 'path';
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
-const PICTURES_PATH = process.env.PICTURES_PATH;
+const PICTURES_PATH = "/www/source/figures";
 const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"]
 const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -46,6 +46,8 @@ class userData {
 
         //Schedule a task to remove expired sessions from the database every hour (3600000 ms)
         this.sessionsClearingJob = setInterval(this.#cleanExpiredSessions, 3600000);
+
+        process.on('SIGINT', () => this.closeDataBase());
     }
 
     initializeTables() {

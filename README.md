@@ -255,7 +255,7 @@ Follow the steps below to set up the project:
         - [ ] Laptops (1025px – 1366px)
         - [X] Desktops (1367px – 1920px)
         - [X] Ultra-Wide Screens (≥ 1921px)
-    - [ ] Check cross-browser compatibility for Chrome and Firefox
+    - [X] Check cross-browser compatibility for Chrome and Firefox
 
 ## Front-End Code
 - [X] **Forms Module Implementation**
@@ -712,10 +712,10 @@ Follow the steps below to set up the project:
     - [X] Returns appropriate success/error response
 
 ### Security
-- [ ] Pretect against **Cross-Site Scripting (XSS)** (implement after docker compose)
+- [X] Pretect against **Cross-Site Scripting (XSS)** (implement after docker compose)
 - [X] Pretect against **SQL Injection**
 - [X] Implement a custom hashing algorithm
-- [ ] Implement/Enforce **HTTPS** communication (implement after docker compose)
+- [X] Implement/Enforce **HTTPS** communication (implement after docker compose)
 
 # Authors
 

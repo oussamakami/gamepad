@@ -12,7 +12,7 @@ class twoFA {
     static emailStep = 900; //15min
     static client_id = process.env.CLIENT_ID;
     static client_secret = process.env.CLIENT_SECRET;
-    static redirectURI = "http://127.0.0.1:3000/api/auth/google/callback";
+    static redirectURI = process.env.CLIENT_REDIRECT;
 
     static validSerials = new Map();
     static timeOutStorage = new Map();
@@ -98,7 +98,7 @@ class twoFA {
                     `scope=${encodeURIComponent(scope)}&` +
                     `state=${encodeURIComponent(state)}&` +
                     `response_type=code`;
-        
+        console.log(url);
         return (url);
     }
 
