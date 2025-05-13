@@ -8,6 +8,7 @@ import { extname, join } from 'path';
 
 const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
 const PICTURES_PATH = "/www/source/figures";
+const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"];
 const database = new userData("/www/source/data.db", false);
 const CONNECTIONS = new SocketManager(database);
 
@@ -78,7 +79,7 @@ function verifyRequestToken(request, reply, next) {
     const verification = database.verifySession(sessionToken);
 
     if (!verification.success) {
-        if (request.url.includes("/auth/") || request.url.endsWith("/health")) return next();
+        if (request.url.includes("/auth/")) return next();
         reply.clearCookie('authToken');
         return reply.status(401).send({error: "Unauthorized Access"});
     }
@@ -515,6 +516,10 @@ async function handleSettingsProfile(request, reply) {
             return reply.status(403).send({error: "unsupported file extention"});
     }
 
+    if (data.deleteFigure === "true") {
+        newData.picture = DEFAULT_PICTURES[Math.random() * DEFAULT_PICTURES.length | 0];
+    }
+
     if (data.username) {
         if (!inputValidator.validateUserName(data.username))
             return reply.status(400).send({error: "Invalid Request"});
@@ -604,11 +609,11 @@ function redirectToGoogle(request, reply) {
     if (referer.indexOf("?") !== -1)
         referer = referer.slice(0, referer.indexOf("?"));
 
-    const originURI = referer?.endsWith("/") ? referer.slice(0, -1) : referer;
+    referer = referer?.endsWith("/") ? referer.slice(0, -1) : referer;
+
+    const originURI = referer.replace(/\/login$/, '').replace(/\/signup$/, '');
 
     if (!originURI) return reply.status(400).send({error: "Invalid Request"});
-
-    console.log(originURI);
 
     if (user_id && unlink === "true") {
         const userquery = database.updateUser(user_id, {goodleId: null});
@@ -738,10 +743,6 @@ function verifyUsersExistence(request, reply) {
     return reply.status(200).send({message: "success!", data: result});
 }
 
-function handleHealthCheck(request, reply) {
-    return reply.status(200).send({message: "healthy!"});
-}
-
 function apiRoutes(fastify, options, done)
 {
     fastify.addHook("preHandler", verifyRequestToken);
@@ -773,8 +774,6 @@ function apiRoutes(fastify, options, done)
     fastify.post("/verifyGameUsers", verifyUsersExistence);
 
     fastify.get("/websocket", { websocket: true }, handleSocket);
-
-    fastify.get("/health", handleHealthCheck);
 
     done();
 }

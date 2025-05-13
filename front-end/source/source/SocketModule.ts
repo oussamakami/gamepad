@@ -79,7 +79,7 @@ class SocketHandler {
             console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
             
             this.reconnectInterval = window.setTimeout(async () => {
-                if (await this.user.isAuthenticated()) {
+                if (!await this.user.isAuthenticated()) {
                     console.error("User not authenticated. Socket connection aborted.");
                     this.socket?.close();
                     this.clearReconnectInterval();
