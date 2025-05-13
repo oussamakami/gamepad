@@ -51,7 +51,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
 }
 
 const USER       = new UserData(API_BASE);
-const SOCKET     = new SocketHandler("wss://127.0.0.1/api/websocket", USER);
+const SOCKET     = new SocketHandler(`wss://${location.host}/api/websocket`, USER);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
