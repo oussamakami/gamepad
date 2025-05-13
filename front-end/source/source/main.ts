@@ -58,7 +58,7 @@ const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
-const CHAT       = new ChatLoader(API_BASE, USER, SOCKET);
+const CHAT       = new ChatLoader(API_BASE, NAVIGATION, SOCKET);
 const SETTINGS   = new SettingsLoader(API_BASE, NAVIGATION);
 const MATCH      = new GameHandler(API_BASE, USER, SOCKET);
 
