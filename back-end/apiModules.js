@@ -9,8 +9,9 @@ import Dotenv from 'dotenv';
 
 Dotenv.config();
 const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
-const PICTURES_PATH = process.env.PICTURES_PATH;
-const database = new userData("", false);
+const CLIENTS_DATA_PATH = process.env.CLIENTS_DATA_PATH;
+const DEFAULT_PICTURES = process.env.DEFAULT_PICTURES.split(',').map(s => s.trim()).filter(Boolean);
+const database = new userData(join(CLIENTS_DATA_PATH, "Database.db"), false);
 const CONNECTIONS = new SocketManager(database);
 
 //generate random data for testing
@@ -135,7 +136,7 @@ function handleLogIn(request, reply) {
         }
         const session = database.createSession(user.data.id, rememberSession, getSessionInfo(request));
 
-        reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+        reply.setCookie("authToken", session.data.token, {path: "/", secure: true, httpOnly: true, priority: "High"});
         delete user.data.twofa_secret;
         delete user.data.password;
         return reply.status(200).send({message: "Login successful!", ...user.data});
@@ -209,7 +210,7 @@ function handleUsersRelations(request, reply) {
     CONNECTIONS.send(target, getUserChats(target));
     CONNECTIONS.send(sender, getUserChats(sender));
 
-    reply.status(201).send(database.fetchFriendshipData(sender, target));
+    return reply.status(201).send(database.fetchFriendshipData(sender, target));
 }
 
 function fetchSessionData(request, reply) {
@@ -226,10 +227,10 @@ async function fetchProfilePicture(request, reply) {
     const queryResponse = database.fetchUser(request.params.userId);
 
     if (!queryResponse.success)
-        reply.status(404).send({error: queryResponse.error.message});
+        return reply.status(404).send({error: queryResponse.error.message});
 
     const filename = queryResponse.data.picture;
-    const path = join(PICTURES_PATH, filename);
+    const path = join(CLIENTS_DATA_PATH, filename);
     const extention = extname(filename);
 
     if (!VALIDEXT.includes(extention))
@@ -251,12 +252,12 @@ function fetchUserData(request, reply) {
     let targetUser = database.fetchUser(request.params.userId);
 
     if (!targetUser.success)
-        reply.status(404).send({error: targetUser.error.message});
+        return reply.status(404).send({error: targetUser.error.message});
     targetUser = targetUser.data.id;
 
     const relation = database.fetchFriendshipData(currentUser, targetUser);
     if (relation?.status === "blocked")
-        reply.status(404).send({error: "User does not exist"});
+        return reply.status(404).send({error: "User does not exist"});
 
     const stats = database.fetchUserGlobalStats(targetUser);
     if (!stats.success)
@@ -340,7 +341,7 @@ function handleAccountReset(request, reply) {
         return reply.status(500).send({error: "Internal Server Error"});
     
     const session = database.createSession(userid, false, getSessionInfo(request));
-    reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+    reply.setCookie("authToken", session.data.token, {path: "/", secure: true, httpOnly: true, priority: "High"});
 
     delete user.data.password;
     delete user.data.twofa_secret;
@@ -364,7 +365,7 @@ function handletwoFa(request, reply) {
         return reply.status(400).send({error: "Invalid Request"});
 
     const session = database.createSession(userid, remember === "true", getSessionInfo(request));
-    reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"});
+    reply.setCookie("authToken", session.data.token, {path: "/", secure: true, httpOnly: true, priority: "High"});
 
     delete user.data.password;
     delete user.data.twofa_secret;
@@ -517,6 +518,10 @@ async function handleSettingsProfile(request, reply) {
             return reply.status(403).send({error: "unsupported file extention"});
     }
 
+    if (data.deleteFigure === "true") {
+        newData.picture = DEFAULT_PICTURES[Math.random() * DEFAULT_PICTURES.length | 0];
+    }
+
     if (data.username) {
         if (!inputValidator.validateUserName(data.username))
             return reply.status(400).send({error: "Invalid Request"});
@@ -601,20 +606,28 @@ async function fetchSettingsData(request, reply) {
 function redirectToGoogle(request, reply) {
     const user_id = request.user_id;
     const unlink = request.query.unlink;
-    const referer = request.headers.referer;
-    const originURI = referer.endsWith("/") ? referer.slice(0, -1) : referer;
+    let   referer = request.headers.referer;
+
+    if (referer.indexOf("?") !== -1)
+        referer = referer.slice(0, referer.indexOf("?"));
+
+    referer = referer?.endsWith("/") ? referer.slice(0, -1) : referer;
+
+    const originURI = referer.replace(/\/login$/, '').replace(/\/signup$/, '');
+
+    if (!originURI) return reply.status(400).send({error: "Invalid Request"});
 
     if (user_id && unlink === "true") {
         const userquery = database.updateUser(user_id, {goodleId: null});
 
         if (userquery.success) {
             if (!userquery.data.password)
-                reply.redirect(`${originURI}/settings?error=${encodeURIComponent("Set password to unlink Google")}`);
-            reply.redirect(`${originURI}/settings`);
+                return reply.redirect(`${originURI}?error=${encodeURIComponent("Set password to unlink Google")}`);
+            return reply.redirect(`${originURI}`);
         };
-        reply.redirect(`${originURI}/settings?error=${encodeURIComponent("Failed to unlink Google")}`);
+        return reply.redirect(`${originURI}?error=${encodeURIComponent("Failed to unlink Google")}`);
     }
-    reply.redirect(twoFA.generateGoogleConsentURL(originURI));
+    return reply.redirect(twoFA.generateGoogleConsentURL(originURI));
 }
 
 async function loginWithGoogle(request, reply) {
@@ -622,7 +635,7 @@ async function loginWithGoogle(request, reply) {
     const googleData = await twoFA.exchangeGoogleCode(request.query.code, request.query.state);
 
     if (!googleData.sub)
-        return reply.redirect(`${googleData.originURI}/${user_id ? "settings" : "login"}?error=${encodeURIComponent("Google data retrieval failed")}`);
+        return reply.redirect(`${googleData.originURI}?error=${encodeURIComponent("Google data retrieval failed")}`);
 
     try {
         let updateQuery;
@@ -646,20 +659,15 @@ async function loginWithGoogle(request, reply) {
             throw {action: "connect", success: true, id: userquery.data.id};
     }
     catch (status) {
-        let target = `${googleData.originURI}/`;
-
-        if (status.action === "link")
-            target += "settings";
+        let target = `${googleData.originURI}`;
 
         if (!status.success) {
-            if (status.action !== "link")
-                target += "login";
             target += `?error=${encodeURIComponent(status.error)}`;
             return reply.redirect(target);
         }
         else if (status.success && status.action !== "link") {
             const session = database.createSession(status.id, true, getSessionInfo(request));
-            return reply.setCookie("authToken", session.data.token, {path: "/", priority: "High"}).redirect(target);
+            return reply.setCookie("authToken", session.data.token, {path: "/", secure: true, httpOnly: true, priority: "High"}).redirect(target);
         }
         else
             return reply.redirect(target);

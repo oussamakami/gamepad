@@ -60,15 +60,15 @@ class SettingsLoader {
         this.blockedList = blockedList as HTMLElement;
         this.twoFaElem = twofa as HTMLElement;
 
-        this.securityForm = new FormHandler(security.id, this.updatePassAPI);
-        this.twoFaForm    = new FormHandler(twofa.id, this.updateTwoFaAPI, async (data) => {navigationModule.reloadPage()});
-        this.profileForm  = new FormHandler(profile.id, this.updateProfileAPI, async (data) => {navigationModule.reloadPage()});
-
-        this.twoFaForm.setStatusVisibility = false;
-
         this.navModule = navigationModule;
         this.user = navigationModule.userData;
         this.btnGenerator = new ActionsHandler(baseAPI);
+
+        this.securityForm = new FormHandler(security.id, this.updatePassAPI);
+        this.twoFaForm    = new FormHandler(twofa.id, this.updateTwoFaAPI, async (data) => {navigationModule.reloadPage()});
+        this.profileForm  = new FormHandler(profile.id, this.updateProfileAPI, async (data) => {await this.user.fetchSessionData(); navigationModule.reloadPage()});
+
+        this.twoFaForm.setStatusVisibility = false;
 
         const closeAllSessionsbtn = elem.querySelector("#closeAllSessions");
         if (closeAllSessionsbtn)
@@ -94,10 +94,14 @@ class SettingsLoader {
         const img = this.profileElem.querySelector("[data-user-img]") as HTMLImageElement;
         const username = this.profileElem.querySelector("#settings-profile-name") as HTMLInputElement;
         const email = this.profileElem.querySelector("#settings-profile-email") as HTMLInputElement;
+        const deletebtn = this.profileElem.querySelector("button") as HTMLButtonElement;
         
+        this.profileForm.addToPayload("deleteFigure", "false");
+    
         img && ( img.src = `${this.pictureAPI}/${this.user.userId}?v=${Date.now()}` );
         username && ( username.value = this.user.userName );
         email && ( email.value = this.user.userEmail );
+        deletebtn && (deletebtn.onclick = () => {this.profileForm.addToPayload("deleteFigure", "true")});
     }
 
     private updateSecurityForm() {
@@ -113,7 +117,7 @@ class SettingsLoader {
         if (googlebtn) {
             if (this.settingsData.usesGoogle) {
                 googlebtn.innerHTML = `
-                    <img src="./assets/images/google_icon.png" alt="google logo">
+                    <img src="/assets/images/google_icon.png" alt="google logo">
                     Disconnect Google Account
                 `;
                 googlebtn.onclick = (e) => {
@@ -123,7 +127,7 @@ class SettingsLoader {
             }
             else {
                 googlebtn.innerHTML = `
-                    <img src="./assets/images/google_icon.png" alt="google logo">
+                    <img src="/assets/images/google_icon.png" alt="google logo">
                     Connect Google Account
                 `;
                 googlebtn.onclick = (e) => {

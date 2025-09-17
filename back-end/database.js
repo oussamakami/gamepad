@@ -13,8 +13,8 @@ import { extname, join } from 'path';
 Dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
-const PICTURES_PATH = process.env.PICTURES_PATH;
-const DEFAULT_PICTURES = ["default1.webp", "default2.webp", "default3.webp"]
+const CLIENTS_DATA_PATH = process.env.CLIENTS_DATA_PATH;
+const DEFAULT_PICTURES = process.env.DEFAULT_PICTURES.split(',').map(s => s.trim()).filter(Boolean);
 const allowedChar = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 class userData {
@@ -46,6 +46,8 @@ class userData {
 
         //Schedule a task to remove expired sessions from the database every hour (3600000 ms)
         this.sessionsClearingJob = setInterval(this.#cleanExpiredSessions, 3600000);
+
+        process.on('SIGINT', () => this.closeDataBase());
     }
 
     initializeTables() {
@@ -166,7 +168,7 @@ class userData {
         try {
             const extension = extname(pictureData.filename) || '.jpg';
             const filename = `${name}${extension}`;
-            const filePath = join(PICTURES_PATH, filename);
+            const filePath = join(CLIENTS_DATA_PATH, filename);
     
             if (!VALIDEXT.includes(extension))
                 throw new Error;

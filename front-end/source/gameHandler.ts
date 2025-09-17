@@ -3,6 +3,7 @@ import FormHandler from "./formsModule";
 import SocketHandler from "./SocketModule";
 import PongHandler from "./pongHandler";
 import RPSHandler from "./rpsHandler";
+import UserData from "./userModule";
 
 
 type GameMode = "single" | "tournament";
@@ -54,6 +55,7 @@ class GameHandler {
     private readonly setupForm      : FormHandler;
 
     //MODULES
+    private readonly user           : UserData;
     private readonly socket         : SocketHandler;
 
     //PAGE DATA
@@ -63,10 +65,10 @@ class GameHandler {
     private matches                 : Match[];
 
     //GAMES
-    private pong                    : PongHandler;
-    private RPS                     : RPSHandler;
+    private readonly pong           : PongHandler;
+    private readonly RPS            : RPSHandler;
 
-    constructor(baseAPI: string, socketHandler: SocketHandler) {
+    constructor(baseAPI: string, USER: UserData, socketHandler: SocketHandler) {
         const elem            = document.getElementById("match-maker");
         const pageTitle       = elem?.querySelector(".section-title");
         const modePage        = elem?.querySelector("#mode-selection");
@@ -93,6 +95,7 @@ class GameHandler {
 
         this.setupForm = new FormHandler("player-setup-form", this.gamesAPI, (data) => this.handleArenaPage(data));
 
+        this.user = USER;
         this.socket = socketHandler;
         this.pong = new PongHandler("ping-pong");
         this.RPS = new RPSHandler("rock-paper");
@@ -268,7 +271,7 @@ class GameHandler {
         btn.textContent = isLastMatch ? "Play Again" : "Next Game";
 
         btn.onclick = isLastMatch
-            ? () => this.load()
+            ? () => this.load(false)
             : () => {
                 this.moveToNextMatch(winner);
                 this.handleArenaPage();
@@ -307,7 +310,15 @@ class GameHandler {
             this.addToScore(await this.RPS.startGame(currentMatch?.player1.nickname, currentMatch.player2.nickname));
     }
 
-    public load(): httpPromise {
+    public async load(checkConnection: boolean = true): httpPromise {
+        if (checkConnection) {
+            await this.user.fetchSessionData();
+            const isLoggedIn = await this.user.isAuthenticated();
+
+            if (!isLoggedIn)
+                return Promise.reject({httpCode: 401, httpName: "forbiden"});
+        }
+
         this.resetPageData();
 
         if (!this.determineGameType())
@@ -316,7 +327,6 @@ class GameHandler {
         this.handleGameMode();
         return Promise.resolve({ httpCode: 200, httpName: "ok" });
     }
-
 }
 
 export default GameHandler;

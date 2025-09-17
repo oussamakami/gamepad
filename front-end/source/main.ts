@@ -12,6 +12,8 @@ import NOTIFICATIONS from "./notificationsModule";
 import SettingsLoader from "./settingsHandler";
 import GameHandler from "./gameHandler";
 
+let API_BASE   = "/api";
+
 function loadUserData(data) {
     if (data.redirectTo) {
         NAVIGATION.navigateTo(data.redirectTo);
@@ -37,7 +39,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
     const serial = url.get("serial") || "";
     const remember = url.get("remember") || 0;
 
-    const response = await fetch("http://127.0.0.1:3000/api/auth/verifyserial"+location.search);
+    const response = await fetch(`${API_BASE}/auth/verifyserial${location.search}`);
 
     if (!response.ok)
         return Promise.reject({httpCode: 404, httpName: "page not found"});
@@ -48,23 +50,17 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
     return Promise.resolve({httpCode: 200, httpName: "OK"});
 }
 
-
-let API_BASE   = "http://127.0.0.1:3000/api/";
-
-if (API_BASE.endsWith("/"))
-    API_BASE = API_BASE.slice(0, -1);
-
 const USER       = new UserData(API_BASE);
-const SOCKET     = new SocketHandler("ws://127.0.0.1:3000/api/websocket", USER);
+const SOCKET     = new SocketHandler(`${location.protocol === "http" ? "ws": "wss"}://${location.host}${API_BASE}/websocket`, USER);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);
 const NAVBAR     = new NavBarHandler(API_BASE, NAVIGATION);
 const SEARCH     = new SearchLoader(API_BASE);
 const FRIENDS    = new FriendsLoader(API_BASE);
-const CHAT       = new ChatLoader(API_BASE, USER, SOCKET);
+const CHAT       = new ChatLoader(API_BASE, NAVIGATION, SOCKET);
 const SETTINGS   = new SettingsLoader(API_BASE, NAVIGATION);
-const MATCH      = new GameHandler(API_BASE, SOCKET);
+const MATCH      = new GameHandler(API_BASE, USER, SOCKET);
 
 const FORMS = {
     TWOFA  : new FormHandler("twofa-form",    `${API_BASE}/auth/twofa`, loadUserData),

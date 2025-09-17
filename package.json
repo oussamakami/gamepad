@@ -7,8 +7,7 @@
   "scripts": {
     "build": "esbuild front-end/source/main.ts --bundle --outfile=front-end/assets/script.js --target=es6 --platform=browser --minify ",
     "clean": "rm front-end/assets/script.js",
-    "api": "npm run build && node -r dotenv/config .",
-    "start": "npm run api & serve front-end/ -p 5500 --single"
+    "start": "node -r dotenv/config ."
   },
   "repository": {
     "type": "git",
@@ -37,7 +36,6 @@
   "devDependencies": {
     "@faker-js/faker": "^9.6.0",
     "dotenv": "^16.5.0",
-    "esbuild": "^0.25.1",
-    "serve": "^14.2.4"
+    "esbuild": "^0.25.1"
   }
 }

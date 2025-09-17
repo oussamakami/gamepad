@@ -1,6 +1,7 @@
 import {httpPromise} from "./browserModule";
 import ActionsHandler from "./actionsModule";
 import SocketHandler from "./SocketModule";
+import NavigationHandler from "./browserModule";
 import UserData from "./userModule";
 
 class ChatLoader {
@@ -14,6 +15,7 @@ class ChatLoader {
     private readonly chatInfo     : HTMLElement;
 
     //MODULES
+    private readonly navigation   : NavigationHandler;
     private readonly user         : UserData
     private readonly socket       : SocketHandler;
     private readonly btnGenerator : ActionsHandler;
@@ -21,19 +23,23 @@ class ChatLoader {
     private ChatData: Record<string, any> | undefined;
     private activeChat: Record<string, any> | undefined;
 
-    constructor(baseAPI: string, USER: UserData, socketHandler: SocketHandler) {
+    constructor(baseAPI: string, navigation: NavigationHandler, socketHandler: SocketHandler) {
         const elem = document.getElementById("chat");
         const chatList = elem?.querySelector("#chat-list")?.querySelector("ul");
         const chatBox = elem?.querySelector("#chat-box");
         const chatInfo = elem?.querySelector("#chat-info");
         const chatinput = chatBox?.querySelector("form") as HTMLFormElement;
+        const pongbtn = chatBox?.querySelector(`[data-game="pong"]`) as HTMLButtonElement;
+        const tictacbtn = chatBox?.querySelector(`[data-game="tic-tac"]`) as HTMLButtonElement;
+        const rpsbtn = chatBox?.querySelector(`[data-game="rps"]`) as HTMLButtonElement;
         const deletebtn = chatBox?.querySelector("#delete-chat") as HTMLButtonElement;
 
         baseAPI = baseAPI.endsWith("/") ? baseAPI.slice(0, -1) : baseAPI;
         this.pictureAPI = baseAPI + "/picture";
 
         if (!elem || !chatList || !chatBox ||
-            !chatInfo || !chatinput || !deletebtn)
+            !chatInfo || !chatinput || !deletebtn ||
+            !pongbtn || !tictacbtn || !rpsbtn)
             throw new Error("Chat Section not found");
 
         this.chatPage = elem;
@@ -41,9 +47,13 @@ class ChatLoader {
         this.chatBox = chatBox as HTMLElement;
         this.chatInfo = chatInfo as HTMLElement;
         chatinput.onsubmit = (e) => this.sendMessage(e);
+        pongbtn.  onclick  = (e) => navigation.navigateTo("/ping-pong");
+        tictacbtn.onclick  = (e) => navigation.navigateTo("/tic-tac");
+        rpsbtn.   onclick  = (e) => navigation.navigateTo("/rock-paper");
         deletebtn.onclick = (e) => this.deleteCurrentChat();
 
-        this.user = USER;
+        this.user = navigation.userData;
+        this.navigation = navigation
         this.socket = socketHandler;
         this.btnGenerator = new ActionsHandler(baseAPI);
     }
