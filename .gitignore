@@ -1,3 +1,4 @@
 node_modules/
 front-end/assets/script.js
+docker/nginx/ssl/*
 .env 

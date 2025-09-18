@@ -12,7 +12,7 @@ import NOTIFICATIONS from "./notificationsModule";
 import SettingsLoader from "./settingsHandler";
 import GameHandler from "./gameHandler";
 
-let API_BASE   = "/api";
+let API_BASE   = `${location.origin}/api`;
 
 function loadUserData(data) {
     if (data.redirectTo) {
@@ -51,7 +51,7 @@ async function containsSerial(formHander?: FormHandler): httpPromise {
 }
 
 const USER       = new UserData(API_BASE);
-const SOCKET     = new SocketHandler(`${location.protocol === "http" ? "ws": "wss"}://${location.host}${API_BASE}/websocket`, USER);
+const SOCKET     = new SocketHandler(`${API_BASE}/websocket`.replace("http", "ws"), USER);
 const NAVIGATION = new NavigationHandler(USER);
 const DASHBOARD  = new DashboardLoader(API_BASE, NAVIGATION);
 const PROFILE    = new ProfileLoader(API_BASE, NAVIGATION);

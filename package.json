@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "a full-stack web development project focused on building a single-page application (SPA) with user authentication, multiplayer gaming, real-time statistics, and game history tracking.",
   "type": "module",
-  "main": "back-end/server.js",
+  "main": "api-source/server.js",
   "scripts": {
     "build": "esbuild front-end/source/main.ts --bundle --outfile=front-end/assets/script.js --target=es6 --platform=browser --minify ",
     "clean": "rm front-end/assets/script.js",
@@ -20,22 +20,22 @@
   },
   "homepage": "https://github.com/oussamakami/gamepad#readme",
   "dependencies": {
+    "fastify": "^5.2.1",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.0.0",
     "@fastify/multipart": "^9.0.3",
     "@fastify/websocket": "^11.0.2",
-    "apexcharts": "^4.5.0",
+    "@faker-js/faker": "^9.6.0",
     "better-sqlite3": "^11.9.0",
-    "fastify": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
     "nanoid": "^5.1.5",
     "nodemailer": "^6.10.1",
     "qrcode": "^1.5.4",
-    "speakeasy": "^2.0.0"
+    "speakeasy": "^2.0.0",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^9.6.0",
-    "dotenv": "^16.5.0",
+    "apexcharts": "^4.5.0",
     "esbuild": "^0.25.1"
   }
 }
