@@ -1,6 +1,7 @@
 FROM node:22-alpine3.21
 
 # Metadata labels for the image
+LABEL project="gamepad"
 LABEL stage="production"
 LABEL maintainer="Oussama Kamili <oussama.kamili@protonmail.com>"
 LABEL description="Serves the back-end API via Node.js"

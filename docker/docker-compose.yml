@@ -1,8 +1,8 @@
 name: gamepad
 
 services:
-    server:
-        container_name: api
+    api:
+        container_name: api-server
         build:
             context: ../
             dockerfile: docker/api/Dockerfile
@@ -13,7 +13,7 @@ services:
         secrets:
             - configuration
         restart: always
-    nginx:
+    frontend:
         container_name: front-end
         build:
             context: ../
@@ -28,8 +28,6 @@ services:
             - ./nginx/ssl:/etc/ssl/gamepad:ro
         networks:
             - priv_network
-        depends_on:
-            - server
         restart: always
 
 networks:

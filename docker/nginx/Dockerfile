@@ -27,6 +27,7 @@ RUN npm install --no-save && \
 FROM nginx:1.28-alpine3.21
 
 # Metadata labels for the image
+LABEL project="gamepad"
 LABEL stage="production"
 LABEL maintainer="Oussama Kamili <oussama.kamili@protonmail.com>"
 LABEL description="Serves the front-end application via Nginx"
