@@ -14,6 +14,7 @@ class RecordGenerator {
     }
 
     #generateUsers(numberOfUsers) {
+        let AbortCount = 0;
         for (let i = 0; i < numberOfUsers; i++) {
             const username = faker.person.firstName().toLowerCase();
             const email = faker.internet.email().toLowerCase();
@@ -21,9 +22,15 @@ class RecordGenerator {
             
             const user = this.#database.createUser(username, email, password);
             if (!user.success) {
+                AbortCount++;
+                if (AbortCount >= 100) {
+                    console.error(`\x1b[1m\x1b[31m[ERROR]: Generated ${i}/${numberOfUsers} users; Failed to generate additional users. Process aborted\x1b[0m`);
+                    break;
+                }
                 i--;
                 continue;
             }
+            AbortCount = 0;
             user.data.password = password;
             this.#users.push(user.data);
         }
@@ -61,6 +68,10 @@ class RecordGenerator {
     }
 
     #generateGameRecords(numberOfRecords) {
+        if (this.#users.length < 2) {
+            console.warn('\x1b[1m\x1b[33m[WARNING]: Insufficient FAKE_USERS to generate FAKE_ACTIVITIES; action aborted\x1b[0m');
+            return;
+        }
         const recordsDates = this.#generateRandomOrderedTimestamps(numberOfRecords);
 
         recordsDates.forEach(date => {
@@ -82,18 +93,18 @@ class RecordGenerator {
     }
 
     generate(numberOfUsers, numberOfRecords) {
-
         this.#generateUsers(numberOfUsers);
         this.#generateGameRecords(numberOfRecords);
         return numberOfRecords;
     }
 
     showGeneratedUsers(numberOfUsers) {
+        if (!this.#users.length) return;
 
         if (numberOfUsers > this.#users.length)
             numberOfUsers = this.#users.length;
 
-        console.log(`\n\n\x1b[31m#############################################################`);
+        console.log(`\n\x1b[31m#############################################################`);
         console.log(`THESE ARE THE CREDENTIALS OF ${numberOfUsers} RANDOMLY GENERATED USERS\x1b[0m\n`);
 
         for (let i = 0; i < numberOfUsers; i++) {
@@ -105,7 +116,7 @@ class RecordGenerator {
             console.log(`\t\x1b[32mpicture \x1b[0m: ${this.#users[i].picture}\n`);
         }
 
-        console.log(`\n\x1b[31m#############################################################\x1b[0m\n\n`);
+        console.log(`\x1b[31m#############################################################\x1b[0m\n`);
     }
 }
 

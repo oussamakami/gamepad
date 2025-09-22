@@ -1,0 +1,41 @@
+name: gamepad
+
+services:
+    server:
+        container_name: api
+        build:
+            context: ../
+            dockerfile: docker/api/Dockerfile
+        volumes:
+            - ${CLIENTS_DATA_PATH}:/server/clientsData:rw
+        networks:
+            - priv_network
+        secrets:
+            - configuration
+        restart: always
+    nginx:
+        container_name: front-end
+        build:
+            context: ../
+            dockerfile: docker/nginx/Dockerfile
+        environment:
+            - FRONTEND_ORIGIN=${FRONTEND_ORIGIN}
+            - API_PORT=${PORT}
+        ports:
+            - 80:80/tcp
+            - 443:443/tcp
+        volumes:
+            - ./nginx/ssl:/etc/ssl/gamepad:ro
+        networks:
+            - priv_network
+        depends_on:
+            - server
+        restart: always
+
+networks:
+    priv_network:
+        driver: bridge
+
+secrets:
+    configuration:
+        file: ../.env

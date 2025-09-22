@@ -19,10 +19,13 @@ fastify.register(fastifyCors, {origin: FRONTEND_ORIGIN, credentials: true});
 fastify.register(fastifyMultipart, {limits: {fileSize: MAX_FILE_SIZE, files: 1}});
 fastify.register(apiRoutes, { prefix: "/api"});
 
-process.on('SIGINT', () => {
-    console.log('\nServer shutting down gracefully...');
+const gracefulShutdown = () => {
+    console.log('Server shutting down gracefully...');
     process.exit(0);
-});
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
 
 const networkIPs = () => {
   const interfaces = os.networkInterfaces();
@@ -35,9 +38,9 @@ const networkIPs = () => {
 const start = async () => {
     try {
         fastify.listen({ port: PORT, host: "0.0.0.0" });
-        console.log(`\x1b[36mAPI Server running\x1b[0m:`);
-        console.log(`\t- \x1b[32mAPI Local\x1b[0m  :\thttp://127.0.0.1:${PORT}`);
-        networkIPs().forEach(ip => console.log(`\t- \x1b[32mAPI Network\x1b[0m:\thttp://${ip}:${PORT}`));
+        console.log(`\x1b[1m\x1b[36m[INFO]: API Server running\x1b[0m`);
+        console.log(`\t\x1b[32mAPI Local\x1b[0m  :\thttp://127.0.0.1:${PORT}`);
+        networkIPs().forEach(ip => console.log(`\t\x1b[32mAPI Network\x1b[0m:\thttp://${ip}:${PORT}`));
     } catch (err) {
         fastify.log.error(err);
         process.exit(1);

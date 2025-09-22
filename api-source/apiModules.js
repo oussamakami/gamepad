@@ -1,3 +1,4 @@
+import RecordGenerator from './randomGenerator.js';
 import inputValidator from './inputValidator.js';
 import Mailer from './mailer.js';
 import twoFA from './twofa.js';
@@ -10,23 +11,33 @@ import Dotenv from 'dotenv';
 Dotenv.config();
 const VALIDEXT = [".png", ".jpg", ".jpeg", ".webp"];
 const CLIENTS_DATA_PATH = process.env.CLIENTS_DATA_PATH;
+const FAKE_DATA_MODE = process.env.FAKE_DATA_MODE.toLowerCase();
 const DEFAULT_PICTURES = process.env.DEFAULT_PICTURES.split(',').map(s => s.trim()).filter(Boolean);
 const database = new userData(join(CLIENTS_DATA_PATH, "Database.db"), false);
 const CONNECTIONS = new SocketManager(database);
 
 //generate random data for testing
+if (FAKE_DATA_MODE === "true") {    
+    console.log('\x1b[1m\x1b[36m[INFO]: Seeding database with random test data...\x1b[0m');
 
-import RecordGenerator from './randomGenerator.js';
+    const generator = new RecordGenerator(database);
+    let FAKE_USERS_COUNT = Number(process.env.FAKE_USERS_COUNT) ?? 0;
+    let FAKE_ACTIVITIES_COUNT = Number(process.env.FAKE_ACTIVITIES_COUNT) ?? 0;
+    let FAKE_USERS_CREDENTIALS_DISPLAY = Number(process.env.FAKE_USERS_CREDENTIALS_DISPLAY) ?? 0;
 
-const numberOfUsersToGenerate = 149;
-const numberOfRecordsToGenerate = 9869;
-const generator = new RecordGenerator(database);
+    if (FAKE_USERS_COUNT > 1500 && (FAKE_USERS_COUNT = 1500))
+        console.warn('\x1b[1m\x1b[33m[WARNING]: FAKE_USERS_COUNT exceeds the allowed limit. Defaulting to MAX value: 1500\x1b[0m');
+    if (FAKE_ACTIVITIES_COUNT > 15000 && (FAKE_ACTIVITIES_COUNT = 15000))
+        console.warn('\x1b[1m\x1b[33m[WARNING]: FAKE_ACTIVITIES_COUNT exceeds the allowed limit. Defaulting to MAX value: 15000\x1b[0m');
+    if (FAKE_USERS_CREDENTIALS_DISPLAY > 10 && (FAKE_USERS_CREDENTIALS_DISPLAY = 10))
+        console.warn('\x1b[1m\x1b[33m[WARNING]: FAKE_USERS_CREDENTIALS_DISPLAY exceeds the allowed limit. Defaulting to MAX value: 10\x1b[0m');
+    
 
-generator.generate(numberOfUsersToGenerate, numberOfRecordsToGenerate);
-generator.showGeneratedUsers(3);
+    generator.generate(FAKE_USERS_COUNT, FAKE_ACTIVITIES_COUNT);
+    console.log('\x1b[1m\x1b[36m[INFO]: Database seeding finished\x1b[0m');
 
-//generate random data for testing
-
+    generator.showGeneratedUsers(FAKE_USERS_CREDENTIALS_DISPLAY);
+}
 
 function getSessionInfo(requestPacket) {
     const browserList = {

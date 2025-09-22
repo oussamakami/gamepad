@@ -33,17 +33,16 @@ LABEL description="Serves the front-end application via Nginx"
 LABEL version="1.0.0"
 
 ENV FRONTEND_ORIGIN="127.0.0.1"
-ENV BACKEND_API="127.0.0.1:3000"
+ENV API_PORT="3000"
 
 VOLUME /etc/ssl/gamepad
 
 # Copy built front-end files from builder stage
 COPY --from=builder /www/front-end /www
 
-# Copy Nginx configuration and SSL certificates
+# Copy Nginx configuration
 COPY docker/nginx/assets/launch.sh .
 COPY docker/nginx/assets/default.conf /etc/nginx/conf.d/default.conf.template
-COPY docker/nginx/ssl /etc/ssl/gamepad/
 
 RUN chmod +x launch.sh
 

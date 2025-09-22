@@ -48,6 +48,7 @@ class userData {
         this.sessionsClearingJob = setInterval(this.#cleanExpiredSessions, 3600000);
 
         process.on('SIGINT', () => this.closeDataBase());
+        process.on('SIGTERM', () => this.closeDataBase());
     }
 
     initializeTables() {
