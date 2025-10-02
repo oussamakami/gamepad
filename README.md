@@ -269,6 +269,22 @@ You can run `GamePad` using **Docker Compose** (recommended) or directly with **
 
     - If you skip `SMTP` or `OAuth2` configuration, those features are simply disabled.
 
+## 🌐 Live Demo
+
+- You can try out the hosted version of the app here:  
+👉 [https://gamepad.okamili.me](https://gamepad.okamili.me/)
+
+- No registration required — simply log in with one of the pre-created accounts below:
+
+    | Username     | Email                            | Password      |
+    |--------------|----------------------------------|---------------|
+    | `dax`        | `jedediah77@yahoo.com`           | `Password123` |
+    | `evan`       | `floy72@hotmail.com`             | `Password123` |
+    | `maci`       | `reece.haley77@gmail.com`        | `Password123` |
+    | `alexanne`   | `rosetta80@hotmail.com`          | `Password123` |
+    | `thaddeus`   | `arden.jenkins56@yahoo.com`      | `Password123` |
+    | `clarabelle` | `yessenia_schneider55@yahoo.com` | `Password123` |
+
 ## 🤝 Authors
 
 - Oussama Kamili [@oussamakami](https://github.com/oussamakami)
