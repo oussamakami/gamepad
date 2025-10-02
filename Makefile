@@ -1,48 +1,51 @@
 .SILENT:
 
 # Paths and flags
-ENV_PATH		:=	.env
-COMPOSE_PATH	:=	docker/docker-compose.yml
-FLAGS			:=	-f ${COMPOSE_PATH} --env-file ${ENV_PATH}
+ENV_PATH        :=  .env
+COMPOSE_PATH    :=  docker/docker-compose.yml
+FLAGS           :=  -f ${COMPOSE_PATH} --env-file ${ENV_PATH}
 
 # Default Variables value
-TARGET			?=	api frontend
-COMPOSE			?=	docker compose
+TARGET          ?=  api frontend
+COMPOSE         ?=  docker compose
 
 .PHONY: all start build stop restart logs watch down clean fclean help
 
-all		:	start
+all     :  start
 
-start	:
+start   :
 	${COMPOSE} ${FLAGS} up -d ${TARGET}
 
-build	:
+build   :
 	${COMPOSE} ${FLAGS} build ${TARGET}
 
-stop	:
+stop    :
 	${COMPOSE} ${FLAGS} stop ${TARGET}
 
-restart	:
+restart :
 	${COMPOSE} ${FLAGS} restart ${TARGET}
 
-logs	:
+logs    :
 	${COMPOSE} ${FLAGS} logs ${TARGET}
 
-watch	:
+watch   :
 	-@${COMPOSE} ${FLAGS} logs -f ${TARGET}
 
-list ls	:
+list ls :
 	${COMPOSE} ${FLAGS} ps ${TARGET}
 
-down	:
+down    :  stop
 	${COMPOSE} ${FLAGS} down
 
-clean	:
+clean   :  stop
 	${COMPOSE} ${FLAGS} down --rmi all -v --remove-orphans
 	docker image prune -f --filter "label=project=gamepad"
 
-fclean	:	clean
+fclean  :  clean
 	docker builder prune -a
+
+ssl     :
+	openssl req -x509 -nodes -batch -days 365 -newkey rsa:2048 -keyout docker/nginx/ssl/privkey.pem -out docker/nginx/ssl/cert.pem
 
 help:
 	@echo "Usage: make [COMMAND] [OPTIONS]"
@@ -59,6 +62,7 @@ help:
 	@echo "  down         # Stop all containers (ignores TARGET)"
 	@echo "  clean        # Stop containers, remove images and volumes (ignores TARGET)"
 	@echo "  fclean       # Run clean and remove build cache (ignores TARGET)"
+	@echo "  ssl          # Create a self-signed SSL certificate in docker/nginx/assets/ssl (ignores OPTIONS)"
 	@echo "  help         # Display this help message"
 	@echo ""
 	@echo ""
